@@ -15,7 +15,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public boolean registrate(User user) {
-		userRepository.save(user);
+		try {
+			userRepository.save(user);
+		}
+		catch(Exception e) {
+			return false;
+		}
 		
 		return true;
 	}
@@ -41,7 +46,7 @@ public class UserServiceImpl implements UserService {
 	 *  3 - You are not the first to enter the same new password the second time
 	 *  4 - Incorrect email
 	 *  5 - Incorrect phone number
-	 *  6 - Everything is right...
+	 *  6 - Everything is right
 	 * */
 	@Override
 	public int correctUser(User oldUser, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email, String city, String phoneNumber) {

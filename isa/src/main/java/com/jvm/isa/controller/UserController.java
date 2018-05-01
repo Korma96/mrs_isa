@@ -34,6 +34,16 @@ public class UserController {
 	@Autowired
 	private HttpSession httpSession;
 	
+	//Ova metoda se koristi samo testiranje getLoggedUser()
+	/*@SuppressWarnings("rawtypes")
+	@RequestMapping(value = "/set_logged_user", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity  setLoggedUser(@RequestBody HashMap<String, String> hm) {
+		User user = new User(hm.get("username"), hm.get("password"), UserType.REGISTERED_USER, true);
+		httpSession.setAttribute("loggedUser", user);
+		
+		return new ResponseEntity<>(HttpStatus.OK);
+	}*/
+
 	@RequestMapping(value = "/logged_user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<User> getLoggedUser() {
 		User user = (User) httpSession.getAttribute("loggedUser");
@@ -145,11 +155,12 @@ public class UserController {
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/logout", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> logout(String username) {
+	public ResponseEntity logout(String username) {
 		httpSession.invalidate(); // brisemo sve sa sesije
 		System.out.println("Logout");
-		boolean successLogout = true;
-		return new ResponseEntity<Boolean>(successLogout, HttpStatus.OK);
+		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }

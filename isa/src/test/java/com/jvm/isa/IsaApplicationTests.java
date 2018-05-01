@@ -12,5 +12,5 @@ public class IsaApplicationTests {
 	@Test
 	public void contextLoads() {
 	}
-
+	
 }

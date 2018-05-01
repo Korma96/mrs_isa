@@ -11,4 +11,6 @@ public interface UserRepository extends Repository<User, Long> {
 	User findByUsernameAndPassword(String username, String password);
 	
 	User save(User user);
+	
+	void deleteAll();
 }

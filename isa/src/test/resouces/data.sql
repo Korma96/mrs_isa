@@ -1,3 +1,3 @@
-insert into User (type, first_name, last_name) values ('ra10-2014', 'Stevan', 'Stević');
-insert into User (index_number, first_name, last_name) values ('ra11-2014', 'Stefan', 'Stefanović');
-insert into User (index_number, first_name, last_name) values ('ra12-2014', 'Aleksa', 'Aleksić');
+insert into isa_database_testing.user (username, password, first_name, last_name, email, city, phone_number, activated, user_type) values ('jovo', 'jovo', 'Jovo', 'Sunjka', 'sunjkajovo@gmail.com', 'Banja Luka', '11111', 1, 0);
+insert into isa_database_testing.user (username, password, first_name, last_name, email, city, phone_number, activated, user_type) values ('marko', 'marko', 'Marko', 'Radovic', 'markoradovic996@gmail.com', 'Novi Sad', '22222', 1, 0);
+insert into isa_database_testing.user (username, password, first_name, last_name, email, city, phone_number, activated, user_type) values ('vuk', 'vuk', 'Vuk', 'Barisic', 'vukbarisic1996@gmail.com', 'Novi Sad', '33333', 1, 0);
