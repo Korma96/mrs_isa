@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
+import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.EmailService;
 import com.jvm.isa.service.UserService;
@@ -47,7 +48,7 @@ public class UserController {
 	@RequestMapping(value = "/logged_user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<User> getLoggedUser() {
 		User user = (User) httpSession.getAttribute("loggedUser");
-		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, false); // iz nekog razloga na frontendu ne mogu da primim null
+		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
 
 		return new ResponseEntity<User>(user, HttpStatus.OK);
 	}
@@ -95,12 +96,12 @@ public class UserController {
 		System.out.println("|" + hm.get("username") + " - " + hm.get("password") + "|");
 		User user = userService.getUser(hm.get("username"), hm.get("password"));
 		System.out.println("user: " + user);
-		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, false); // iz nekog razloga na frontendu ne mogu da primim null
+		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
 		else {
 			
-			if(!user.isActivated()) {
+			if(user.getUserStatus() != UserStatus.ACTIVATED) {
 				// posto user nije aktiviran
-				user = new User("-1", "-1", UserType.REGISTERED_USER, false); // iz nekog razloga na frontendu ne mogu da primim null
+				user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
 			}
 			else {
 				httpSession.setAttribute("loggedUser", user); // cuvamo ulogovanog korisnika na sesiji

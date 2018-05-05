@@ -47,6 +47,7 @@ import com.jvm.isa.TestUtil;
 import com.jvm.isa.domain.Activation;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
+import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.repository.ActivationRepository;
 import com.jvm.isa.repository.UserRepository;
@@ -98,10 +99,10 @@ public class UserControllerTest {
 	public void testGetLoggedUser() throws Exception {
 		// za rest metodu koju gadjamo koristi se HttpSession
 		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, false)); // ovaj user nam govori da trenutno nemamo 
+		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 																								//ulogovanog korisnika
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setActivated(true);
+		ru.setUserStatus(UserStatus.PENDING);
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		
@@ -211,7 +212,7 @@ public class UserControllerTest {
 		//--------------------------------------------------------------------------------------------
 		
 		user = userRepository.findByUsernameAndPassword(TEST_USERNAME, TEST_PASSWORD);
-		user.setActivated(true);
+		user.setUserStatus(UserStatus.ACTIVATED);
 		userRepository.save(user);
 		// sad smo aktivirali nalog registrovanog korisnika, i ocekujemo uspesno logovanje
 		
@@ -292,13 +293,13 @@ public class UserControllerTest {
 	@Test
 	public void testSaveChangesOnProfile() throws Exception {
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setActivated(true);
+		ru.setUserStatus(UserStatus.PENDING);
 		userRepository.save(ru);
 		// REGISTROVANJE
 		
 		// za rest metodu koju gadjamo koristi se HttpSession
 		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, false)); // ovaj user nam govori da trenutno nemamo 
+		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 																										//ulogovanog korisnika
 		
 		HashMap<String, String> hm = new HashMap<String, String>();
@@ -354,14 +355,14 @@ public class UserControllerTest {
 	@Test
 	public void testLogout() throws Exception {
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setActivated(true);
+		ru.setUserStatus(UserStatus.PENDING);
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		
 		
 		// za rest metodu koju gadjamo koristi se HttpSession
 		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, false)); // ovaj user nam govori da trenutno nemamo 
+		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 																								//ulogovanog korisnika
 		
 		ResultActions ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
@@ -404,7 +405,7 @@ public class UserControllerTest {
 		
 		ra = this.mockMvc.perform(delete(URL_PREFIX + "/logout").sessionAttrs(sessionAttr))
 				.andExpect(status().isOk());
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, false)); // ovaj user nam govori da trenutno nemamo 
+		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 		// zatim smo se izlogovali
 		
 		

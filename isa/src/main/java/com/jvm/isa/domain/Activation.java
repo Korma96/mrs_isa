@@ -20,13 +20,13 @@ public class Activation {
 	private String idForActivation;
 	
 	@OneToOne(optional = false)
-	private User user;
+	private RegisteredUser user;
 
 	public Activation() {
 		
 	}
 	
-	public Activation(String idForActivation, User user) {
+	public Activation(String idForActivation, RegisteredUser user) {
 		this.idForActivation = idForActivation;
 		this.user = user;
 	}
@@ -39,11 +39,11 @@ public class Activation {
 		this.idForActivation = idForActivation;
 	}
 
-	public User getUser() {
+	public RegisteredUser getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(RegisteredUser user) {
 		this.user = user;
 	}
 	

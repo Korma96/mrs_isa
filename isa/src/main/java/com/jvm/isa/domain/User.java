@@ -33,18 +33,19 @@ public class User {
 	@Enumerated(EnumType.ORDINAL)
 	private UserType userType;
 	
-	@Column(name="activated", unique=false, nullable=false)
-	private boolean activated;
+	@Column(name="user_status", unique=false, nullable=false)
+	@Enumerated(EnumType.ORDINAL)
+	private UserStatus userStatus;
 	
 	public User() {
 		
 	}
 	
-	public User(String username, String password, UserType type, boolean activated) {
+	public User(String username, String password, UserType type, UserStatus status) {
 		this.username = username;
 		this.password = password;
 		this.userType = type;
-		this.activated = activated;
+		this.userStatus = status;
 	}
 
 	public String getUsername() {
@@ -59,12 +60,14 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public boolean isActivated() {
-		return activated;
+	public UserStatus getUserStatus() {
+		return userStatus;
 	}
-	public void setActivated(boolean activated) {
-		this.activated = activated;
+
+	public void setUserStatus(UserStatus userStatus) {
+		this.userStatus = userStatus;
 	}
+
 	public UserType getUserType() {
 		return userType;
 	}

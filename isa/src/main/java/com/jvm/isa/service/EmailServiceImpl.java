@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.jvm.isa.domain.Activation;
 import com.jvm.isa.domain.RegisteredUser;
+import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.repository.ActivationRepository;
 
 
@@ -98,7 +99,7 @@ public class EmailServiceImpl implements EmailService {
 	public boolean activateAccount(String idForActivation) {
 		Activation activation = activationRepository.findByIdForActivation(idForActivation);
 		if (activation != null) { 
-			activation.getUser().setActivated(true);
+			activation.getUser().setUserStatus(UserStatus.ACTIVATED);;
 			activationRepository.delete(activation);
 			return true;
 		}
