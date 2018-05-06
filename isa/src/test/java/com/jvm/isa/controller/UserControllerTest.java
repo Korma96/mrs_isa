@@ -102,7 +102,7 @@ public class UserControllerTest {
 		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 																								//ulogovanog korisnika
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setUserStatus(UserStatus.PENDING);
+		ru.setUserStatus(UserStatus.ACTIVATED);
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		
@@ -293,7 +293,7 @@ public class UserControllerTest {
 	@Test
 	public void testSaveChangesOnProfile() throws Exception {
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setUserStatus(UserStatus.PENDING);
+		ru.setUserStatus(UserStatus.ACTIVATED);
 		userRepository.save(ru);
 		// REGISTROVANJE
 		
@@ -355,7 +355,7 @@ public class UserControllerTest {
 	@Test
 	public void testLogout() throws Exception {
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
-		ru.setUserStatus(UserStatus.PENDING);
+		ru.setUserStatus(UserStatus.ACTIVATED);
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		

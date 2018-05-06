@@ -47,6 +47,13 @@ public class User {
 		this.userType = type;
 		this.userStatus = status;
 	}
+	
+	public User(String username, String password, UserType type) {
+		this.username = username;
+		this.password = password;
+		this.userType = type;
+		this.userStatus = UserStatus.ACTIVATED;
+	}
 
 	public String getUsername() {
 		return username;

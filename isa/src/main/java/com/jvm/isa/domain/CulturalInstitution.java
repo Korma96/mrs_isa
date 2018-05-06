@@ -3,7 +3,6 @@ package com.jvm.isa.domain;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,9 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 @Entity
-//ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za 
-//objekte ove klase
-@DiscriminatorValue("A")
 public class CulturalInstitution{
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,13 +26,71 @@ public class CulturalInstitution{
 	@Column(name="description", unique=false, nullable=false)
 	private String description;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "culturalInstitution")
+	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "culturalInstitution"*/)
 	private List<Auditorium> auditoriums;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "culturalInstitution")
+	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "culturalInstitution"*/)
 	private List<Repertoire> repertoires;
+
+	public CulturalInstitution() {
+		
+	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "culturalInstitution")
-	private List<Ticket> tickets;
+	public CulturalInstitution(String name, String address, String description, List<Auditorium> auditoriums,
+			List<Repertoire> repertoires) {
+		this.name = name;
+		this.address = address;
+		this.description = description;
+		this.auditoriums = auditoriums;
+		this.repertoires = repertoires;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Auditorium> getAuditoriums() {
+		return auditoriums;
+	}
+
+	public void setAuditoriums(List<Auditorium> auditoriums) {
+		this.auditoriums = auditoriums;
+	}
+
+	public List<Repertoire> getRepertoires() {
+		return repertoires;
+	}
+
+	public void setRepertoires(List<Repertoire> repertoires) {
+		this.repertoires = repertoires;
+	}
 	
 }

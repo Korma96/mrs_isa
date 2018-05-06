@@ -3,19 +3,12 @@ package com.jvm.isa.domain;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 @Entity
 //ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za 
 //objekte ove klase
 @DiscriminatorValue("AD")
 public class Administrator extends User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name="id", unique=true, nullable=false)
-	private Long id;
 	
 	@Column(name="first_name", unique=false, nullable=false)
 	private String firstName;
