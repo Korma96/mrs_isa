@@ -41,7 +41,6 @@ th {text-align: center;
 
 .medium_img {
 	width: 400px; height: 230px
-}
 
 #vanredne_situacije {border-color: green;}
 
@@ -54,4 +53,5 @@ input[type=checkbox] {
 
 .google_map {width: 300px; height: 300px;}
 
-#id_pretraga_i_filter {height: auto; width: 100%}
+#id_pretraga_i_filter {height: auto; width: 100%
+

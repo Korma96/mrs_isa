@@ -4,6 +4,7 @@ var registrateUserURL = "/myapp/users/registrate";
 var activateAccountURL = "/myapp/users/activate";
 var logOutURL = "/myapp/users/logout";
 var saveChangesOnProfileURL = "/myapp/users/save_changes_on_profile";
+var culturalInstitutionsURL = "/myapp/users/cultural_institutions";
 	
 	
 $(document).ready(function() {
@@ -178,6 +179,15 @@ $(document).on("click", ".a_home_page", function(event) {
 	$("#center").load("html/partials/home_page.html", null, loadHomePageComplete);
 });
 
+function show_cinemas()
+{
+	alert('cinemas');
+}
+
+function show_theaters()
+{
+	alert('theaters');
+}
 
 function loadLoggedUser() {	
 	var receivedUser;

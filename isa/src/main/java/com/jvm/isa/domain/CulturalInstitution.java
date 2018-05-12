@@ -26,6 +26,9 @@ public class CulturalInstitution{
 	@Column(name="description", unique=false, nullable=false)
 	private String description;
 	
+	@Column(name="type", unique=false, nullable=false)
+	private CulturalInstitutionType type;
+	
 	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "culturalInstitution"*/)
 	private List<Auditorium> auditoriums;
 	
