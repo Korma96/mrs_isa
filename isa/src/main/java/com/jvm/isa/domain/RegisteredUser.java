@@ -143,5 +143,23 @@ public class RegisteredUser extends User {
 	public void setTickets(List<Ticket> tickets) {
 		this.tickets = tickets;
 	}
-
+	
+	public boolean equals(String username) {
+		return false;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof RegisteredUser) {
+			RegisteredUser user = (RegisteredUser) obj;
+			return user.getUsername().equals(username) && user.getPassword().equals(password);
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return username + " - " + firstName + " " + lastName; 
+	}
 }

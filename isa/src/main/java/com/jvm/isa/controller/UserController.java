@@ -1,5 +1,6 @@
 package com.jvm.isa.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpSession;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.RegisteredUser;
+import com.jvm.isa.domain.RegisteredUserDTO;
 import com.jvm.isa.domain.User;
+import com.jvm.isa.domain.UserDTO;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.EmailService;
@@ -46,11 +49,20 @@ public class UserController {
 	}*/
 
 	@RequestMapping(value = "/logged_user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<User> getLoggedUser() {
+	public ResponseEntity<UserDTO> getLoggedUser() {
 		User user = (User) httpSession.getAttribute("loggedUser");
-		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
-
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		
+		UserDTO userDTO;
+		if(user == null) {
+			user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
+			userDTO = new UserDTO(user);
+		}
+		else {
+			if(user.getUserType() == UserType.REGISTERED_USER) userDTO = new RegisteredUserDTO((RegisteredUser) user);
+			else userDTO = new UserDTO(user);
+		}
+		
+		return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/registrate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
@@ -91,7 +103,7 @@ public class UserController {
 	@RequestMapping(value = "/login", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
 																			produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
-	public ResponseEntity<User> login(@RequestBody HashMap<String, String> hm) {
+	public ResponseEntity<UserDTO> login(@RequestBody HashMap<String, String> hm) {
 		
 		System.out.println("|" + hm.get("username") + " - " + hm.get("password") + "|");
 		User user = userService.getUser(hm.get("username"), hm.get("password"));
@@ -109,7 +121,7 @@ public class UserController {
 			
 		}
 		
-		return new ResponseEntity<User>(user, HttpStatus.OK);
+		return new ResponseEntity<UserDTO>(new UserDTO(user), HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/activate/{id_for_activation}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -164,4 +176,169 @@ public class UserController {
 		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	@RequestMapping(value = "/get_people", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getPeople() {
+		User user = (User) httpSession.getAttribute("loggedUser");
+		
+		if(user != null) {
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				RegisteredUser ru = (RegisteredUser) user;
+				
+				ArrayList<String> people = userService.getPeople(ru);
+				
+				return new ResponseEntity<ArrayList<String>>(people, HttpStatus.OK);
+			}
+		}
+		
+		// vracamo praznu arrayList-u, ako nijedan korisnik nije ulogovan
+		return new ResponseEntity<ArrayList<String>>(new ArrayList<String>(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/get_friends", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getFriends() {
+		User user = (User) httpSession.getAttribute("loggedUser");
+		ArrayList<String> friends = new ArrayList<String>();
+		
+		if(user != null) {
+			user = userService.getUser(user.getUsername()); 
+			httpSession.setAttribute("loggedUser", user); // refresh trenutno ulogovanoog
+			
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				RegisteredUser ru = (RegisteredUser) user;
+				for (RegisteredUser registeredUser : ru.getFriends()) {
+					friends.add(registeredUser.toString());
+				}
+				
+			}
+		}
+		
+		// vracamo praznu arrayList-u, ako nijedan korisnik nije ulogovan
+		return new ResponseEntity<ArrayList<String>>(friends, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/get_requests", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getRequests() {
+		User user = (User) httpSession.getAttribute("loggedUser");
+		ArrayList<String> requests = new ArrayList<String>();
+		
+		if(user != null) {
+			user = userService.getUser(user.getUsername()); 
+			httpSession.setAttribute("loggedUser", user); // refresh trenutno ulogovanoog
+			
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				RegisteredUser ru = (RegisteredUser) user;
+				for (RegisteredUser registeredUser : ru.getRequests()) {
+					requests.add(registeredUser.toString());
+				}
+				
+			}
+		}
+		
+		// vracamo praznu arrayList-u, ako nijedan korisnik nije ulogovan
+		return new ResponseEntity<ArrayList<String>>(requests, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/send_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> sendRequestFriend(@RequestBody HashMap<String, String> hm) {
+		String username = hm.get("username");
+		User user = (User) httpSession.getAttribute("loggedUser");
+		
+		if(user != null) {
+			user = userService.getUser(user.getUsername()); // refresh ulogovanog
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				User user2 = userService.getUser(username);
+				if(user2 != null) {
+					if(user2.getUserType() == UserType.REGISTERED_USER) {
+						RegisteredUser ru = (RegisteredUser) user;
+						RegisteredUser potentialFriend = (RegisteredUser) user2;
+						
+						if(!ru.equals(potentialFriend) && !potentialFriend.getRequests().contains(ru) && !ru.getFriends().contains(potentialFriend)) {
+							potentialFriend.getRequests().add(ru);
+							userService.registrate(potentialFriend); // cuvanje izmena (dodavanje novo request-a)
+							
+							// zahtev uspesno poslat
+							return new ResponseEntity<>(true, HttpStatus.OK);
+						}
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+		// zahtev nije poslat 
+		return new ResponseEntity<>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/accept_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> acceptRequestFriend(@RequestBody HashMap<String, String> hm) {
+		String username = hm.get("username");
+		User user = (User) httpSession.getAttribute("loggedUser");
+		
+		if(user != null) {
+			user = userService.getUser(user.getUsername()); // refresh ulogovanog
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				User user2 = userService.getUser(username);
+				if(user2 != null) {
+					if(user2.getUserType() == UserType.REGISTERED_USER) {
+						RegisteredUser ru = (RegisteredUser) user;
+						RegisteredUser ru2 = (RegisteredUser) user2;
+						
+						if(!ru.equals(ru2) && ru.getRequests().contains(ru2) && !ru.getFriends().contains(ru2)) {
+							ru.getRequests().remove(ru2);
+							ru.getFriends().add(ru2);
+							ru2.getFriends().add(ru);
+							userService.registrate(ru); // cuvanje izmena (dodavanje novo friend-a)
+							userService.registrate(ru2); // cuvanje izmena (dodavanje novo friend-a)
+							
+							return new ResponseEntity<>(true, HttpStatus.OK);
+						}
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+		return new ResponseEntity<>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/decline_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> declineRequestFriend(@RequestBody HashMap<String, String> hm) {
+		String username = hm.get("username");
+		User user = (User) httpSession.getAttribute("loggedUser");
+		
+		if(user != null) {
+			user = userService.getUser(user.getUsername()); // refresh ulogovanog
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				User user2 = userService.getUser(username);
+				if(user2 != null) {
+					if(user2.getUserType() == UserType.REGISTERED_USER) {
+						RegisteredUser ru = (RegisteredUser) user;
+						RegisteredUser ru2 = (RegisteredUser) user2;
+						
+						if(!ru.equals(ru2) && ru.getRequests().contains(ru2) && !ru.getFriends().contains(ru2)) {
+							ru.getRequests().remove(ru2);
+							
+							userService.registrate(ru); // cuvanje izmena (brisanje request-a)
+							
+							return new ResponseEntity<>(true, HttpStatus.OK);
+						}
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+		return new ResponseEntity<>(false, HttpStatus.OK);
+	}
+	
 }

@@ -1,10 +1,16 @@
 package com.jvm.isa.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
+import com.jvm.isa.domain.UserStatus;
+import com.jvm.isa.domain.UserType;
 import com.jvm.isa.repository.UserRepository;
 
 @Service
@@ -30,6 +36,12 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByUsername(username) != null;
 	}
 
+	@Override
+	public User getUser(String username) {
+		User user = userRepository.findByUsernameAndUserTypeAndUserStatus(username, UserType.REGISTERED_USER, UserStatus.ACTIVATED);
+		return user;
+	}
+	
 	@Override
 	public User getUser(String username, String password) {
 		User user = userRepository.findByUsernameAndPassword(username, password);
@@ -74,14 +86,19 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
-	/*@Override
-	public boolean logout(String username) {
-		User user = userRepository.findByUsername(username);
+	@Override
+	public ArrayList<String> getPeople(RegisteredUser ru) {
+		ArrayList<String> people = new ArrayList<String>();
+	
+		List<User> registeredUsers = userRepository.findByUserTypeAndUserStatus(UserType.REGISTERED_USER, UserStatus.ACTIVATED);
 		
-		if(user == null) return false;
+		for (User user : registeredUsers) {
+			if (user.equals(ru)) continue;
+			
+			people.add(((RegisteredUser) user).toString());
+		}
 		
-		return true;
-	}*/
-
+		return people;
+	}
 	
 }

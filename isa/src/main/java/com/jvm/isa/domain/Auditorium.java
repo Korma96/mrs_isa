@@ -8,8 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-//ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za 
-//objekte ove klase
 public class Auditorium {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

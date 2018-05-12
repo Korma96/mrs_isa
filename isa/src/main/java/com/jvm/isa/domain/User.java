@@ -21,21 +21,21 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name="id", unique=true, nullable=false)
-	private Long id;
+	protected Long id;
 	
 	@Column(name="username", unique=false, nullable=false)
-	private String username;
+	protected String username;
 	
 	@Column(name="password", unique=false, nullable=false)
-	private String password;
+	protected String password;
 	
 	@Column(name="user_type", unique=false, nullable=false)
 	@Enumerated(EnumType.ORDINAL)
-	private UserType userType;
+	protected UserType userType;
 	
 	@Column(name="user_status", unique=false, nullable=false)
 	@Enumerated(EnumType.ORDINAL)
-	private UserStatus userStatus;
+	protected UserStatus userStatus;
 	
 	public User() {
 		
@@ -82,4 +82,13 @@ public class User {
 		this.userType = userType;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof User) {
+			User user = (User) obj;
+			return user.username.equals(username) && user.password.equals(password);
+		}
+		
+		return false;
+	}
 }
