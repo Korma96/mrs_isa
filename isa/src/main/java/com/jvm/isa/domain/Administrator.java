@@ -5,26 +5,31 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
-//ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za 
-//objekte ove klase
+// ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za
+// objekte ove klase
 @DiscriminatorValue("AD")
 public class Administrator extends User {
-	
-	@Column(name="first_name", unique=false, nullable=false)
+
+	@Column(name = "first_name", unique = false, nullable = false)
 	private String firstName;
-	
-	@Column(name="last_name", unique=false, nullable=false)
+
+	@Column(name = "last_name", unique = false, nullable = false)
 	private String lastName;
-	
-	@Column(name="email", unique=false, nullable=false)
+
+	@Column(name = "email", unique = false, nullable = false)
 	private String email;
-	
-	public Administrator(String username, String password, String firstName, String lastName, String email, UserType type, UserStatus status) {
+
+	public Administrator(String username, String password, String firstName, String lastName, String email,
+			UserType type, UserStatus status) {
 		super(username, password, type, status);
-		
+
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+	}
+
+	public Administrator() {
+		super();
 	}
 
 	public String getFirstName() {
@@ -50,6 +55,5 @@ public class Administrator extends User {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
-	
+
 }
