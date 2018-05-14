@@ -274,12 +274,12 @@ function successfullyLogged(loggedUser) {
 	
 	});
 	
-	$("#center").append('You have successfully logged in.');
+	/*$("#center").append('You have successfully logged in.');
 	$("#center").append('<br/> Username: ' + loggedUser.username);
 	$("#center").append('<br/> Password: ' + loggedUser.password);
 	
 	toastr.success('You have successfully logged in!'); 
-}
+}*/}
 
 function registeredUserPage(loggedUser) {
 	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
@@ -328,7 +328,7 @@ function adminSystemPage(loggedUser) {
 }
 
 function adminFunzonePage(loggedUser) {
-	$("#title").html('FanZone ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
+	$("#title").html('FunZone ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
 	
 	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/admins/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_regist" href="/myapp/#/admins/register_system"> Add requisite </a>');
@@ -359,7 +359,30 @@ function updateProfileFanZone(loggedUser)
 	
 	deleteAllExceptFirst();
 	
+	center.append(
+			'<form > \
+				<table> \
+					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+				</div> \
+				<br/> \
+			</form>');
+	
+	$("#id_btn_save_changes_on_profile").click(function(event) {
+		event.preventDefault();
+		
+		saveChangesOnProfileSystemAdmin();
+	});
+	
 }
+	
 
 function updateProfileSysAdmin(loggedUser) {
 	

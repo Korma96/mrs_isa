@@ -98,6 +98,7 @@ public class AdminController {
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	
+	
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/logout", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity logout(String username) {
