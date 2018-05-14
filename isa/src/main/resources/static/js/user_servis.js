@@ -4,6 +4,8 @@ var registrateUserURL = "/myapp/users/registrate";
 var activateAccountURL = "/myapp/users/activate";
 var logOutURL = "/myapp/users/logout";
 var saveChangesOnProfileURL = "/myapp/users/save_changes_on_profile";
+var saveChangesOnProfileSysAdminURL = "/myapp/admins/save_changes_on_profile";
+var registerAdminURL = "/myapp/admins/register";
 	
 	
 $(document).ready(function() {
@@ -252,16 +254,17 @@ function successfullyLogged(loggedUser) {
 		if (loggedUser.userType == "REGISTERED_USER") {
 			registeredUserPage(loggedUser);
 		}
-		else{
-			// TODO administratoroPage();
-			
-			
-		}
+		else if (loggedUser.userType == "SYS_ADMINISTRATOR") adminSystemPage(loggedUser);
+		
+		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") adminFunzonePage(loggedUser);
+		
+		//else if
+	
 	});
 	
-	/*$("#center").append('You have successfully logged in.');
+	$("#center").append('You have successfully logged in.');
 	$("#center").append('<br/> Username: ' + loggedUser.username);
-	$("#center").append('<br/> Password: ' + loggedUser.password);*/
+	$("#center").append('<br/> Password: ' + loggedUser.password);
 	
 	toastr.success('You have successfully logged in!'); 
 }
@@ -285,6 +288,182 @@ function registeredUserPage(loggedUser) {
 	});
 	
 }
+
+function adminSystemPage(loggedUser) {
+	$("#title").html('SYSTEM ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
+	
+	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/admins/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/admins/register"> Register administrator </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/admins/logout"> Logout </a>');
+	
+	$("#id_update_profile").click(function(event) {
+		event.preventDefault();
+		
+		updateProfileSysAdmin(loggedUser);
+	});
+	$("#id_register_admin").click(function(event) {
+		event.preventDefault();
+		
+		registerAdmin(loggedUser);
+	});
+	
+	$("#id_logout").click(function(event) {
+		event.preventDefault();
+		
+		logout();
+	});
+	
+}
+
+function adminFunzonePage(loggedUser) {
+	$("#title").html('FanZone ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
+	
+	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/admins/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_regist" href="/myapp/#/admins/register_system"> Add requisite </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/admins/logout"> Logout </a>');
+	
+	$("#id_update_profile_admin_fan_zone").click(function(event) {
+		event.preventDefault();
+
+		updateProfileFanZone(loggedUser);
+	});
+	$("#id_register_admin").click(function(event) {
+		event.preventDefault();
+		
+		addRequisite(loggedUser);
+	});
+	
+	$("#id_logout").click(function(event) {
+		event.preventDefault();
+		
+		logout();
+	});
+	
+}
+
+function updateProfileFanZone(loggedUser)
+{
+	var center = $("#center");
+	
+	deleteAllExceptFirst();
+	
+}
+
+function updateProfileSysAdmin(loggedUser) {
+	
+	var center = $("#center");
+	
+	deleteAllExceptFirst();
+	
+	center.append(
+			'<form > \
+				<table> \
+					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+				</div> \
+				<br/> \
+			</form>');
+	
+	$("#id_btn_save_changes_on_profile").click(function(event) {
+		event.preventDefault();
+		
+		saveChangesOnProfileSystemAdmin();
+	});
+	
+}
+
+function registerAdmin(loggedUser) {
+	
+	var center = $("#center");
+	
+	deleteAllExceptFirst();
+	
+	center.append(
+			'<form > \
+				<table> \
+					<tr>  <td><label for="id_username_a">Username:</label></td>  <td><input type="text" id="id_username_a" /></td>  </tr> \
+					<tr>  <td><label for="id_new_password_a">Password:</label></td>  <td><input type="password" id="id_new_password_a" /></td>  </tr> \
+					<tr>  <td><label for="id_repeat_new_password_a">Repeat password:</label></td>  <td><input type="password" id="id_repeat_new_password_a" /></td>  </tr> \
+					<tr>  <td><label for="id_first_name_a">First name:</label></td>  <td><input type="text" id="id_first_name_a"/></td>  </tr> \
+					<tr>  <td><label for="id_last_name_a">Last name:</label></td>  <td><input type="text" id="id_last_name_a"/></td>  </tr> \
+					<tr>  <td><label for="id_email_a">Email:</label></td>  <td><input type="text" id="id_email_a" /></td>  </tr> \
+					<tr>  <td><label for="id_role_a">Role:</label></td>  <td class = "select"> \
+					<select id="id_role_a"> \
+            		<option value="SA">system admin</option>\
+            		<option value="CIA">Institution admin</option>\
+            		<option value="FZA">fan zone admin</option>\
+            		</select>\
+            		</td> \
+            		</tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Register system admin"/> \
+				</div> \
+				<br/> \
+			</form>');
+	
+	$("#id_btn_save_changes_on_profile").click(function(event) {
+		event.preventDefault();
+		saveAdmin();
+	});
+	
+}
+
+function saveAdmin(){
+	var username = $("#id_username_a").val();
+	var newPassword = $("#id_new_password_a").val();
+	var repeatNewPassword = $("#id_repeat_new_password_a").val();
+	var firstName = $("#id_first_name_a").val();
+	var lastName = $("#id_last_name_a").val();
+	var email = $("#id_email_a").val();
+	var role = $("#id_role_a").find('option:selected').val();
+
+	$.ajax({ 
+	    type: "POST",
+		url:  registerAdminURL,
+	    data: JSON.stringify({
+			"username": username,
+			"newPassword": newPassword,
+			"repeatNewPassword": repeatNewPassword,
+			"firstName": firstName,
+			"lastName": lastName,
+			"email": email,
+			"role" : role,
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(successRegistrate) {
+	    	if(successRegistrate) {
+	    		$("#id_username").val("");
+	    		$("#id_password").val("");
+	    		$("#id_repeat_password").val("");
+	    		$("#id_first_name").val("");
+	    		$("#id_last_name").val("");
+	    		$("#id_email").val("");
+	    		$("#id_city").val("");
+	    		$("#id_phone_number").val("");
+	    		
+	    		toastr.success("You have successfully registered! You will soon receive an email to activate your account.");
+	    	}
+	    	else {
+	    		toastr.error("Registration error!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+}
+    	
+
+	
+
 
 function updateProfile(loggedUser) {
 	var center = $("#center");
@@ -315,6 +494,69 @@ function updateProfile(loggedUser) {
 		saveChangesOnProfile();
 	});
 }
+
+function saveChangesOnProfileSystemAdmin() {
+	var username = $("#id_username").val();
+	var oldPassword = $("#id_old_password").val();
+	var newPassword = $("#id_new_password").val();
+	var repeatNewPassword = $("#id_repeat_new_password").val();
+	var firstName = $("#id_first_name").val();
+	var lastName = $("#id_last_name").val();
+	var email = $("#id_email").val();
+
+	$.ajax({ 
+	    type: "PUT",
+		url:  saveChangesOnProfileSysAdminURL,
+	    data: JSON.stringify({
+			"username": username,
+			"oldPassword": oldPassword,
+			"newPassword": newPassword,
+			"repeatNewPassword": repeatNewPassword,
+			"firstName": firstName,
+			"lastName": lastName,
+			"email": email,
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(intValue) {
+	    	switch(intValue) {
+		    	case -1:
+		    		toastr.error("There was a problem. No logged user!");
+		    		break;
+		    	case 0:
+		    		toastr.error("All fields are not filled!");
+		    		break;
+		    	case 1:
+		    		toastr.error("This username already exists!");
+		    		break;
+		    	case 2:
+		    		toastr.error("You did not enter the correct old password!");
+		    		break;
+		    	case 3:
+		    		toastr.error("You are not the first to enter the same new password the second time!");
+		    		break;
+		    	case 4:
+		    		toastr.error("Incorrect email!");
+		    		break;
+		    	case 5:
+		    		$("#id_old_password").val("")
+		    		$("#id_new_password").val("");
+		    		$("#id_repeat_new_password").val("");
+		    		toastr.success("You have successfully edited the data!");
+		    		break;
+		    	default:
+		    		toastr.error("There was a problem.!");
+		    		break;
+	    	}
+	    	
+    	},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+}
+
 
 function saveChangesOnProfile() {
 	var username = $("#id_username").val();
