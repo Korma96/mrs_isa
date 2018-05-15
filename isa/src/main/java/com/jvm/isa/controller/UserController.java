@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jvm.isa.domain.Administrator;
+import com.jvm.isa.domain.AdministratorDTO;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
 import com.jvm.isa.domain.User;
@@ -38,30 +40,48 @@ public class UserController {
 	@Autowired
 	private HttpSession httpSession;
 	
-	//Ova metoda se koristi samo testiranje getLoggedUser()
-	/*@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/set_logged_user", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity  setLoggedUser(@RequestBody HashMap<String, String> hm) {
-		User user = new User(hm.get("username"), hm.get("password"), UserType.REGISTERED_USER, true);
-		httpSession.setAttribute("loggedUser", user);
+	public User getLoggedUserLocalMethod() {
+		String username = (String) httpSession.getAttribute("loggedUsername");
+		User user = null;
 		
-		return new ResponseEntity<>(HttpStatus.OK);
-	}*/
-
+		if(username != null) {
+			user = userService.getUser(username);
+		}
+		
+		return user;
+	}
+	
+	@RequestMapping(value = "/is_logged", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> isLogged() {
+		String username = (String) httpSession.getAttribute("loggedUsername");
+		return new ResponseEntity<Boolean>(username != null, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/logged_user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<UserDTO> getLoggedUser() {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		UserDTO userDTO= null;
 		
-		UserDTO userDTO;
-		if(user == null) {
-			user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
-			userDTO = new UserDTO(user);
-		}
-		else {
-			if(user.getUserType() == UserType.REGISTERED_USER) userDTO = new RegisteredUserDTO((RegisteredUser) user);
-			else userDTO = new UserDTO(user);
-		}
+		User user = getLoggedUserLocalMethod();
 		
+		if(user != null) {
+			switch (user.getUserType()) {
+			case REGISTERED_USER:
+				RegisteredUserDTO registeredUserDTO = new RegisteredUserDTO((RegisteredUser) user);
+				return new ResponseEntity<UserDTO>(registeredUserDTO, HttpStatus.OK);
+			case FUNZONE_ADMINISTRATOR:
+			case INSTITUTION_ADMINISTRATOR:
+				AdministratorDTO administratorDTO = new AdministratorDTO((Administrator) user);
+				return new ResponseEntity<UserDTO>(administratorDTO, HttpStatus.OK);
+			case SYS_ADMINISTRATOR:
+				userDTO = new UserDTO(user);
+				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
+
+			default:
+				userDTO = new UserDTO(user);
+				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
+			}
+		}
+	
 		return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 	}
 	
@@ -103,25 +123,20 @@ public class UserController {
 	@RequestMapping(value = "/login", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
 																			produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
-	public ResponseEntity<UserDTO> login(@RequestBody HashMap<String, String> hm) {
-		
+	public ResponseEntity<Boolean> login(@RequestBody HashMap<String, String> hm) {
 		System.out.println("|" + hm.get("username") + " - " + hm.get("password") + "|");
 		User user = userService.getUser(hm.get("username"), hm.get("password"));
 		System.out.println("user: " + user);
-		if(user == null) user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
-		else {
-			
-			if(user.getUserStatus() != UserStatus.ACTIVATED) {
-				// posto user nije aktiviran
-				user = new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING); // iz nekog razloga na frontendu ne mogu da primim null
-			}
-			else {
-				httpSession.setAttribute("loggedUser", user); // cuvamo ulogovanog korisnika na sesiji
+		if(user != null) {
+			if(user.getUserStatus() == UserStatus.ACTIVATED) {
+				httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
+				
+				return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 			}
 			
 		}
 		
-		return new ResponseEntity<UserDTO>(new UserDTO(user), HttpStatus.OK);
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/activate/{id_for_activation}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -134,35 +149,41 @@ public class UserController {
 	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
 																					produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfile(@RequestBody HashMap<String, String> hm) {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
-			RegisteredUser loggedUser = (RegisteredUser) user;
-			
-			String username = hm.get("username");
-			String oldPassword = hm.get("oldPassword");
-			String newPassword = hm.get("newPassword");
-			String repeatNewPassword = hm.get("repeatNewPassword");
-			String firstName = hm.get("firstName");
-			String lastName = hm.get("lastName");
-			String email = hm.get("email");
-			String city = hm.get("city");
-			String phoneNumber = hm.get("phoneNumber");
-			
-			int correct = userService.correctUser(loggedUser, username, oldPassword, newPassword, repeatNewPassword, firstName, lastName, email, city, phoneNumber);
-			if(correct == 6) {
-				loggedUser.setUsername(username);
-				loggedUser.setPassword(newPassword);
-				loggedUser.setFirstName(firstName);
-				loggedUser.setLastName(lastName);
-				loggedUser.setEmail(email);
-				loggedUser.setCity(city);
-				loggedUser.setPhoneNumber(phoneNumber);
+			if(user.getUserType() == UserType.REGISTERED_USER) {
+				RegisteredUser loggedUser = (RegisteredUser) user;
 				
-				userService.registrate(loggedUser); // cuvanje napravljenih izmena
+				String username = hm.get("username");
+				String oldPassword = hm.get("oldPassword");
+				String newPassword = hm.get("newPassword");
+				String repeatNewPassword = hm.get("repeatNewPassword");
+				String firstName = hm.get("firstName");
+				String lastName = hm.get("lastName");
+				String email = hm.get("email");
+				String city = hm.get("city");
+				String phoneNumber = hm.get("phoneNumber");
+				
+				int correct = userService.correctUser(loggedUser, username, oldPassword, newPassword, repeatNewPassword, firstName, lastName, email, city, phoneNumber);
+				if(correct == 6) {
+					if(!loggedUser.getUsername().equals(username)) {
+						httpSession.setAttribute("loggedUsername", username);
+					}
+					loggedUser.setUsername(username);
+					loggedUser.setPassword(newPassword);
+					loggedUser.setFirstName(firstName);
+					loggedUser.setLastName(lastName);
+					loggedUser.setEmail(email);
+					loggedUser.setCity(city);
+					loggedUser.setPhoneNumber(phoneNumber);
+					
+					userService.registrate(loggedUser); // cuvanje napravljenih izmena
+				}
+				
+				return new ResponseEntity<Integer>(correct, HttpStatus.OK);
 			}
 			
-			return new ResponseEntity<Integer>(correct, HttpStatus.OK);
 		}
 		
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
@@ -179,7 +200,7 @@ public class UserController {
 	
 	@RequestMapping(value = "/get_people", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getPeople() {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
@@ -197,13 +218,10 @@ public class UserController {
 	
 	@RequestMapping(value = "/get_friends", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getFriends() {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		User user = getLoggedUserLocalMethod();
 		ArrayList<String> friends = new ArrayList<String>();
 		
 		if(user != null) {
-			user = userService.getUser(user.getUsername()); 
-			httpSession.setAttribute("loggedUser", user); // refresh trenutno ulogovanoog
-			
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
 				for (RegisteredUser registeredUser : ru.getFriends()) {
@@ -219,13 +237,10 @@ public class UserController {
 	
 	@RequestMapping(value = "/get_requests", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getRequests() {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		User user = getLoggedUserLocalMethod();
 		ArrayList<String> requests = new ArrayList<String>();
 		
 		if(user != null) {
-			user = userService.getUser(user.getUsername()); 
-			httpSession.setAttribute("loggedUser", user); // refresh trenutno ulogovanoog
-			
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
 				for (RegisteredUser registeredUser : ru.getRequests()) {
@@ -242,13 +257,12 @@ public class UserController {
 	@RequestMapping(value = "/send_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> sendRequestFriend(@RequestBody HashMap<String, String> hm) {
-		String username = hm.get("username");
-		User user = (User) httpSession.getAttribute("loggedUser");
+		String usernameOfPotentialFriend = hm.get("username");
+		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
-			user = userService.getUser(user.getUsername()); // refresh ulogovanog
 			if (user.getUserType() == UserType.REGISTERED_USER) {
-				User user2 = userService.getUser(username);
+				User user2 = userService.getUser(usernameOfPotentialFriend);
 				if(user2 != null) {
 					if(user2.getUserType() == UserType.REGISTERED_USER) {
 						RegisteredUser ru = (RegisteredUser) user;
@@ -276,13 +290,12 @@ public class UserController {
 	@RequestMapping(value = "/accept_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> acceptRequestFriend(@RequestBody HashMap<String, String> hm) {
-		String username = hm.get("username");
-		User user = (User) httpSession.getAttribute("loggedUser");
+		String usernameOfNewFriend = hm.get("username");
+		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
-			user = userService.getUser(user.getUsername()); // refresh ulogovanog
 			if (user.getUserType() == UserType.REGISTERED_USER) {
-				User user2 = userService.getUser(username);
+				User user2 = userService.getUser(usernameOfNewFriend);
 				if(user2 != null) {
 					if(user2.getUserType() == UserType.REGISTERED_USER) {
 						RegisteredUser ru = (RegisteredUser) user;
@@ -311,13 +324,12 @@ public class UserController {
 	@RequestMapping(value = "/decline_request_friend", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> declineRequestFriend(@RequestBody HashMap<String, String> hm) {
-		String username = hm.get("username");
-		User user = (User) httpSession.getAttribute("loggedUser");
+		String usernameOfDeclineFriend = hm.get("username");
+		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
-			user = userService.getUser(user.getUsername()); // refresh ulogovanog
 			if (user.getUserType() == UserType.REGISTERED_USER) {
-				User user2 = userService.getUser(username);
+				User user2 = userService.getUser(usernameOfDeclineFriend);
 				if(user2 != null) {
 					if(user2.getUserType() == UserType.REGISTERED_USER) {
 						RegisteredUser ru = (RegisteredUser) user;
@@ -327,6 +339,40 @@ public class UserController {
 							ru.getRequests().remove(ru2);
 							
 							userService.registrate(ru); // cuvanje izmena (brisanje request-a)
+							
+							return new ResponseEntity<>(true, HttpStatus.OK);
+						}
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+		return new ResponseEntity<>(false, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/remove_friend", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> removeFriend(@RequestBody HashMap<String, String> hm) {
+		String removeFriend = hm.get("username");
+		User user = getLoggedUserLocalMethod();
+		
+		if(user != null) {
+			if (user.getUserType() == UserType.REGISTERED_USER) {
+				User user2 = userService.getUser(removeFriend);
+				if(user2 != null) {
+					if(user2.getUserType() == UserType.REGISTERED_USER) {
+						RegisteredUser ru = (RegisteredUser) user;
+						RegisteredUser ru2 = (RegisteredUser) user2;
+						
+						if(!ru.equals(ru2) && ru.getFriends().contains(ru2) && ru2.getFriends().contains(ru)) {
+							ru.getFriends().remove(ru2);
+							ru2.getFriends().remove(ru);
+							userService.registrate(ru); // cuvanje izmena (brisanje friend-a)
+							userService.registrate(ru2); // cuvanje izmena (brisanje friend-a)
 							
 							return new ResponseEntity<>(true, HttpStatus.OK);
 						}

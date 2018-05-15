@@ -19,6 +19,10 @@ public class Administrator extends User {
 	@Column(name="email", unique=false, nullable=false)
 	private String email;
 	
+	public Administrator() {
+		
+	}
+	
 	public Administrator(String username, String password, String firstName, String lastName, String email, UserType type, UserStatus status) {
 		super(username, password, type, status);
 		

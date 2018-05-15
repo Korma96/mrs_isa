@@ -11,7 +11,7 @@ public class UserControllerConstants {
 	public static final String TEST_CORRECT_REPEAT_PASSWORD = "jovo";
 	public static final String TEST_FIRST_NAME = "Jovo";
 	public static final String TEST_LAST_NAME = "Sunjka";
-	public static final String TEST_EMAIL = "sunjkajovo@gmail.com";
+	public static final String TEST_EMAIL = "mrs.isa.jvm@gmail.com";
 	public static final String TEST_INCORRECT_EMAIL = "sunjkajovo.com";
 	public static final String TEST_CITY = "Novi Sad";
 	public static final String TEST_PHONE_NUMBER = "222";

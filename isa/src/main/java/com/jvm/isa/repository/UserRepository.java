@@ -16,7 +16,7 @@ public interface UserRepository extends Repository<User, Long> {
 	
 	List<User> findByUserTypeAndUserStatus(UserType userType, UserStatus userStatus);
 	
-	User findByUsernameAndUserTypeAndUserStatus(String username, UserType userType, UserStatus userStatus);
+	User findByUsernameAndUserStatus(String username, UserStatus userStatus);
 	
 	User save(User user);
 	

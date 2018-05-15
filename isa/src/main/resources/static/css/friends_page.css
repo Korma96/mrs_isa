@@ -1,3 +1,8 @@
 #id_table_requests, #id_table_friends {
     border: 5px solid #008000;
 }
+
+#id_header_requests, #id_header_friends {
+    border: 3px solid #008000;
+    background: #ffff00;
+}

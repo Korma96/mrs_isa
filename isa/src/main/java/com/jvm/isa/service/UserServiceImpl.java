@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User getUser(String username) {
-		User user = userRepository.findByUsernameAndUserTypeAndUserStatus(username, UserType.REGISTERED_USER, UserStatus.ACTIVATED);
+		User user = userRepository.findByUsernameAndUserStatus(username, UserStatus.ACTIVATED);
 		return user;
 	}
 	

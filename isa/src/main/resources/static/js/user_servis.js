@@ -4,17 +4,9 @@ var registrateUserURL = "/myapp/users/registrate";
 var activateAccountURL = "/myapp/users/activate";
 var logOutURL = "/myapp/users/logout";
 var saveChangesOnProfileURL = "/myapp/users/save_changes_on_profile";
-var peopleURL = "/myapp/users/get_people";
-var friendsURL = "/myapp/users/get_friends";
-var requestsURL = "/myapp/users/get_requests";
-var sendRequestFriendURL = "/myapp/users/send_request_friend";
-var acceptRequestFriendURL = "/myapp/users/accept_request_friend";
-var declineRequestFriendURL = "/myapp/users/decline_request_friend";
-var isLoggedURL = "/myapp/users/is_logged";
-var removeFriendURL = "/myapp/users/remove_friend";
-
-
-
+var culturalInstitutionsURL = "/myapp/users/cultural_institutions";
+	
+	
 $(document).ready(function() {
 	$("#center").load("html/partials/home_page.html", null, loadHomePageComplete);
 	
@@ -64,18 +56,6 @@ $(window).on('hashchange', function(e){
 	case "/users/registrate/":
 	case "/users/registrate":
 		$("#center").load("html/partials/register.html", null, loadRegisterComplete);
-		break;
-	case "users/update_profile":
-	case "users/update_profile/":
-	case "/users/update_profile/":
-	case "/users/update_profile":
-		updateProfile();
-		break;
-	case "users/friends_page":
-	case "users/friends_page/":
-	case "/users/friends_page/":
-	case "/users/friends_page":
-		friendsPage();
 		break;
 	default:
 		$("#title").empty();
@@ -153,14 +133,6 @@ function loadLoginComplete() {
 	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
 }
 
-function loadUpadteProfileComplete() {
-	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
-}
-
-function loadFriendsPageComplete() {
-	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a>  ');
-}
-
 $(document).on("click", ".a_registrate", function(event) {
 	event.preventDefault();
 	
@@ -186,35 +158,13 @@ $(document).on("click", ".a_login", function(event) {
 
 
 function loadLogin() {
-	var logged = isLogged();
-	if (logged) { // ako je vec ulogovan
-		successfullyLogged();
+	var loggedUser = loadLoggedUser();
+	if (loggedUser) { // ako je vec ulogovan
+		successfullyLogged(loggedUser);
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);
 	}
-}
-
-function isLogged() {
-	var receivedLogged = false;
-	
-	$.ajax({
-		async: false,
-		type : "GET",
-		url : isLoggedURL,
-		dataType : "json",
-		contentType: "application/json",
-		cache: false,
-		success : function(logged) {
-						receivedLogged = logged;
-		},
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-					return null;
-		}
-	});
-	
-	return receivedLogged; 
 }
 
 $(document).on("click", ".a_home_page", function(event) {
@@ -229,6 +179,15 @@ $(document).on("click", ".a_home_page", function(event) {
 	$("#center").load("html/partials/home_page.html", null, loadHomePageComplete);
 });
 
+function show_cinemas()
+{
+	alert('cinemas');
+}
+
+function show_theaters()
+{
+	alert('theaters');
+}
 
 function loadLoggedUser() {	
 	var receivedUser;
@@ -245,7 +204,7 @@ function loadLoggedUser() {
 										  	// iz ove funkcije nije moguce odraditi return loadLoggedUser funkciju,
 											// pa zato uvodimo promenljivu receivedUser, koju cemo setovati ako se 
 											// ajax poziv izvrsi uspesno
-						if(loggedUser== "") {
+						if(loggedUser.username == "-1") {
 							receivedUser = null;
 						}
 						else {
@@ -271,12 +230,12 @@ function attemptToLog(username, password) {
 		dataType : "json",
 	    contentType: "application/json",
 	    cache: false,
-	    success: function(logged) {
-					if(logged) { 
-						successfullyLogged();
+	    success: function(loggedUser) {
+					if(loggedUser.username == "-1") {
+						toastr.error("Invalid username or password!"); 
 					}
 					else {
-						toastr.error("Invalid username or password!");
+						successfullyLogged(loggedUser);
 					}
 					
 				
@@ -287,7 +246,7 @@ function attemptToLog(username, password) {
 	});
 }
 
-function successfullyLogged() {
+function successfullyLogged(loggedUser) {
 	$("#center").empty();
 	
 	$('<link>')
@@ -300,13 +259,13 @@ function successfullyLogged() {
 	
 	$("#center").prepend('<div id="id_menu"></div><br/><br/>');
 	$("#id_menu").load("html/partials/registered_user_page.html", null, function () {
-		var loggedUser = loadLoggedUser();
-		
 		if (loggedUser.userType == "REGISTERED_USER") {
-			registeredUserPage();
+			registeredUserPage(loggedUser);
 		}
 		else{
-			administratorPage()
+			// TODO administratoroPage();
+			
+			
 		}
 	});
 	
@@ -317,39 +276,16 @@ function successfullyLogged() {
 	toastr.success('You have successfully logged in!'); 
 }
 
-function registeredUserPage() {
-	$('<link>')
-	  .appendTo('head')
-	  .attr({
-	      type: 'text/css', 
-	      rel: 'stylesheet',
-	      href: 'css/friends_page.css'
-	});
-	
+function registeredUserPage(loggedUser) {
 	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
 	
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/users/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="id_friends" href="/myapp/#/users/friends"> Friends </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/logout"> Logout </a>');
 	
 	$("#id_update_profile").click(function(event) {
 		event.preventDefault();
 		
-		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/users/update_profile"); // set URL
-		}
-		
-		updateProfile();
-	});
-	
-	$("#id_friends").click(function(event) {
-		event.preventDefault();
-		
-		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/users/friends_page"); // set URL
-		}
-		
-		friendsPage();
+		updateProfile(loggedUser);
 	});
 	
 	$("#id_logout").click(function(event) {
@@ -360,9 +296,7 @@ function registeredUserPage() {
 	
 }
 
-function updateProfile() {
-	var loggedUser = loadLoggedUser();
-	
+function updateProfile(loggedUser) {
 	var center = $("#center");
 	
 	deleteAllExceptFirst();
@@ -390,8 +324,6 @@ function updateProfile() {
 		
 		saveChangesOnProfile();
 	});
-	
-	loadUpadteProfileComplete();
 }
 
 function saveChangesOnProfile() {
@@ -461,336 +393,6 @@ function saveChangesOnProfile() {
 		}
 	});
 	
-}
-
-function friendsPage() {
-	$('<link>')
-	  .appendTo('head')
-	  .attr({
-	      type: 'text/css', 
-	      rel: 'stylesheet',
-	      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
-	});
-	
-	deleteAllExceptFirst();
-	$("#center").append('<div id="id_friends_page"></div>');
-	
-	$("#id_friends_page").load("html/partials/friends_page.html", workWithFriends);
-	
-}
-
-var indexOfFriends = 0;
-var indexOfRequests = 0;
-
-function workWithFriends() {
-	var people = getPeople();
-	var friends = getFriends();
-	var requests = getRequests();
-	
-	//popunjavanje tabele zahteva 
-	if(requests) {
-		for (var i in requests) {
-			  $( "#id_table_requests" ).append('<tr id="id_request_row_' + indexOfRequests + '"> <td></td> <td> <b>' + requests[i] + ' </b></td> <td><input type="button" id="id_accept_request_' + indexOfRequests + '" class="buttons" value="Accept request"/></td> <td><input type="button" id="id_decline_request_' + indexOfRequests + '" class="buttons_remove" value="Decline request"/></td> </tr>');
-			  $("#id_decline_request_" + indexOfRequests).on("click", {index: indexOfRequests, request: requests[i]}, declineRequest);
-			  
-			  $("#id_accept_request_" + indexOfRequests).on("click", {index: indexOfRequests, request: requests[i]}, acceptRequest);
-			  
-			  indexOfRequests++;  
-		}
-	}
-	
-	//popunjavanje tabele prijatelja 
-	if(friends) {
-		for (var i in friends) {
-			  $( "#id_table_friends" ).append('<tr id="id_friend_row_' + indexOfFriends + '"> <td></td> <td> <b>' + friends[i] + ' </b></td> <td><input type="button" id="id_remove_friend_' + indexOfFriends + '" class="buttons_remove" value="Remove friend"/></td> </tr>');
-			  $("#id_remove_friend_" + indexOfFriends).on("click", {index: indexOfFriends, removeFriend: friends[i]}, removeFriend);
-			  
-			  indexOfFriends++;  
-		}
-		
-		$("#id_header_requests").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(1, "id_table_requests");
-		});
-		
-		$("#id_header_friends").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(1, "id_table_friends");
-		});
-	}
-	
-	// podesavanje za autocomplete
-	$( function() {
-	    $( "#id_new_friend" ).autocomplete({
-	      source: people
-	    });
-	});
-	
-	
-	$("#id_btn_send_request").click(function(event) {
-		event.preventDefault();
-		
-		var newFriend = $("#id_new_friend").val();
-		
-		var retValue = sendRequestFriend(newFriend);
-		if(retValue) {
-			$("#id_new_friend").val("");
-		
-		}
-		
-	});
-	
-	loadFriendsPageComplete();
-}
-
-function declineRequest(event) {
-	event.preventDefault();
-	var retValue = declineRequestFriend(event.data.request);
-	if(retValue) {
-		$( "#id_request_row_" + event.data.index ).remove();
-		//indexOfRequests--;
-	}
-}
-
-function acceptRequest(event) {
-	event.preventDefault();
-	
-	var retValue = acceptRequestFriend(event.data.request);
-	if(retValue) {
-		$( "#id_request_row_" + event.data.index ).remove();
-		//indexOfRequests--;
-		
-		$( "#id_tr_header_friends" ).after('<tr id="id_friend_row_' + indexOfFriends + '"> <td></td> <td><b>' + event.data.request + ' </b></td> <td><input type="button" id="id_remove_friend_' + indexOfFriends + '" class="buttons_remove" value="Remove friend"/></td> </tr>');
-		$("#id_remove_friend_" + indexOfFriends).on("click", {index: indexOfFriends, removeFriend: event.data.request}, removeFriend);
-		
-		indexOfFriends++;
-	}
-}
-
-function removeFriend(event) {
-	event.preventDefault();
-	
-	var retValue = sendRemoveFriend(event.data.removeFriend);
-	$( "#id_friend_row_" + event.data.index ).remove();
-	
-	
-}
-
-function sendRemoveFriend(friendForRemove) {
-	var retValue = false;
-	
-	var tokens = friendForRemove.split("-");
-	if(tokens.length == 2) {
-		var username = tokens[0].trim();
-		
-		$.ajax({
-			async: false,
-			type : "DELETE",
-			url : removeFriendURL,
-			data: JSON.stringify({"username": username}),
-			dataType : "json",
-		    contentType: "application/json",
-		    cache: false, 
-			success : function(successRemove) { 
-				if(successRemove) {
-					toastr.success("You've been successful remove friend!"); 
-				}
-				else {
-					toastr.error(friendForRemove + " has already deleted your friendship!"); 
-				}
-				retValue = successRemove;
-			
-			},
-			error : function(XMLHttpRequest, textStatus, errorThrown) { 
-						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-			}
-		});
-	}
-	else {
-		toastr.error("Unsuccessful remove friendship with " + newFriend + "!"); 
-	}
-	
-	return retValue;
-}
-
-function sendRequestFriend(newFriend) {
-	var retValue = false;
-	
-	var tokens = newFriend.split("-");
-	if(tokens.length == 2) {
-		var username = tokens[0].trim();
-		
-		$.ajax({ 
-			async: false,
-		    type: "PUT",
-			url:  sendRequestFriendURL,
-			data: JSON.stringify({"username": username}),
-			dataType : "json",
-		    contentType: "application/json",
-		    cache: false,
-		    success: function(successSendRequest) {
-		    	if(successSendRequest) {
-		    		toastr.success("Request sent!"); 
-		    	}
-		    	else {
-		    		toastr.error("Request not sent!"); 
-		    	}
-		    	retValue = successSendRequest;
-					
-		   },
-			error : function(XMLHttpRequest, textStatus, errorThrown) { 
-						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-			}
-		});
-	}
-	else {
-		toastr.error("Request not sent!"); 
-	}
-	
-	return retValue;
-}
-
-function acceptRequestFriend(newFriend) {
-	var retValue = false;
-	
-	var tokens = newFriend.split("-");
-	if(tokens.length == 2) {
-		var username = tokens[0].trim();
-		
-		$.ajax({ 
-			async: false,
-		    type: "PUT",
-			url:  acceptRequestFriendURL,
-			data: JSON.stringify({"username": username}),
-			dataType : "json",
-		    contentType: "application/json",
-		    cache: false,
-		    success: function(successAcceptRequest) {
-		    	if(successAcceptRequest) {
-		    		toastr.success("You accepted a request for friendship with " + newFriend + "!"); 
-		    	}
-		    	else {
-		    		toastr.error("Unsuccessful acceptance of the request for friendship with " + newFriend + "!"); 
-		    	}
-		    	retValue = successAcceptRequest;
-					
-		   },
-			error : function(XMLHttpRequest, textStatus, errorThrown) { 
-						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-			}
-		});
-	}
-	else {
-		toastr.error("Unsuccessful acceptance of the request for friendship with " + newFriend + "!"); 
-	}
-	
-	return retValue;
-}
-
-function declineRequestFriend(newFriend) {
-	var retValue = false;
-	
-	var tokens = newFriend.split("-");
-	if(tokens.length == 2) {
-		var username = tokens[0].trim();
-		
-		$.ajax({ 
-			async: false,
-		    type: "PUT",
-			url:  declineRequestFriendURL,
-			data: JSON.stringify({"username": username}),
-			dataType : "json",
-		    contentType: "application/json",
-		    cache: false,
-		    success: function(successDeclineRequest) {
-		    	if(successDeclineRequest) {
-		    		toastr.success("You declined a request for friendship with " + newFriend + "!"); 
-		    	}
-		    	else {
-		    		toastr.error("Unsuccessful decline of the request for friendship with " + newFriend + "!"); 
-		    	}
-		    	retValue = successDeclineRequest;
-					
-		   },
-			error : function(XMLHttpRequest, textStatus, errorThrown) { 
-						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-			}
-		});
-	}
-	else {
-		toastr.error("Unsuccessful decline of the request for friendship with " + newFriend + "!"); 
-	}
-	
-	return retValue;
-}
-
-
-function getPeople() {
-	var people = null;
-	
-	$.ajax({
-		async: false,
-		type : "GET",
-		url : peopleURL,
-		dataType : "json",
-		contentType: "application/json",
-		cache: false,
-		success : function(receivePeople) {
-						people = receivePeople;
-		},
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-					return null;
-		}
-	});
-	
-	return people;
-}
-
-function getFriends() {
-	var friends = null;
-	
-	$.ajax({
-		async: false,
-		type : "GET",
-		url : friendsURL,
-		dataType : "json",
-		contentType: "application/json",
-		cache: false,
-		success : function(receiveFriends) {
-						friends = receiveFriends;
-		},
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-					return null;
-		}
-	});
-	
-	return friends;
-}
-
-function getRequests() {
-	var requests = null;
-	
-	$.ajax({
-		async: false,
-		type : "GET",
-		url : requestsURL,
-		dataType : "json",
-		contentType: "application/json",
-		cache: false,
-		success : function(receiveRequests) {
-				requests = receiveRequests;
-		},
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-					return null;
-		}
-	});
-	
-	return requests;
 }
 
 function logout() {
@@ -910,59 +512,3 @@ $(document).on("click", ".dropbtn", function(event)  {
 	$("#myDropdown").addClass("show");
 });
 	
-
-
-function sortTable(n, id_for_table) {
-	  var rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-	  //table = $("#id_table_friends")
-	  switching = true;
-	  // Set the sorting direction to ascending:
-	  dir = "asc"; 
-	  /* Make a loop that will continue until
-	  no switching has been done: */
-	  while (switching) {
-	    // Start by saying: no switching is done:
-	    switching = false;
-	    rows = $("#" + id_for_table + " tr")
-	    /* Loop through all table rows (except the
-	    first, which contains table headers): */
-	    for (var i = 1; i < (rows.length - 1); i++) {
-	      // Start by saying there should be no switching:
-	      shouldSwitch = false;
-	      /* Get the two elements you want to compare,
-	      one from current row and one from the next: */
-	      x = $(rows[i]).children()[n];
-	      y = $(rows[i + 1]).children()[n];
-	      /* Check if the two rows should switch place,
-	      based on the direction, asc or desc: */
-	      if (dir == "asc") {
-	        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-	          // If so, mark as a switch and break the loop:
-	          shouldSwitch= true;
-	          break;
-	        }
-	      } else if (dir == "desc") {
-	        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-	          // If so, mark as a switch and break the loop:
-	          shouldSwitch= true;
-	          break;
-	        }
-	      }
-	    }
-	    if (shouldSwitch) {
-	      /* If a switch has been marked, make the switch
-	      and mark that a switch has been done: */
-	      $(rows[i]).before(rows[i + 1]);
-	      switching = true;
-	      // Each time a switch is done, increase this count by 1:
-	      switchcount ++; 
-	    } else {
-	      /* If no switching has been done AND the direction is "asc",
-	      set the direction to "desc" and run the while loop again. */
-	      if (switchcount == 0 && dir == "asc") {
-	        dir = "desc";
-	        switching = true;
-	      }
-	    }
-	  }
-	}

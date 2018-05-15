@@ -37,6 +37,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -48,9 +49,7 @@ import com.jvm.isa.domain.Activation;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
 import com.jvm.isa.domain.User;
-import com.jvm.isa.domain.UserDTO;
 import com.jvm.isa.domain.UserStatus;
-import com.jvm.isa.domain.UserType;
 import com.jvm.isa.repository.ActivationRepository;
 import com.jvm.isa.repository.UserRepository;
 
@@ -66,6 +65,7 @@ public class UserControllerTest {
 			                                      Charset.forName("utf8")
 			                                     );
 	
+	
 	private MockMvc mockMvc;
 	
 	@Autowired
@@ -77,12 +77,12 @@ public class UserControllerTest {
 	@Autowired
 	private ActivationRepository activationRepository;
 	
-	//private MockHttpSession httpSession;
+	@Autowired
+	private MockHttpSession mockHttpSession;
 	
 	@PostConstruct
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-		//this.httpSession = new MockHttpSession(webApplicationContext.getServletContext());
 	}
 	
 	@Before
@@ -98,54 +98,52 @@ public class UserControllerTest {
 	
 	
 	@Test
+	public void testIsLogged() throws Exception {
+		ResultActions ra = mockMvc.perform(get(URL_PREFIX + "/is_logged").session(mockHttpSession))
+				.andExpect(status().isOk());
+		String returnJson = ra.andReturn().getResponse().getContentAsString();
+		boolean failLogged = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertFalse(failLogged);
+		
+		mockHttpSession.setAttribute("loggedUsername", TEST_USERNAME);
+		
+		
+		ra = mockMvc.perform(get(URL_PREFIX + "/is_logged").session(mockHttpSession))
+				.andExpect(status().isOk());
+		returnJson = ra.andReturn().getResponse().getContentAsString();
+		boolean successLogged = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertTrue(successLogged);
+	}
+	
+	@Test
 	public void testGetLoggedUser() throws Exception {
-		// za rest metodu koju gadjamo koristi se HttpSession
-		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.INSTITUTION_ADMINISTRATOR, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
-																								//ulogovanog korisnika
 		RegisteredUser ru = new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER);
 		ru.setUserStatus(UserStatus.ACTIVATED);
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		
 		
-		// TRAZENJE ULOGOVANOG
-		ResultActions ra = mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
+		ResultActions ra = mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
 				.andExpect(status().isOk());
 		String returnJson = ra.andReturn().getResponse().getContentAsString();
-		System.out.println( "***************************************"+ returnJson + "******************");
-		RegisteredUserDTO registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
+		assertEquals("", returnJson);
+		// pokusaj trazenja ulogovanog korisnika
 		
-		assertEquals("-1", registeredUserDTO.getUsername());
-		//assertEquals("-1", user.getPassword());
-		
-		
-		// LOGOVANJE
-		HashMap<String, String> hm1 = new HashMap<String, String>();
-		hm1.put("username", TEST_USERNAME);
-		hm1.put("password", TEST_PASSWORD);
-		String json = TestUtil.objectTojson(hm1);
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").sessionAttrs(sessionAttr).contentType(contentType).content(json)).andExpect(status().isOk());
-		returnJson = ra.andReturn().getResponse().getContentAsString();
-		System.out.println( "***************************************"+ returnJson + "******************");
-		registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
-		assertEquals(TEST_USERNAME, registeredUserDTO.getUsername());
-		//assertEquals(TEST_PASSWORD, user.getPassword());
-		User user = userRepository.findByUsernameAndPassword(TEST_USERNAME, TEST_PASSWORD);
-		sessionAttr.put("loggedUser", user);
-		//-----------------------------------------------------------------------------------------------------------------------
-		
+		mockHttpSession.setAttribute("loggedUsername", TEST_USERNAME);
 		
 		// TRAZENJE ULOGOVANOG
-		ra = mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
+		ra = mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
-		
-		assertEquals(registeredUserDTO.getUsername(), TEST_USERNAME);
-		//assertEquals(user.getPassword(), TEST_PASSWORD);
-		
+		RegisteredUserDTO registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
+		assertNotNull(registeredUserDTO);
+		assertEquals(TEST_USERNAME, registeredUserDTO.getUsername());
+		assertEquals(TEST_FIRST_NAME, registeredUserDTO.getFirstName());
+		assertEquals(TEST_LAST_NAME, registeredUserDTO.getLastName());
+		assertEquals(TEST_EMAIL, registeredUserDTO.getEmail());
+		assertEquals(TEST_CITY, registeredUserDTO.getCity());
+		assertEquals(TEST_PHONE_NUMBER, registeredUserDTO.getPhoneNumber());
 	}
 	
 	
@@ -193,24 +191,21 @@ public class UserControllerTest {
 		hm.put("password", TEST_PASSWORD);
 		
 		String json = TestUtil.objectTojson(hm);
-		ResultActions ra = this.mockMvc.perform(put(URL_PREFIX + "/login").contentType(contentType).content(json)).andExpect(status().isOk());
+		ResultActions ra = this.mockMvc.perform(put(URL_PREFIX + "/login").session(mockHttpSession).contentType(contentType).content(json)).andExpect(status().isOk());
 		String returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		UserDTO userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		assertEquals("-1", userDTO.getUsername());
-		//assertEquals("-1", user.getPassword());
+		Boolean loginFail = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertFalse(loginFail);
 		
-	
+		
 		userRepository.save(new RegisteredUser(TEST_USERNAME, TEST_PASSWORD, TEST_FIRST_NAME, TEST_LAST_NAME, TEST_EMAIL, TEST_CITY, TEST_PHONE_NUMBER));
 		// prvo moram registrovati nekog korisnika, a zatim cemo proveriti logovanje
 		
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").contentType(contentType).content(json)).andExpect(status().isOk());
+		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").session(mockHttpSession).contentType(contentType).content(json)).andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		// korisnik je registrovan, ali nije jos aktivairan njegov nalog, zato ocekujemo neuspesno logovanje
-		assertEquals("-1", userDTO.getUsername());
-		//assertEquals("-1", user.getPassword());
+		loginFail = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertFalse(loginFail);
 		
 		//--------------------------------------------------------------------------------------------
 		
@@ -219,13 +214,26 @@ public class UserControllerTest {
 		userRepository.save(user);
 		// sad smo aktivirali nalog registrovanog korisnika, i ocekujemo uspesno logovanje
 		
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").contentType(contentType).content(json)).andExpect(status().isOk());
+		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").session(mockHttpSession).contentType(contentType).content(json)).andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		assertEquals(TEST_USERNAME, user.getUsername());
-		//assertEquals(TEST_PASSWORD, user.getPassword());
+		Boolean loginSuccess = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertTrue(loginSuccess);
 		
+		
+		// TRAZENJE ULOGOVANOG
+		ra = mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
+				.andExpect(status().isOk());
+		returnJson = ra.andReturn().getResponse().getContentAsString();
+		System.out.println( "***************************************"+ returnJson + "******************");
+		RegisteredUserDTO registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
+		assertNotNull(registeredUserDTO);
+		assertEquals(TEST_USERNAME, registeredUserDTO.getUsername());
+		assertEquals(TEST_FIRST_NAME, registeredUserDTO.getFirstName());
+		assertEquals(TEST_LAST_NAME, registeredUserDTO.getLastName());
+		assertEquals(TEST_EMAIL, registeredUserDTO.getEmail());
+		assertEquals(TEST_CITY, registeredUserDTO.getCity());
+		assertEquals(TEST_PHONE_NUMBER, registeredUserDTO.getPhoneNumber());
 	}
 	
 	public void testActivateAccount() throws Exception {
@@ -300,26 +308,17 @@ public class UserControllerTest {
 		userRepository.save(ru);
 		// REGISTROVANJE
 		
-		// za rest metodu koju gadjamo koristi se HttpSession
-		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.REGISTERED_USER, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
-																										//ulogovanog korisnika
-		
 		HashMap<String, String> hm = new HashMap<String, String>();
 		hm.put("username", TEST_USERNAME);
 		hm.put("password", TEST_PASSWORD);
 		
 		String json = TestUtil.objectTojson(hm);
-		ResultActions ra = this.mockMvc.perform(put(URL_PREFIX + "/login").sessionAttrs(sessionAttr).contentType(contentType).content(json))
+		ResultActions ra = this.mockMvc.perform(put(URL_PREFIX + "/login").session(mockHttpSession).contentType(contentType).content(json))
 				.andExpect(status().isOk());
 		String returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		UserDTO userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		assertEquals(TEST_USERNAME, userDTO.getUsername());
-		//assertEquals(TEST_PASSWORD, user.getPassword());
-		User user = userRepository.findByUsernameAndPassword(TEST_USERNAME, TEST_PASSWORD);
-		assertEquals(userDTO.getUsername(), user.getUsername());
-		sessionAttr.put("loggedUser", user);
+		Boolean successLogin = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertTrue(successLogin);
 		// ulogovali smo se
 		
 		
@@ -335,7 +334,7 @@ public class UserControllerTest {
 		hm2.put("phoneNumber", TEST_PHONE_NUMBER);
 		
 		json = TestUtil.objectTojson(hm2);
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/save_changes_on_profile").sessionAttrs(sessionAttr).contentType(contentType).content(json))
+		ra = this.mockMvc.perform(put(URL_PREFIX + "/save_changes_on_profile").session(mockHttpSession).contentType(contentType).content(json))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
@@ -346,14 +345,14 @@ public class UserControllerTest {
 		hm2.put("oldPassword", TEST_PASSWORD);
 		
 		json = TestUtil.objectTojson(hm2);
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/save_changes_on_profile").sessionAttrs(sessionAttr).contentType(contentType).content(json))
+		ra = this.mockMvc.perform(put(URL_PREFIX + "/save_changes_on_profile").session(mockHttpSession).contentType(contentType).content(json))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
 		res = TestUtil.jsonToT(returnJson, Integer.class);
 		assertEquals(EVERYTHING_IS_RIGHT, res);
 		
-		user = userRepository.findByUsernameAndPassword(TEST_NEW_USERNAME, TEST_NEW_PASSWORD);
+		User user = userRepository.findByUsernameAndPassword(TEST_NEW_USERNAME, TEST_NEW_PASSWORD);
 		assertNotNull(user);
 	}
 	
@@ -364,19 +363,11 @@ public class UserControllerTest {
 		userRepository.save(ru);
 		// prvo smo registrovali nekog korisnika
 		
-		
-		// za rest metodu koju gadjamo koristi se HttpSession
-		HashMap<String, Object> sessionAttr = new HashMap<String, Object>();
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.INSTITUTION_ADMINISTRATOR, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
-																								//ulogovanog korisnika
-		
-		ResultActions ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
+		ResultActions ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
 						.andExpect(status().isOk());
 		String returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		UserDTO userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		assertEquals("-1", userDTO.getUsername());
-		//assertEquals("-1", user.getPassword());
+		assertEquals("", returnJson);
 		// na pocetku nije niko ulogovan
 		
 		HashMap<String, String> hm = new HashMap<String, String>();
@@ -384,48 +375,46 @@ public class UserControllerTest {
 		hm.put("password", TEST_PASSWORD);
 		
 		String json = TestUtil.objectTojson(hm);
-		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").sessionAttrs(sessionAttr).contentType(contentType).content(json))
+		ra = this.mockMvc.perform(put(URL_PREFIX + "/login").session(mockHttpSession).contentType(contentType).content(json))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		RegisteredUserDTO registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
-		assertEquals(TEST_USERNAME, registeredUserDTO.getUsername());
-		//assertEquals(TEST_PASSWORD, registeredUserDTO.getPassword());
-		User user = userRepository.findByUsernameAndPassword(TEST_USERNAME, TEST_PASSWORD);
-		assertEquals(registeredUserDTO.getUsername(), user.getUsername());
-		sessionAttr.put("loggedUser", user);
+		Boolean loginSuccess = TestUtil.jsonToT(returnJson, Boolean.class);
+		assertTrue(loginSuccess);
 		// ulogovali smo se
 		
 		//-----------------------------------------------------------------------------------------------------------------------------------
 		
 		
-		ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
+		ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
+		RegisteredUserDTO registeredUserDTO = TestUtil.jsonToT(returnJson, RegisteredUserDTO.class);
+		assertNotNull(registeredUserDTO);
 		assertEquals(TEST_USERNAME, registeredUserDTO.getUsername());
-		//assertEquals(TEST_PASSWORD, user.getPassword());
+		assertEquals(TEST_FIRST_NAME, registeredUserDTO.getFirstName());
+		assertEquals(TEST_LAST_NAME, registeredUserDTO.getLastName());
+		assertEquals(TEST_EMAIL, registeredUserDTO.getEmail());
+		assertEquals(TEST_CITY, registeredUserDTO.getCity());
+		assertEquals(TEST_PHONE_NUMBER, registeredUserDTO.getPhoneNumber());
 		// nasli smo ulogovanog korisnika
 		
 		//----------------------------------------------------------------------------------------------------------------------------
 		
-		ra = this.mockMvc.perform(delete(URL_PREFIX + "/logout").sessionAttrs(sessionAttr))
+		ra = this.mockMvc.perform(delete(URL_PREFIX + "/logout").session(mockHttpSession))
 				.andExpect(status().isOk());
-		sessionAttr.put("loggedUser", new User("-1", "-1", UserType.INSTITUTION_ADMINISTRATOR, UserStatus.PENDING)); // ovaj user nam govori da trenutno nemamo 
 		// zatim smo se izlogovali
 		
 		
 		//-----------------------------------------------------------------------------------------------------------------------------
 		
 		
-		ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").sessionAttrs(sessionAttr))
+		ra = this.mockMvc.perform(get(URL_PREFIX + "/logged_user").session(mockHttpSession))
 				.andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");
-		userDTO = TestUtil.jsonToT(returnJson, UserDTO.class);
-		assertEquals("-1", userDTO.getUsername());
-		//assertEquals("-1", user.getPassword());
+		assertEquals("", returnJson);
 		// ocekujemo da nema ulogovanog korisnika
 		
 	}

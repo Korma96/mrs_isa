@@ -1,6 +1,7 @@
 package com.jvm.isa.domain;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -17,6 +18,9 @@ public class Repertoire {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name="id", unique=true, nullable=false)
 	private Long id;
+	
+	@Column(name="date", unique=false, nullable=false)
+	private Date date;
 	
 	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "repertoire"*/)
 	private List<Showing> showings;

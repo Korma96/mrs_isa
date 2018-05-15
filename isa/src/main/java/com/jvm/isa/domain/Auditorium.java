@@ -17,21 +17,23 @@ public class Auditorium {
 	@Column(name="name", unique=false, nullable=false)
 	private String name;
 	
-	@Column(name="num_Of_seats", unique=false, nullable=false)
-	private int numOfSeats;
+	@Column(name="num_Of_rows", unique=false, nullable=false)
+	private int numOfRows;
+	
+	@Column(name="num_Of_cols", unique=false, nullable=false)
+	private int numOfCols;
 
 	
 	public Auditorium() {
 		
 	}
-	
-	
-	public Auditorium(String name, int numOfSeats) {
+
+	public Auditorium(String name, int numOfRows, int numOfCols) {
+		super();
 		this.name = name;
-		this.numOfSeats = numOfSeats;
+		this.numOfRows = numOfRows;
+		this.numOfCols = numOfCols;
 	}
-
-
 
 	public Long getId() {
 		return id;
@@ -49,12 +51,20 @@ public class Auditorium {
 		this.name = name;
 	}
 
-	public int getNumOfSeats() {
-		return numOfSeats;
+	public int getNumOfRows() {
+		return numOfRows;
 	}
 
-	public void setNumOfSeats(int numOfSeats) {
-		this.numOfSeats = numOfSeats;
+	public void setNumOfRows(int numOfRows) {
+		this.numOfRows = numOfRows;
+	}
+
+	public int getNumOfCols() {
+		return numOfCols;
+	}
+
+	public void setNumOfCols(int numOfCols) {
+		this.numOfCols = numOfCols;
 	}
 	
 }
