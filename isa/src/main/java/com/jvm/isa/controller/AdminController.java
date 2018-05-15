@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jvm.isa.service.EmailService;
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
-import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.User;
@@ -28,16 +26,13 @@ import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.AdminService;
 
 @RestController
-@RequestMapping(value = "/admins")
+@RequestMapping(value = "/administrators")
 
 public class AdminController {
 
 	@Autowired
 	private AdminService adminService;
-
-	@Autowired
-	private EmailService emailService;
-
+	
 	@Autowired
 	private HttpSession httpSession;
 
@@ -104,15 +99,6 @@ public class AdminController {
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	
-	
-	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/logout", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity logout(String username) {
-		httpSession.invalidate();
-		System.out.println("Logout");
-		
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
 	@RequestMapping(value = "/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();

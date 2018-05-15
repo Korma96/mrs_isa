@@ -305,8 +305,12 @@ function successfullyLogged() {
 		if (loggedUser.userType == "REGISTERED_USER") {
 			registeredUserPage();
 		}
-		else{
-			administratorPage()
+		else if (loggedUser.userType == "SYS_ADMINISTRATOR") {
+			adminSystemPage(loggedUser);
+		}
+		
+		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
+			adminFunzonePage(loggedUser);
 		}
 	});
 	

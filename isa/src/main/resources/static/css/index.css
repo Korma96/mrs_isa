@@ -1,15 +1,17 @@
 html { height: 100%; }
 
-body {height: 100%; background: url("bg.png");}
+body {height: 100%; background-color: #0080ff;}
 
 .page {align: center}
 
-#header {background-color: crimson; align:center; }
+.image_preview { border:3px solid red; width:auto; height:230px;}
 
-#center {border:3px black; background-color: crimson; justify-content: center; position: absolute; }
+#header {background-color: #ff8000; align:center; }
+
+#center {border:3px solid blue; background-color: #ff9900; justify-content: center; position: absolute; }
   
  .buttons {
-    background-color: lightblue; /* Green */
+    background-color: #008000; /* Green */
     border: border:3px solid blue;
     color: white;
     padding: 15px 32px;
@@ -29,7 +31,7 @@ body {height: 100%; background: url("bg.png");}
     display: inline-block;
     font-size: 16px;
 }
-
+ 
 th, td {
     padding: 8px;
     
@@ -39,7 +41,7 @@ th {text-align: center;
 	bgcolor: grey;}
 
 #title {
-  color: #0000ff;
+  color: green;
   font-size: 25px;
   text-align:center;
 }
@@ -52,6 +54,7 @@ th {text-align: center;
 
 .medium_img {
 	width: 400px; height: 230px
+}
 
 #vanredne_situacije {border-color: green;}
 
@@ -64,5 +67,4 @@ input[type=checkbox] {
 
 .google_map {width: 300px; height: 300px;}
 
-#id_pretraga_i_filter {height: auto; width: 100%
-
+#id_pretraga_i_filter {height: auto; width: 100%}
