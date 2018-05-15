@@ -2,6 +2,7 @@ package com.jvm.isa.domain;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -29,12 +30,17 @@ public class CulturalInstitution{
 	@Column(name="type", unique=false, nullable=false)
 	private CulturalInstitutionType type;
 	
-	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "culturalInstitution"*/)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "culturalInstitution"*/)
 	private List<Auditorium> auditoriums;
 	
-	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "culturalInstitution"*/)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "repertoire"*/)
+	private List<Showing> showings;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "culturalInstitution"*/)
 	private List<Repertoire> repertoires;
 
+
+	
 	public CulturalInstitution() {
 		
 	}
@@ -94,6 +100,44 @@ public class CulturalInstitution{
 
 	public void setRepertoires(List<Repertoire> repertoires) {
 		this.repertoires = repertoires;
+	}
+	
+	public CulturalInstitutionType getType() {
+		return type;
+	}
+
+	public void setType(CulturalInstitutionType type) {
+		this.type = type;
+	}
+
+	public List<Showing> getShowings() {
+		return showings;
+	}
+
+	public void setShowings(List<Showing> showings) {
+		this.showings = showings;
+	}
+
+	
+
+	public boolean containsShowing(String showingName) {
+		for (Showing showing : showings) {
+			if (showing.getName().equals(showingName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public Showing getShowing(String showingName) {
+		for (Showing showing : showings) {
+			if (showing.getName().equals(showingName)) {
+				return showing;
+			}
+		}
+		
+		return null;
 	}
 	
 }

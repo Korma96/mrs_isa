@@ -1,6 +1,8 @@
 package com.jvm.isa.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,7 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.service.EmailService;
 import com.jvm.isa.domain.Administrator;
+import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
+import com.jvm.isa.domain.Requisite;
+import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
@@ -107,5 +113,61 @@ public class AdminController {
 		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	@RequestMapping(value = "/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getCulturalInstitutions() {
+		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();
+		
+		return new ResponseEntity<ArrayList<String>>(culturalInstitutions, HttpStatus.OK);
+		
+	}
+	
+	@RequestMapping(value = "/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE,
+																									produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getShowingsOfCulturalInstitution(@PathVariable("culturalInstitutionName") String culturalInstitutionName) {
+		ArrayList<String> showings = adminService.getShowings(culturalInstitutionName);
+		
+		return new ResponseEntity<ArrayList<String>>(showings, HttpStatus.OK);
+		
+	}
+	
+	
+	@RequestMapping(value = "/add_requisite", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+																			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> AddRequisite(@RequestBody HashMap<String, String> hm) {
+		String name = hm.get("name");
+		String description = hm.get("description");
+		String priceStr = hm.get("price");
+		String culturalInstitutionName = hm.get("culturalInstitution");
+		String showing = hm.get("showing");
+		
+		boolean successAddRequisite;
+		int correct = adminService.correctRequisite(name, description, priceStr, culturalInstitutionName, showing);
+		if(correct == 6) {
+			CulturalInstitution cInstitution = adminService.getCulturalInstitution(culturalInstitutionName);
+			double price = Double.parseDouble(priceStr);
+			successAddRequisite = adminService.addRequisite(new Requisite(name, description, price, cInstitution.getShowing(showing), cInstitution));
+		}
+		else successAddRequisite = false;
+		
+		return new ResponseEntity<Boolean>(successAddRequisite, HttpStatus.OK);
+	
+	}
+	
+	@RequestMapping(value = "/get_requisites", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<RequisiteDTO>> getRequisites() {
+		List<Requisite> requisites = adminService.getRequisites();
+		
+		ArrayList<RequisiteDTO> requisiteDTOs = new ArrayList<RequisiteDTO>();
+		
+		for (Requisite requisite : requisites) {
+			requisiteDTOs.add(new RequisiteDTO(requisite));
+		}
+		
+		return new ResponseEntity<ArrayList<RequisiteDTO>>(requisiteDTOs, HttpStatus.OK);
+	
+	}
+	
+		
 }
+
 
