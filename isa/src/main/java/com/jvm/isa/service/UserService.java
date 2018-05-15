@@ -15,6 +15,8 @@ public interface UserService {
 	
 	User getUser(String username);
 	
+	User getUserWithoutProxy(String username);
+	
 	int correctUser(User oldUser, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email, String city, String phoneNumber);
 
 	ArrayList<String> getPeople(RegisteredUser ru);

@@ -1,3 +1,14 @@
+insert into user
+values('AD', 101, 'ia0', 0, 1, 'ia0', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
+insert into user
+values('AD', 102, 'ia1', 1, 1, 'ia1', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
+insert into user
+values('AD', 103, 'ia2', 2, 1, 'ia2', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
+insert into user
+values('AD', 104, 'fa', 2, 2, 'fa', 'markoradovic996@gmail.com', 'fa', 'fa', 'rrr', 123);
+insert into user
+values('AD', 105, 'sa', 0, 3, 'sa', 'markoradovic996@gmail.com', 'sa', 'sa', 'rrr', 123);
+
 insert into cultural_institution 
 values(1,'Pozorisni trg 1, Novi Sad','Promotivni opis 1','Srpsko narodno pozoriste', 1);
 insert into cultural_institution 

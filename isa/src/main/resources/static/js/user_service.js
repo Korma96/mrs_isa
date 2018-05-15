@@ -312,6 +312,10 @@ function successfullyLogged() {
 		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
 			adminFunzonePage(loggedUser);
 		}
+		
+		else if (loggedUser.userType == "INSTITUTION_ADMINISTRATOR") {
+			adminCulturalInstitutionsPage(loggedUser);
+		}
 	});
 	
 	/*$("#center").append('You have successfully logged in.');

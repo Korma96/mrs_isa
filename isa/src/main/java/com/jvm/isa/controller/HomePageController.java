@@ -24,17 +24,15 @@ public class HomePageController
 {		
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
-	
-	@Autowired
-	private HttpSession httpSession;
+
 	
 	@RequestMapping(value = "/cultural_institutions", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<CulturalInstitution>> getCinemas(@RequestBody HashMap<String, String> hm)
+	public ResponseEntity<List<CulturalInstitution>> getCulturalInstitutions(@RequestBody HashMap<String, String> hm)
 	{
 		int type = Integer.parseInt(hm.get("type"));
-		List<CulturalInstitution> cinemas = culturalInstitutionService.getCulturalInstitutionsByType(CulturalInstitutionType.values()[type]);
-		return new ResponseEntity<List<CulturalInstitution>>(cinemas, HttpStatus.OK);
+		List<CulturalInstitution> culturalInstitutions = culturalInstitutionService.getCulturalInstitutionsByType(CulturalInstitutionType.values()[type]);
+		return new ResponseEntity<List<CulturalInstitution>>(culturalInstitutions, HttpStatus.OK);
 	}
 }
 

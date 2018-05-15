@@ -34,7 +34,7 @@ public class AdminController {
 	private AdminService adminService;
 	
 	@Autowired
-	private HttpSession httpSession;
+	private UserController userController;
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
@@ -65,10 +65,18 @@ public class AdminController {
 		return new ResponseEntity<Boolean>(successregister, HttpStatus.OK);
 
 	}
+	
+	@RequestMapping(value = "/admin_changes_default_password", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
+	public ResponseEntity<Boolean> adminChangePassword(@RequestBody HashMap<String, String> hm) 
+	{
+		
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
 
 	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfile(@RequestBody HashMap<String, String> hm) {
-		User user = (User) httpSession.getAttribute("loggedUser");
+		User user = userController.getLoggedUserLocalMethod();
 
 		if (user != null) {
 			Administrator loggedUser = (Administrator) user;

@@ -45,7 +45,7 @@ public class UserController {
 		User user = null;
 		
 		if(username != null) {
-			user = userService.getUser(username);
+			user = userService.getUserWithoutProxy(username);
 		}
 		
 		return user;
@@ -105,6 +105,8 @@ public class UserController {
 		
 		if(correct == 6)	{
 			RegisteredUser user = new RegisteredUser(username, password, firstName, lastName, email, city, phoneNumber);
+			user.setUserType(UserType.REGISTERED_USER);
+			user.setUserStatus(UserStatus.PENDING);
 			successRegistrate = userService.registrate(user);
 			
 			try {
@@ -128,10 +130,23 @@ public class UserController {
 		User user = userService.getUser(hm.get("username"), hm.get("password"));
 		System.out.println("user: " + user);
 		if(user != null) {
-			if(user.getUserStatus() == UserStatus.ACTIVATED) {
-				httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
-				
-				return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			if(user.getUserType() == UserType.REGISTERED_USER)
+			{
+				if(user.getUserStatus() == UserStatus.ACTIVATED) {
+					httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
+					
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+				}
+			}
+			else
+			{
+				// kada je admin PENDING to znaci da jos nije promenuo default lozinku
+				if(user.getUserStatus() != UserStatus.DEACTIVATED)
+				{
+					httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
+					
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+				}
 			}
 			
 		}

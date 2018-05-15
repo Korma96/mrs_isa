@@ -4,6 +4,7 @@ var addRequisiteURL = "/myapp/administrators/add_requisite";
 var getRequisitesURL = "/myapp/administrators/get_requisites"; 
 var saveChangesOnProfileSysAdminURL = "/myapp/administrators/save_changes_on_profile";
 var registerAdminURL = "/myapp/administrators/register";
+var changePasswordURL = "/myapp/administrators/admin_changes_default_password";
 
 
 function adminSystemPage(loggedUser) {
@@ -73,6 +74,85 @@ function adminFunzonePage(loggedUser) {
 	
 }
 
+function adminCulturalInstitutionsPage(loggedUser) {
+	$("#title").html('CULTURAL INSTITUTIONS ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
+	
+	if(loggedUser.userStatus == 'PENDING')
+	{
+		forceAdminToChangePassword(loggedUser);
+	}
+	else if(loggedUser.userStatus == 'ACTIVATED')
+	{
+		adminCulturalInstitutionsMainPage(loggedUser);
+	}
+	else
+	{
+		toastr.error("User is DEACTIVATED!");
+	}
+}
+
+function adminCulturalInstitutionsMainPage(loggedUser)
+{
+	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_update_showings" href="/myapp/#/administrators/update_showings"> Update showings </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/logout"> Logout </a>');
+	
+	$("#id_update_profile_cultural_institutions_admin").click(function(event) {
+		event.preventDefault();
+		
+		updateProfileCulturalInstitutionsAdmin(loggedUser);
+	});
+	$("#id_update_showings").click(function(event) {
+		event.preventDefault();
+		
+		updateShowings();
+	});
+	
+	$("#id_logout").click(function(event) {
+		event.preventDefault();
+		
+		logout();
+	});
+}
+
+function forceAdminToChangePassword(loggedUser)
+{
+	if(window.history.pushState)
+	{
+		window.history.pushState(null, null, $(this).attr('href')); // set URL
+	}
+	$("#center").load("html/partials/admin_change_password.html", null, null);
+	var alert_string = loggedUser.username + ', please set your new password.'
+	alert(alert_string);
+}
+
+$(document).on("click", "#id_btn_chpwd", function(event) {
+	$.ajax({ 
+	    type: "POST",
+		url:  registerAdminURL,
+	    data: JSON.stringify({
+			"password": $("#chpwd_password"),
+			"rePassword": $("#chpwd_repassword")
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(successRegistrate) {
+	    	if(successRegistrate) {
+	    		$("#id_username").val("");
+	    		$("#id_password").val("");
+	    		adminCulturalInstitutionsMainPage(loadLoggedUser());
+	    		toastr.success("You have successfully changed password!");
+	    	}
+	    	else {
+	    		toastr.error("Registration error!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+});
+
 function updateProfileFanZone(loggedUser)
 {
 	var center = $("#center");
@@ -101,6 +181,35 @@ function updateProfileFanZone(loggedUser)
 		saveChangesOnProfileSystemAdmin();
 	});
 	
+}
+
+function updateProfileCulturalInstitutionsAdmin(loggedUser)
+{
+	var center = $("#center");
+	
+	deleteAllExceptFirst();
+	
+	center.append(
+			'<form > \
+				<table> \
+					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+				</div> \
+				<br/> \
+			</form>');
+	
+	$("#id_btn_save_changes_on_profile").click(function(event) {
+		event.preventDefault();
+		
+		saveChangesOnProfileSystemAdmin();
+	});
 }
 	
 
@@ -315,6 +424,12 @@ function saveAdmin(){
 		logout();
 	});
 }*/
+
+function updateShowings()
+{
+	alert('showings!');
+}
+
 
 function addRequisite() {
 	$('<link>')
