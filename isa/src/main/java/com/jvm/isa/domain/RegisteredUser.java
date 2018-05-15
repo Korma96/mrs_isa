@@ -25,10 +25,10 @@ public class RegisteredUser extends User {
 	@Column(name="email", unique=false, nullable=false)
 	private String email;
 	
-	@Column(name="city", unique=false, nullable=false)
+	@Column(name="city", unique=false, nullable = true)
 	private String city;
 	
-	@Column(name="phone_number", unique=false, nullable=false)
+	@Column(name="phone_number", unique=false)
 	private String phoneNumber;
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

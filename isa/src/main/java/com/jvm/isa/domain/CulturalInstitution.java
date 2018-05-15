@@ -39,6 +39,8 @@ public class CulturalInstitution{
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "culturalInstitution"*/)
 	private List<Repertoire> repertoires;
 
+
+	
 	public CulturalInstitution() {
 		
 	}

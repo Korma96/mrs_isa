@@ -1,15 +1,15 @@
 html { height: 100%; }
 
-body {height: 100%; background-color: #0080ff;}
+body {height: 100%; background: url("bg.png");}
 
 .page {align: center}
 
-#header {background-color: #ff8000; align:center; }
+#header {background-color: crimson; align:center; }
 
-#center {border:3px solid blue; background-color: #ff9900; justify-content: center; position: absolute; }
+#center {border:3px black; background-color: crimson; justify-content: center; position: absolute; }
   
  .buttons {
-    background-color: #008000; /* Green */
+    background-color: lightblue; /* Green */
     border: border:3px solid blue;
     color: white;
     padding: 15px 32px;
@@ -36,10 +36,10 @@ th, td {
 }
 
 th {text-align: center;
-	bgcolor: #0000ff;}
+	bgcolor: grey;}
 
 #title {
-  color: green;
+  color: #0000ff;
   font-size: 25px;
   text-align:center;
 }
