@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -22,7 +23,7 @@ public class Repertoire {
 	@Column(name="date", unique=false, nullable=false)
 	private Date date;
 	
-	@OneToMany(fetch = FetchType.LAZY/*, mappedBy = "repertoire"*/)
+	@ManyToMany(fetch = FetchType.LAZY/*, mappedBy = "repertoire"*/)
 	private List<Showing> showings;
 
 	public Repertoire() {

@@ -19,25 +19,25 @@ insert into cultural_institution
 values(4,'Ignjata Pavlasa 4, Novi Sad','Promotivni opis 4','Pozoriste mladih', 1); 
 
 insert into auditorium 
-values(1,'Sala 1',1,7,8);
+values(1,'Sala 1',7,8);
 insert into auditorium 
-values(2,'Sala 1',2,7,8);
+values(2,'Sala 1',7,8);
 insert into auditorium 
-values(3,'Sala 1',3,7,8);
+values(3,'Sala 1',7,8);
 insert into auditorium 
-values(4,'Sala 1',4,7,8);
+values(4,'Sala 1',7,8);
 insert into auditorium 
-values(5,'Sala 2',1,10,10);
+values(5,'Sala 2',10,10);
 insert into auditorium 
-values(6,'Sala 2',2,10,10);
+values(6,'Sala 2',10,10);
 insert into auditorium 
-values(7,'Sala 2',3,10,10);
+values(7,'Sala 2',10,10);
 insert into auditorium 
-values(8,'Sala 2',4,10,10);
+values(8,'Sala 2',10,10);
 insert into auditorium 
-values(9,'Sala 3',1,8,9);
+values(9,'Sala 3',8,9);
 insert into auditorium 
-values(10,'Sala 3',2,8,9);
+values(10,'Sala 3',8,9);
 
 insert into cultural_institution_auditoriums
 values(1,1);
@@ -85,21 +85,21 @@ values(11,5.7,152,'Adventure','Doe De carteret, Camella De la puelba, Pepi Chaml
 insert into showing
 values(12,6.9,132,'History','Berri Wight, Nelia Wyatt, Clarice Mcgehee, Dorolisa Glendinin','Spotlight','Dolli Benham','','Description12');
 
-insert into repertoire values(0,1,'2018-06-1');
-insert into repertoire values(1,2,'2018-06-12');
-insert into repertoire values(2,3,'2018-06-24');
-insert into repertoire values(3,4,'2018-06-22');
-insert into repertoire values(4,1,'2018-06-12');
-insert into repertoire values(5,2,'2018-06-15');
-insert into repertoire values(6,3,'2018-06-5');
-insert into repertoire values(7,4,'2018-06-6');
-insert into repertoire values(8,1,'2018-06-13');
-insert into repertoire values(9,2,'2018-06-16');
-insert into repertoire values(10,3,'2018-06-2');
-insert into repertoire values(11,4,'2018-06-14');
-insert into repertoire values(12,1,'2018-06-21');
-insert into repertoire values(13,2,'2018-06-14');
-insert into repertoire values(14,3,'2018-06-21');
+insert into repertoire values(0,'2018-06-1');
+insert into repertoire values(1,'2018-06-12');
+insert into repertoire values(2,'2018-06-24');
+insert into repertoire values(3,'2018-06-22');
+insert into repertoire values(4,'2018-06-12');
+insert into repertoire values(5,'2018-06-15');
+insert into repertoire values(6,'2018-06-5');
+insert into repertoire values(7,'2018-06-6');
+insert into repertoire values(8,'2018-06-13');
+insert into repertoire values(9,'2018-06-16');
+insert into repertoire values(10,'2018-06-2');
+insert into repertoire values(11,'2018-06-14');
+insert into repertoire values(12,'2018-06-21');
+insert into repertoire values(13,'2018-06-14');
+insert into repertoire values(14,'2018-06-21');
 
 insert into cultural_institution_repertoires values(1,0);
 insert into cultural_institution_repertoires values(2,1);
