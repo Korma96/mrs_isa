@@ -30,7 +30,8 @@ $(document).ready(function() {
 		
 		window.history.pushState(null, null, "/myapp/#" + pathname); // set URL
 		
-		activateAccount(pathname);
+		reactionOnChangeUrl();
+		//activateAccount(pathname);
 		
 	    /*$(window).on('popstate', function() {
 	    	toastr.info('Back button was pressed.');
@@ -43,7 +44,12 @@ $(document).ready(function() {
 $(window).on('hashchange', function(e){
 	// Alerts every time the hash changes!
 	
-	var pathname = getPathname();
+	reactionOnChangeUrl();
+	
+});
+
+function reactionOnChangeUrl() {
+var pathname = getPathname();
 	
 	switch(pathname) {
 	case "/":
@@ -77,6 +83,18 @@ $(window).on('hashchange', function(e){
 	case "/users/friends_page":
 		friendsPage();
 		break;
+	case "home_page/cinemas":
+	case "home_page/cinemas/":
+	case "/home_page/cinemas/":
+	case "/home_page/cinemas":
+		showCinemas();
+		break;
+	case "home_page/theaters":
+	case "home_page/theaters/":
+	case "/home_page/theaters/":
+	case "/home_page/theaters":
+		showTheaters();
+		break;
 	default:
 		$("#title").empty();
 		$("#center").html(getStringFor404());
@@ -84,8 +102,7 @@ $(window).on('hashchange', function(e){
 	}
 	
 	activateAccount(pathname);
-	
-});
+}
 
 function activateAccount(pathname) {
 	if (pathname.indexOf("activate?id_for_activation=") >= 0) {

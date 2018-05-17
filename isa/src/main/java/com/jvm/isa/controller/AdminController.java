@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,7 +32,7 @@ public class AdminController {
 	private AdminService adminService;
 	
 	@Autowired
-	private HttpSession httpSession;
+	private UserController userController;
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
@@ -68,8 +66,7 @@ public class AdminController {
 
 	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfile(@RequestBody HashMap<String, String> hm) {
-		User user = (User) httpSession.getAttribute("loggedUser");
-
+		User user = userController.getLoggedUserLocalMethod();
 		if (user != null) {
 			Administrator loggedUser = (Administrator) user;
 			String username = hm.get("username");

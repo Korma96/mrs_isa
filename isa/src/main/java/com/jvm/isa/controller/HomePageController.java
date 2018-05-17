@@ -25,8 +25,6 @@ public class HomePageController
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
 	
-	@Autowired
-	private HttpSession httpSession;
 	
 	@RequestMapping(value = "/cultural_institutions", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)

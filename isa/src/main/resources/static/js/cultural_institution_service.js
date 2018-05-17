@@ -2,21 +2,32 @@ var showCulturalInstitutionsPath = "/myapp/home_page/cultural_institutions";
 
 $(document).on("click", "#cinemas_div", function(event)
 {
-	if(window.history.pushState)
-	{
-		window.history.pushState(null, null, $(this).attr('href')); // set URL
+	if(window.history.pushState) {
+	    window.history.pushState(null, null, "/myapp/#/home_page/cinemas"); // set URL
 	}
-	$("#center").load("html/partials/cultural_institutions.html", null, get_data("0"));
+	
+	showCinemas();
+	
 });
 
 $(document).on("click", "#theaters_div", function(event)
 {
-	if(window.history.pushState)
-	{
-		window.history.pushState(null, null, $(this).attr('href')); // set URL
+	if(window.history.pushState) {
+	    window.history.pushState(null, null, "/myapp/#/home_page/theaters"); // set URL
 	}
-	$("#center").load("html/partials/cultural_institutions.html", null, get_data("1"));
+	
+	showTheaters();
 });
+
+function showCinemas() {
+	$("#title").html('CINEMAS &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate"> Registrate </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#center").load("html/partials/cultural_institutions.html", null, get_data("0"));
+}
+
+function showTheaters() {
+	$("#title").html('THEATERS &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate"> Registrate </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#center").load("html/partials/cultural_institutions.html", null, get_data("1"));
+}
 
 function get_data(param)
 {
