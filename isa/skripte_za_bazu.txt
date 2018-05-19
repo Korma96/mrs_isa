@@ -22,6 +22,7 @@ insert into cultural_institution values(2,'Bulevar Mihajla Pupina 3, Novi Sad','
 insert into cultural_institution values(3,'Sentandrejski put 11, Novi Sad','Promotivni opis 3','CineStar', 0);
 insert into cultural_institution values(4,'Ignjata Pavlasa 4, Novi Sad','Promotivni opis 4','Pozoriste mladih', 1); 
 
+<<<<<<< HEAD
 insert into auditorium values(1,'Sala 1',7,8);
 insert into auditorium values(2,'Sala 2',7,8);
 insert into auditorium values(3,'Sala 3',7,8);
@@ -32,6 +33,28 @@ insert into auditorium values(7,'Sala 7',10,10);
 insert into auditorium values(8,'Sala 8',10,10);
 insert into auditorium values(9,'Sala 9',8,9);
 insert into auditorium values(10,'Sala 10',8,9);
+=======
+insert into auditorium 
+values(1,'Sala 1',7,8);
+insert into auditorium 
+values(2,'Sala 1',7,8);
+insert into auditorium 
+values(3,'Sala 1',7,8);
+insert into auditorium 
+values(4,'Sala 1',7,8);
+insert into auditorium 
+values(5,'Sala 2',10,10);
+insert into auditorium 
+values(6,'Sala 2',10,10);
+insert into auditorium 
+values(7,'Sala 2',10,10);
+insert into auditorium 
+values(8,'Sala 2',10,10);
+insert into auditorium 
+values(9,'Sala 3',8,9);
+insert into auditorium 
+values(10,'Sala 3',8,9);
+>>>>>>> branch 'master' of https://github.com/jovosunjka/mrs_isa.git
 
 insert into cultural_institution_auditoriums values(1,1);
 insert into cultural_institution_auditoriums
