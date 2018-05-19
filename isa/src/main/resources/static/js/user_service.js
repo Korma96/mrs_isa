@@ -12,6 +12,7 @@ var acceptRequestFriendURL = "/myapp/users/accept_request_friend";
 var declineRequestFriendURL = "/myapp/users/decline_request_friend";
 var isLoggedURL = "/myapp/users/is_logged";
 var removeFriendURL = "/myapp/users/remove_friend";
+var saveChangedPasswordURL = "/myapp/users/save_changed_password";
 
 
 
@@ -216,6 +217,10 @@ function loadUpadteProfileComplete() {
 	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
 }
 
+function loadChangedPasswordComplete() {
+	$("#title").html('CHANGE PASSWORD &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+}
+
 function loadFriendsPageComplete() {
 	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a>  ');
 }
@@ -326,7 +331,7 @@ function attemptToLog(username, password) {
 	$.ajax({ 
 	    type: "PUT",
 		url:  loginURL,
-        data: JSON.stringify({"username": username, "password": password}),
+        data: JSON.stringify({"username": username.trim(), "password": password.trim()}),
 		dataType : "json",
 	    contentType: "application/json",
 	    cache: false,
@@ -405,15 +410,26 @@ function registeredUserPage() {
 	
 	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
 	
+	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/users/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/users/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_friends" href="/myapp/#/users/friends"> Friends </a>');
-	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/logout"> Logout </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	$("#id_change_password").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		changePassword(saveChangedPasswordURL);
+	});
 	
 	$("#id_update_profile").click(function(event) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/users/update_profile"); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
 		}
 		
 		updateProfile();
@@ -423,7 +439,7 @@ function registeredUserPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/users/friends_page"); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
 		}
 		
 		friendsPage();
@@ -432,43 +448,53 @@ function registeredUserPage() {
 	$("#id_logout").click(function(event) {
 		event.preventDefault();
 		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
 		logout();
 	});
 	
 }
 
 function updateProfile() {
-	var loggedUser = loadLoggedUser();
-	
-	var center = $("#center");
-	
-	deleteAllExceptFirst();
-	
-	center.append(
-			'<form > \
-				<table> \
-					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
-					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
-					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
-					<tr>  <td><label for="id_city">City:</label></td> <td><input type="text" id="id_city" value="' + loggedUser.city + '" /></td>  </tr> \
-					<tr>  <td><label for="id_phone_number">Phone number:</label></td>  <td><input type="text" id="id_phone_number" value="'+ loggedUser.phoneNumber +'" /></td>  </tr> \
-				</table> \
-				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
-				</div> \
-				<br/> \
-			</form>');
-	
-	$("#id_btn_save_changes_on_profile").click(function(event) {
-		event.preventDefault();
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
 		
-		saveChangesOnProfile();
-	});
-	
-	loadUpadteProfileComplete();
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append(
+				'<form > \
+					<table> \
+						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+						<tr>  <td><label for="id_city">City:</label></td> <td><input type="text" id="id_city" value="' + loggedUser.city + '" /></td>  </tr> \
+						<tr>  <td><label for="id_phone_number">Phone number:</label></td>  <td><input type="text" id="id_phone_number" value="'+ loggedUser.phoneNumber +'" /></td>  </tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			
+			saveChangesOnProfile();
+		});
+		
+		loadUpadteProfileComplete();
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 }
 
 function saveChangesOnProfile() {
@@ -504,7 +530,7 @@ function saveChangesOnProfile() {
 		    		toastr.error("There was a problem. No logged user!");
 		    		break;
 		    	case 0:
-		    		toastr.error("All fields are not filled!");
+		    		toastr.error("All fields are not filled (only the new password and repeat new password can remain unfilled)!");
 		    		break;
 		    	case 1:
 		    		toastr.error("This username already exists!");
@@ -540,19 +566,108 @@ function saveChangesOnProfile() {
 	
 }
 
-function friendsPage() {
-	$('<link>')
-	  .appendTo('head')
-	  .attr({
-	      type: 'text/css', 
-	      rel: 'stylesheet',
-	      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
+function changePassword(changePasswordUrl) {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+		
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append(
+				'<form > \
+					<table> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save new password"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			
+			saveChangedPassword(changePasswordUrl);
+			
+		});
+		
+		loadChangedPasswordComplete();
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+
+}
+
+function saveChangedPassword(changePasswordUrl) {
+	var oldPassword = $("#id_old_password").val();
+	var newPassword = $("#id_new_password").val();
+	var repeatNewPassword = $("#id_repeat_new_password").val();
+
+	$.ajax({ 
+	    type: "PUT",
+		url:  changePasswordUrl,
+	    data: JSON.stringify({
+			"oldPassword": oldPassword,
+			"newPassword": newPassword,
+			"repeatNewPassword": repeatNewPassword
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(intValue) {
+	    	switch(intValue) {
+		    	case -1:
+		    		toastr.error("There was a problem. No logged user!");
+		    		break;
+		    	case 0:
+		    		toastr.error("All fields are not filled!");
+		    		break;
+		    	case 1:
+		    		toastr.error("You did not enter the correct old password!");
+		    		break;
+		    	case 2:
+		    		toastr.error("You are not the first to enter the same new password the second time!");
+		    		break;
+		    	case 3:
+		    		$("#id_old_password").val("")
+		    		$("#id_new_password").val("");
+		    		$("#id_repeat_new_password").val("");
+		    		toastr.success("You have successfully changed password!");
+		    		break;
+		    	default:
+		    		toastr.error("There was a problem.!");
+		    		break;
+	    	}
+	    	
+    	},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
 	});
-	
-	deleteAllExceptFirst();
-	$("#center").append('<div id="id_friends_page"></div>');
-	
-	$("#id_friends_page").load("html/partials/friends_page.html", workWithFriends);
+}
+
+function friendsPage() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		$('<link>')
+		  .appendTo('head')
+		  .attr({
+		      type: 'text/css', 
+		      rel: 'stylesheet',
+		      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
+		});
+		
+		deleteAllExceptFirst();
+		$("#center").append('<div id="id_friends_page"></div>');
+		
+		$("#id_friends_page").load("html/partials/friends_page.html", workWithFriends);
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 	
 }
 

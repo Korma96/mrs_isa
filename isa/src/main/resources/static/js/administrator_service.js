@@ -6,9 +6,12 @@ var saveChangesOnProfileSysAdminURL = "/myapp/administrators/sys_admin/update_pr
 var saveChangesOnProfileAdminFunZoneURL = "/myapp/administrators/admin_funzone/update_profile";
 var saveChangesOnProfileadminCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/update_profile";
 var registerAdminURL = "/myapp/administrators/sys_admin/register";
-var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/changes_default_username_password";
-var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/changes_default_username_password";
-var culturalInstitutionAdminChangePasswordURL = "/myapp/administrators/admin_cultural_institution/changes_default_username_password";
+var sysAdminChangeUsernameAndPasswordURL = "/myapp/administrators/sys_admin/changes_default_username_password";
+var adminFunzoneChangeUsernameAndPasswordURL = "/myapp/administrators/admin_funzone/changes_default_username_password";
+var culturalInstitutionAdminChangeUsernameAndPasswordURL = "/myapp/administrators/admin_cultural_institution/changes_default_username_password";
+var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/save_changed_password";
+var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/save_changed_password";
+var culturalInstitutionAdminChangePasswordURL = "/myapp/administrators/admin_cultural_institution/save_changed_password";
 
 
 
@@ -17,7 +20,7 @@ function adminSystemPage(loggedUser) {
 	
 	if(loggedUser.userStatus == 'PENDING')
 	{
-		forceAdminToChangeUsernameAndPassword(sysAdminChangePasswordURL);
+		forceAdminToChangeUsernameAndPassword(sysAdminChangeUsernameAndPasswordURL);
 	}
 	else if(loggedUser.userStatus == 'ACTIVATED')
 	{
@@ -31,9 +34,20 @@ function adminSystemPage(loggedUser) {
 }
 
 function adminSystemMainPage() {
+	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/sys_admin/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/sys_admin/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/sys_admin/register"> Register administrator </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	$("#id_change_password").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		changePassword(sysAdminChangePasswordURL);
+	});
 	
 	$("#id_update_profile").click(function(event) {
 		event.preventDefault();
@@ -71,7 +85,7 @@ function adminFunzonePage(loggedUser) {
 	
 	if(loggedUser.userStatus == 'PENDING')
 	{
-		forceAdminToChangeUsernameAndPassword(adminFunzoneChangePasswordURL);
+		forceAdminToChangeUsernameAndPassword(adminFunzoneChangeUsernameAndPasswordURL);
 	}
 	else if(loggedUser.userStatus == 'ACTIVATED')
 	{
@@ -89,7 +103,7 @@ function adminCulturalInstitutionsPage(loggedUser) {
 	
 	if(loggedUser.userStatus == 'PENDING')
 	{
-		forceAdminToChangeUsernameAndPassword(culturalInstitutionAdminChangePasswordURL);
+		forceAdminToChangeUsernameAndPassword(culturalInstitutionAdminChangeUsernameAndPasswordURL);
 	}
 	else if(loggedUser.userStatus == 'ACTIVATED')
 	{
@@ -103,10 +117,21 @@ function adminCulturalInstitutionsPage(loggedUser) {
 
 
 function adminFunzoneMainPage() {
+	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/admin_funzone/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/administrators/admin_funzone/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="add_requisite" href="/myapp/#/administrators/admin_funzone/add_requisite"> Add requisite </a>');
 	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/admin_funzone/get_requisites"> Show requisites </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	$("#id_change_password").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		changePassword(adminFunzoneChangePasswordURL);
+	});
 	
 	$("#id_update_profile_admin_fan_zone").click(function(event) {
 		event.preventDefault();
@@ -149,11 +174,21 @@ function adminFunzoneMainPage() {
 }
 
 
-function adminCulturalInstitutionsMainPage()
-{
+function adminCulturalInstitutionsMainPage() {
+	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/admin_cultural_institution/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_update_showings" href="/myapp/#/administrators/admin_cultural_institution/update_showings"> Update showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	$("#id_change_password").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		changePassword(culturalInstitutionAdminChangePasswordURL);
+	});
 	
 	$("#id_update_profile_cultural_institutions_admin").click(function(event) {
 		event.preventDefault();
@@ -353,6 +388,7 @@ function updateProfileSysAdmin() {
 						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
 						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
 						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" /></td>  </tr> \
 					</table> \
 					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
 					</div> \
@@ -376,6 +412,7 @@ function saveChangesOnProfileSystemAdmin() {
 	var oldPassword = $("#id_old_password").val();
 	var newPassword = $("#id_new_password").val();
 	var repeatNewPassword = $("#id_repeat_new_password").val();
+	var email = $("#id_email").val();
 	
 	$.ajax({ 
 	    type: "PUT",
@@ -384,7 +421,8 @@ function saveChangesOnProfileSystemAdmin() {
 			"username": username,
 			"oldPassword": oldPassword,
 			"newPassword": newPassword,
-			"repeatNewPassword": repeatNewPassword
+			"repeatNewPassword": repeatNewPassword,
+			"email": email
 		}),
 	    dataType: "json", 
 	    contentType: "application/json",
@@ -394,7 +432,7 @@ function saveChangesOnProfileSystemAdmin() {
 		    		toastr.error("There was a problem. No logged user!");
 		    		break;
 		    	case 0:
-		    		toastr.error("All fields are not filled!");
+		    		toastr.error("All fields are not filled (only the new password and repeat new password can remain unfilled)!");
 		    		break;
 		    	case 1:
 		    		toastr.error("This username already exists!");
@@ -429,7 +467,7 @@ function saveChangesOnProfileAdmin(url) {
 	var username = $("#id_username").val();
 	var oldPassword = $("#id_old_password").val();
 	var newPassword = $("#id_new_password").val();
-	var repeatNewPassword = $("#id_repeat_new_password");
+	var repeatNewPassword = $("#id_repeat_new_password").val();
 	var firstName = $("#id_first_name").val();
 	var lastName = $("#id_last_name").val();
 	var email = $("#id_email").val();
@@ -454,25 +492,25 @@ function saveChangesOnProfileAdmin(url) {
 		    		toastr.error("There was a problem. No logged user!");
 		    		break;
 		    	case 0:
-		    		toastr.error("All fields are not filled!");
-		    		break;
-		    	case 1:
-		    		toastr.error("This username already exists!");
-		    		break;
-		    	case 2:
-		    		toastr.error("You did not enter the correct old password!");
-		    		break;
-		    	case 3:
-		    		toastr.error("You are not the first to enter the same new password the second time!");
-		    		break;
-		    	case 4:
-		    		toastr.error("Incorrect email!");
-		    		break;
-		    	case 5:
 		    		$("#id_old_password").val("")
 		    		$("#id_new_password").val("");
 		    		$("#id_repeat_new_password").val("");
 		    		toastr.success("You have successfully edited the data!");
+		    		break;
+		    	case 1:
+		    		toastr.error("All fields are not filled (only the new password and repeat new password can remain unfilled)!");
+		    		break;
+		    	case 2:
+		    		toastr.error("This username already exists!");
+		    		break;
+		    	case 3:
+		    		toastr.error("You did not enter the correct old password!");
+		    		break;
+		    	case 4:
+		    		toastr.error("You are not the first to enter the same new password the second time!");
+		    		break;
+		    	case 5:
+		    		toastr.error("Incorrect email!");
 		    		break;
 		    	default:
 		    		toastr.error("There was a problem.!");

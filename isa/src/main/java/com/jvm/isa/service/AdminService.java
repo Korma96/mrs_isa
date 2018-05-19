@@ -20,7 +20,7 @@ public interface AdminService {
 	
 	int validAdmin(Administrator oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email);
 	
-	int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword);
+	int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword, String email);
 	
 	int correctRequisite(String name, String description, String price, String culturalInstitution, String showing);
 
@@ -33,6 +33,9 @@ public interface AdminService {
 	ArrayList<String> getCulturalInstitutions();
 
 	ArrayList<String> getShowings(String culturalInstitutionName);
+
+	int validChangedUsernameAndPassword(User user, String username, String password, String password2,
+			String repeatPassword);
 	
 
 

@@ -16,9 +16,6 @@ import com.jvm.isa.repository.RequisiteRepository;
 @Service
 public class AdminServiceImpl implements AdminService {
 
-	//@Autowired
-	//private AdminRepository adminRepository;
-	
 	@Autowired
 	private UserService userService;
 	
@@ -51,65 +48,91 @@ public class AdminServiceImpl implements AdminService {
 		return adminRepository.findByUsernameAndPassword(username, password);
 	}*/
 
+	
+	/*
+	 * return value:
+	 *  0 - Everything is right
+	 *  1 - All fields are not filled
+	 *  2 - This username already exists
+	 *  3 - You did not enter the correct old password
+	 *  4 - You are not the first to enter the same new password the second time
+	 *  5 - Incorrect email
+	 * */
 	@Override
 	public int validAdmin(Administrator oldAdmin, String username, String oldPassword, String newPassword,
 			String repeatNewPassword, String firstName, String lastName, String email) {
-
-		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0;
 		
-		if (username.equals("") || oldPassword.equals("") || firstName.equals("") || lastName.equals("") || email.equals(""))
-			return 0;
+		if (firstName.equals("") || lastName.equals("")) return 1;
 		
-		if (oldAdmin != null) {
-			if (userService.exists(username) && !oldAdmin.getUsername().equals(username)) {
-				return 1;
-			}
-			
-		} 
-		else {
-			if (userService.exists(username)) return 1;
-		}
-		
-		if (!oldAdmin.getPassword().equals(oldPassword))
-			return 2;
-
-		if (!newPassword.equals(repeatNewPassword))
-			return 3;
-
-		if(!EmailValidator.getInstance().isValid(email)) return 4;
-		
-		return 5;
+		return validSystemAdmin(oldAdmin, username, oldPassword, newPassword, repeatNewPassword, email);
 	}
 
+	/*
+	 * return value:
+	 *  0 - Everything is right
+	 *  1 - All fields are not filled
+	 *  2 - This username already exists
+	 *  3 - You did not enter the correct old password
+	 *  4 - You are not the first to enter the same new password the second time
+	 *  5 - Incorrect email
+	 * */
 	@Override
-	public int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword) {
+	public int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword, String email) {
 		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0;
 		
+		if (email.equals(""))
+			return 1;
+		
+		if(!EmailValidator.getInstance().isValid(email)) return 5;
+		
+		return validChangedUsernameAndPassword(oldAdmin, username, oldPassword, newPassword, repeatNewPassword);
+		
+	}
+	
+	
+	/*
+	 * return value:
+	 *  0 - Everything is right
+	 *  1 - All fields are not filled
+	 *  2 - This username already exists
+	 *  3 - You did not enter the correct old password
+	 *  4 - You are not the first to enter the same new password the second time
+	 * */
+	@Override
+	public int validChangedUsernameAndPassword(User oldAdmin, String username, String oldPassword, String newPassword,
+			String repeatNewPassword) {
+		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 1;
+		
 		if (username.equals("") || oldPassword.equals(""))
-			return 0;
+			return 1;
 		
 		if (oldAdmin != null) {
 			if (userService.exists(username) && !oldAdmin.getUsername().equals(username)) {
-				return 1;
+				return 2;
 			}
 			
 		} 
 		else {
-			if (userService.exists(username)) return 1;
+			if (userService.exists(username)) return 2;
 		}
 		
 		if (!oldAdmin.getPassword().equals(oldPassword))
-			return 2;
-
-		if (!newPassword.equals(repeatNewPassword))
 			return 3;
 
-		return 4;
+		if (!newPassword.equals(repeatNewPassword))
+			return 4;
+
+		return 0;
 	}
 	
 	@Override
 	public int correctRequisite(String name, String description, String priceStr, String culturalInstitutionName,
 			String showing) {
+		
+		if(culturalInstitutionName == null || showing == null) {
+			return 0;
+		}
+		
 		if (name.equals("") || description.equals("") || priceStr.equals("") || culturalInstitutionName.equals("")
 				|| showing.equals("")) {
 			return 0;

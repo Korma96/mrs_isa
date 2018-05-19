@@ -90,6 +90,19 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
+	public int correctChangepassword(User oldUser, String oldPassword, String newPassword, String repeatNewPassword) {
+		if(oldPassword.equals("") || newPassword.equals("") || repeatNewPassword.equals("")) {
+			return 0;
+		}
+		
+		if(!oldUser.getPassword().equals(oldPassword)) return 1;
+		
+		if(!newPassword.equals(repeatNewPassword)) return 2;
+		
+		return 3;
+	}
+	
+	@Override
 	public ArrayList<String> getPeople(RegisteredUser ru) {
 		ArrayList<String> people = new ArrayList<String>();
 	

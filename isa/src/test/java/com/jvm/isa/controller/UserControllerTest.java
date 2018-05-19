@@ -272,7 +272,7 @@ public class UserControllerTest {
 		//---------------------------------------------------------------------------------------------------------------------------------
 		
 		user = userRepository.findByUsernameAndPassword(TEST_USERNAME, TEST_PASSWORD);
-		Activation activation = activationRepository.findByUser(user);
+		Activation activation = activationRepository.findByUser((RegisteredUser) user);
 		ra = this.mockMvc.perform(post(URL_PREFIX + "/activate/" + activation.getIdForActivation()).contentType(contentType).content(json)).andExpect(status().isOk());
 		returnJson = ra.andReturn().getResponse().getContentAsString();
 		System.out.println( "***************************************"+ returnJson + "******************");

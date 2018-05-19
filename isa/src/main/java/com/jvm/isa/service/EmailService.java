@@ -13,4 +13,6 @@ public interface EmailService {
 	void sendNewAdminEmailAsync(String username, String password, String email, String typeOfAdmin) throws MessagingException;
 	
 	boolean activateAccount(String idForActivation);
+
+	void sendUserChangedEmail(String username, String password, String email) throws MessagingException;
 }

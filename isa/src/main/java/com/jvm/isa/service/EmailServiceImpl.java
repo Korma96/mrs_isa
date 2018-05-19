@@ -104,16 +104,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendNewAdminEmailAsync(String username, String password, String email, String typeOfAdmin) throws MessagingException {
 		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 		
-		String idForActivation;
-		Activation activation;
-		do {
-			idForActivation = generateIdForActivation();
-			activation = activationRepository.findByIdForActivation(idForActivation);
-		}
-		while(activation != null);
-		
 		String htmlMsg = "You are registered as a " + typeOfAdmin + " <br/><br/>";
-				htmlMsg += "<h3> Welcome to ISA </h3> <br/><br/>";
 				htmlMsg += "Below are your login details for your new account with ISA: <br/><br/>";
 				htmlMsg += "&nbsp; Email: &nbsp; <b> "+ email +" <b> <br/>";
 				htmlMsg += "&nbsp; Username: &nbsp; <b> " + username + " <b> <br/>";
@@ -132,6 +123,30 @@ public class EmailServiceImpl implements EmailService {
 		javaMailSender.send(mimeMessage);
 
 		System.out.println("Email poslat!");
+	}
+	
+	@Override
+	public void sendUserChangedEmail(String username, String password, String email) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		
+		String htmlMsg = "You have changed your email address to your account. <br/><br/>";
+				htmlMsg += "Below are your login details for your account with ISA: <br/><br/>";
+				htmlMsg += "&nbsp; Email: &nbsp; <b> "+ email +" <b> <br/>";
+				htmlMsg += "&nbsp; Username: &nbsp; <b> " + username + " <b> <br/>";
+				htmlMsg += "&nbsp; Password: &nbsp; <b> " + password + " <b> <br/><br/>";
+				htmlMsg += "Kind Regards, <br/>";
+				htmlMsg += "ISA Support";
+		mimeMessage.setContent(htmlMsg, "text/html");
+		
+		
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
+		helper.setTo(email);
+		helper.setSubject("ISA Support");
+		helper.setFrom(env.getProperty(emailOfSender, passwordOfSender));
+		javaMailSender.send(mimeMessage);
+
+		System.out.println("Email poslat!");
+		
 	}
 	
 	@Override

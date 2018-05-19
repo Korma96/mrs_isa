@@ -18,5 +18,7 @@ public interface UserService {
 	int correctUser(User oldUser, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email, String city, String phoneNumber);
 
 	ArrayList<String> getPeople(RegisteredUser ru);
+
+	int correctChangepassword(User user, String oldPassword, String newPassword, String repeatNewPassword);
 	
 }

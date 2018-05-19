@@ -9,20 +9,19 @@ insert into user values('AD', 203, 'ia22', 0, 2, 'ia22', 'markoradovic996@gmail.
 insert into user values('AD', 204, 'fa2', 0, 2, 'fa2', 'markoradovic996@gmail.com', 'fa', 'fa', 'rrr', 123);
 insert into user values('AD', 205, 'sa2', 0, 2, 'sa2', 'markoradovic996@gmail.com', 'sa', 'sa', 'rrr', 123);
 insert into user values('RU', 301, 'ia3', 0, 0, 'ia3', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
-insert into user values('RU', 302, 'ia3', 0, 0, 'ia3', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
-insert into user values('RU', 303, 'ia3', 0, 0, 'ia3', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
+insert into user values('RU', 302, 'ia4', 0, 0, 'ia4', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
+insert into user values('RU', 303, 'ia5', 0, 0, 'ia5', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123);
 insert into user values('RU', 304, 'fa3', 0, 0, 'fa3', 'markoradovic996@gmail.com', 'fa', 'fa', 'rrr', 123);
 insert into user values('RU', 305, 'sa3', 0, 0, 'sa3', 'markoradovic996@gmail.com', 'sa', 'sa', 'rrr', 123);
-insert into user values('SA', 405, 'sa4', 0, 3, 'sa4', "", "", "", "", -1);
-insert into user values('SA', 406, 'sa5', 0, 3, 'sa5', "", "", "", "", -1);
-insert into user values('SA', 407, 'sa6', 0, 3, 'sa6', "", "", "", "", -1);
+insert into user values('SA', 405, 'sa4', 0, 3, 'sa4', '', '', '', '', '');
+insert into user values('SA', 406, 'sa5', 0, 3, 'sa5', '', '', '', '', '');
+insert into user values('SA', 407, 'sa6', 0, 3, 'sa6', '', '', '', '', '');
 
 insert into cultural_institution values(1,'Pozorisni trg 1, Novi Sad','Promotivni opis 1','Srpsko narodno pozoriste', 1);
 insert into cultural_institution values(2,'Bulevar Mihajla Pupina 3, Novi Sad','Promotivni opis 2','Arena Cineplex', 0);
 insert into cultural_institution values(3,'Sentandrejski put 11, Novi Sad','Promotivni opis 3','CineStar', 0);
 insert into cultural_institution values(4,'Ignjata Pavlasa 4, Novi Sad','Promotivni opis 4','Pozoriste mladih', 1); 
 
-<<<<<<< HEAD
 insert into auditorium values(1,'Sala 1',7,8);
 insert into auditorium values(2,'Sala 2',7,8);
 insert into auditorium values(3,'Sala 3',7,8);
@@ -33,28 +32,6 @@ insert into auditorium values(7,'Sala 7',10,10);
 insert into auditorium values(8,'Sala 8',10,10);
 insert into auditorium values(9,'Sala 9',8,9);
 insert into auditorium values(10,'Sala 10',8,9);
-=======
-insert into auditorium 
-values(1,'Sala 1',7,8);
-insert into auditorium 
-values(2,'Sala 1',7,8);
-insert into auditorium 
-values(3,'Sala 1',7,8);
-insert into auditorium 
-values(4,'Sala 1',7,8);
-insert into auditorium 
-values(5,'Sala 2',10,10);
-insert into auditorium 
-values(6,'Sala 2',10,10);
-insert into auditorium 
-values(7,'Sala 2',10,10);
-insert into auditorium 
-values(8,'Sala 2',10,10);
-insert into auditorium 
-values(9,'Sala 3',8,9);
-insert into auditorium 
-values(10,'Sala 3',8,9);
->>>>>>> branch 'master' of https://github.com/jovosunjka/mrs_isa.git
 
 insert into cultural_institution_auditoriums values(1,1);
 insert into cultural_institution_auditoriums

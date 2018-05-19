@@ -3,6 +3,7 @@ package com.jvm.isa.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,8 +139,8 @@ public class UserController {
 																			produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
 	public ResponseEntity<Boolean> login(@RequestBody HashMap<String, String> hm) {
-		System.out.println("|" + hm.get("username") + " - " + hm.get("password") + "|");
-		User user = userService.getUser(hm.get("username"), hm.get("password"));
+		System.out.println("|" + hm.get("username").trim() + " - " + hm.get("password").trim() + "|");
+		User user = userService.getUser(hm.get("username").trim(), hm.get("password").trim());
 		System.out.println("user: " + user);
 		if(user != null) {
 			if(user.getUserType() == UserType.REGISTERED_USER)
@@ -200,7 +201,14 @@ public class UserController {
 					if(!repeatNewPassword.equals("")) loggedUser.setPassword(repeatNewPassword);
 					loggedUser.setFirstName(firstName);
 					loggedUser.setLastName(lastName);
-					loggedUser.setEmail(email);
+					if (!email.equals(loggedUser.getEmail())) {
+						loggedUser.setEmail(email);
+						try {
+							emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+						} catch (MessagingException e) {
+							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+						}
+					}
 					loggedUser.setCity(city);
 					loggedUser.setPhoneNumber(phoneNumber);
 					
@@ -212,6 +220,35 @@ public class UserController {
 			
 		}
 		
+		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+																					produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveRegisteredUserChangedPassword(@RequestBody HashMap<String, String> hm) {
+		return saveChangedPassword(hm);
+	}
+	
+	public ResponseEntity<Integer> saveChangedPassword(HashMap<String, String> hm) {
+		User user = getLoggedUserLocalMethod();
+		
+		if(user != null) {
+			String oldPassword = hm.get("oldPassword");
+			String newPassword = hm.get("newPassword");
+			String repeatNewPassword = hm.get("repeatNewPassword");
+			
+			int correct = userService.correctChangepassword(user, oldPassword, newPassword, repeatNewPassword);
+			if(correct == 3) {
+				user.setPassword(repeatNewPassword);
+			
+				userService.registrate(user); // cuvanje napravljenih izmena
+			}
+		
+			return new ResponseEntity<Integer>(correct, HttpStatus.OK);
+			
+		}
+	
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	

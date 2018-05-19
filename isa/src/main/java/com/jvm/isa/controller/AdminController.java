@@ -137,13 +137,23 @@ public class AdminController {
 			String oldPassword = hm.get("oldPassword");
 			String newPassword = hm.get("newPassword");
 			String repeatNewPassword = hm.get("repeatNewPassword");
+			String email = hm.get("email");
 
-			int correct = adminService.validSystemAdmin(user, username, oldPassword, newPassword, repeatNewPassword);
-			if (correct == 4) {
-				user.setUsername(username);
+			int correct = adminService.validSystemAdmin(user, username, oldPassword, newPassword, repeatNewPassword, email);
+			if (correct == 0) {
+				SysAdministrator sysAdministrator = (SysAdministrator) user;
+				sysAdministrator.setUsername(username);
 				userController.setLogged(username);
-				if(!newPassword.equals("")) user.setPassword(newPassword);
+				if(!newPassword.equals("")) sysAdministrator.setPassword(newPassword);
 				
+				if (!email.equals(sysAdministrator.getEmail())) {
+					sysAdministrator.setEmail(email);
+					try {
+						emailService.sendUserChangedEmail(sysAdministrator.getUsername(), sysAdministrator.getPassword(), sysAdministrator.getEmail());
+					} catch (MessagingException e) {
+						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+					}
+				}
 
 				adminService.register(user); // cuvanje napravljenih
 													// izmena
@@ -180,13 +190,20 @@ public class AdminController {
 
 			int correct = adminService.validAdmin(loggedUser, username, oldPassword, newPassword, repeatNewPassword,
 					firstName, lastName, email);
-			if (correct == 5) {
+			if (correct == 0) {
 				loggedUser.setUsername(username);
 				userController.setLogged(username);
 				if(!repeatNewPassword.equals("")) loggedUser.setPassword(repeatNewPassword);
 				loggedUser.setFirstName(firstName);
 				loggedUser.setLastName(lastName);
-				loggedUser.setEmail(email);
+				if (!email.equals(loggedUser.getEmail())) {
+					loggedUser.setEmail(email);
+					try {
+						emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+					} catch (MessagingException e) {
+						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+					}
+				}
 
 				adminService.register(loggedUser); // cuvanje napravljenih
 													// izmena
@@ -196,6 +213,24 @@ public class AdminController {
 		}
 
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_funzone/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+																					produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveAdminFunZoneChangedPassword(@RequestBody HashMap<String, String> hm) {
+		return userController.saveChangedPassword(hm);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveAdminCulturalInstitutionChangedPassword(@RequestBody HashMap<String, String> hm) {
+		return userController.saveChangedPassword(hm);
+	}
+	
+	@RequestMapping(value = "/sys_admin/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveSysAdminChangedPassword(@RequestBody HashMap<String, String> hm) {
+		return userController.saveChangedPassword(hm);
 	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -278,8 +313,8 @@ public class AdminController {
 			String password = hm.get("password");
 			String repeatPassword = hm.get("repeatPassword");
 			
-			int correct = adminService.validSystemAdmin(user, username, user.getPassword(), password, repeatPassword);
-			if (correct == 4) {
+			int correct = adminService.validChangedUsernameAndPassword(user, username, user.getPassword(), password, repeatPassword);
+			if (correct == 0) {
 				if(!repeatPassword.equals("")) {
 					user.setUsername(username);
 					userController.setLogged(username);

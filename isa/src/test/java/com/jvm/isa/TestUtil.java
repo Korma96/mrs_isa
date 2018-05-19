@@ -2,14 +2,10 @@ package com.jvm.isa;
 
 import java.io.IOException;
 
-import org.json.JSONException;
-import org.skyscreamer.jsonassert.JSONParser;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jvm.isa.domain.User;
 
 public class TestUtil {
 

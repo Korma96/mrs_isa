@@ -23,7 +23,7 @@ public class User {
 	@Column(name="id", unique=true, nullable=false)
 	protected Long id;
 	
-	@Column(name="username", unique=false, nullable=false)
+	@Column(name="username", unique=true, nullable=false)
 	protected String username;
 	
 	@Column(name="password", unique=false, nullable=false)
