@@ -40,6 +40,11 @@ public class UserController {
 	@Autowired
 	private HttpSession httpSession;
 	
+	public UserService getUserService()
+	{
+		return userService;
+	}
+	
 	public User getLoggedUserLocalMethod() {
 		String username = (String) httpSession.getAttribute("loggedUsername");
 		User user = null;

@@ -70,8 +70,17 @@ public class AdminController {
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
 	public ResponseEntity<Boolean> adminChangePassword(@RequestBody HashMap<String, String> hm) 
 	{
-		
-		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		String password = hm.get("password");
+		String rePassword = hm.get("rePassword");
+		if(!password.equals(rePassword))
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		Administrator admin = (Administrator)userController.getLoggedUserLocalMethod();
+		admin.setUserStatus(UserStatus.ACTIVATED);
+		admin.setPassword(password);
+		adminService.register(admin);
+		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

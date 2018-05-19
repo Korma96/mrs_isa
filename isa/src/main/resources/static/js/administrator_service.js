@@ -121,37 +121,54 @@ function forceAdminToChangePassword(loggedUser)
 	{
 		window.history.pushState(null, null, $(this).attr('href')); // set URL
 	}
-	$("#center").load("html/partials/admin_change_password.html", null, null);
+	$("#id_menu").load("html/partials/admin_change_password.html", null, null);
 	var alert_string = loggedUser.username + ', please set your new password.'
 	alert(alert_string);
 }
 
 $(document).on("click", "#id_btn_chpwd", function(event) {
-	$.ajax({ 
-	    type: "POST",
-		url:  registerAdminURL,
-	    data: JSON.stringify({
-			"password": $("#chpwd_password"),
-			"rePassword": $("#chpwd_repassword")
-		}),
-	    dataType: "json", 
-	    contentType: "application/json",
-	    success: function(successRegistrate) {
-	    	if(successRegistrate) {
-	    		$("#id_username").val("");
-	    		$("#id_password").val("");
-	    		adminCulturalInstitutionsMainPage(loadLoggedUser());
-	    		toastr.success("You have successfully changed password!");
-	    	}
-	    	else {
-	    		toastr.error("Registration error!"); 
-	    	}
-	   },
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-		}
-	});
+	var password = $("#chpwd_password").val();
+	var rePassword = $("#chpwd_repassword").val();
+	if(password === rePassword)
+	{
+		$.ajax({ 
+		    type: "POST",
+		    async: false,
+			url:  changePasswordURL,
+		    data: JSON.stringify({
+				"password": password,
+				"rePassword" : rePassword
+			}),
+		    dataType: "json", 
+		    contentType: "application/json",
+		    success: function(success) {
+		    	if(success) {
+		    		createAdminInstitutionPage();
+		    		toastr.success("You have successfully changed password!");
+		    	}
+		    	else {
+		    		toastr.error("Error!"); 
+		    	}
+		   },
+			error : function(XMLHttpRequest, textStatus, errorThrown) { 
+						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+			}
+		});
+	}
+	else
+	{
+		toastr.error("Passwords don`t match! Try again.");
+	}
 });
+
+function createAdminInstitutionPage()
+{
+	var loggedUser = loadLoggedUser();
+	$("#center").empty();
+	$("#center").prepend('<div id="id_menu"></div><br/><br/>');
+	$("#id_menu").html('<div class="dropdown"><button class="dropbtn">Menu</button><div id="myDropdown" class="dropdown-content"></div></div>');
+	adminCulturalInstitutionsMainPage(loggedUser);
+}
 
 function updateProfileFanZone(loggedUser)
 {

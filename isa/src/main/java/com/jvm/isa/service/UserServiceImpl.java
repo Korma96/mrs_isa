@@ -40,12 +40,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUser(String username) {
 		User user = userRepository.findByUsernameAndUserStatus(username, UserStatus.ACTIVATED);
+		/*
 		if(user.getUserType() != UserType.REGISTERED_USER)
 		{
 			RegisteredUser ru = (RegisteredUser)user;
 			Administrator admin = new Administrator(username, ru.getPassword(), ru.getFirstName(), ru.getLastName(), ru.getEmail(), ru.getUserType(), ru.getUserStatus());
 			return admin;
 		}
+		*/
 		return user;
 	}
 	
@@ -55,12 +57,14 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByUsername(username);
 		if(user.getUserStatus() == UserStatus.DEACTIVATED)
 			return null;
+		/*
 		if(user.getUserType() != UserType.REGISTERED_USER)
 		{
 			RegisteredUser ru = (RegisteredUser)user;
 			Administrator admin = new Administrator(username, ru.getPassword(), ru.getFirstName(), ru.getLastName(), ru.getEmail(), ru.getUserType(), ru.getUserStatus());
 			return admin;
 		}
+		*/
 		return user;
 	}
 	
@@ -68,12 +72,14 @@ public class UserServiceImpl implements UserService {
 	public User getUser(String username, String password) {
 		// iz nekog razloga kad vrati usera uvek ga kastuje u RegisteredUsera
 		User user = userRepository.findByUsernameAndPassword(username, password);
+		/*
 		if(user.getUserType() != UserType.REGISTERED_USER)
 		{
 			RegisteredUser ru = (RegisteredUser)user;
 			Administrator admin = new Administrator(username, password, ru.getFirstName(), ru.getLastName(), ru.getEmail(), ru.getUserType(), ru.getUserStatus());
 			return admin;
 		}
+		*/
 		
 		return user;
 	}
@@ -128,6 +134,12 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		return people;
+	}
+
+	@Override
+	public void delete(User user)
+	{
+		userRepository.delete(user);	
 	}
 	
 }

@@ -21,4 +21,6 @@ public interface UserService {
 
 	ArrayList<String> getPeople(RegisteredUser ru);
 	
+	void delete(User user);
+	
 }

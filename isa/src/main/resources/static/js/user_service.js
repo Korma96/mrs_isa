@@ -806,7 +806,7 @@ function logout() {
 		type : "DELETE",
 		url : logOutURL,
 		success : function() { 
-			toastr.success("You've been successful logout!"); 
+			toastr.success("You've successfully logged out!"); 
 
 			$("#center").load("html/partials/login.html", null, loadLoginComplete);			
 		},
