@@ -36,6 +36,6 @@ public class EmailServiceTest {
 	
 	@Test
 	public void testSuccessSendEmailAsync() throws Exception {
-			emailService.sendEmailAsync(new RegisteredUser("", "", "Pera", "Peric", "sunjkajov.com", "", ""));
+			emailService.sendActivationEmailAsync(new RegisteredUser("", "", "Pera", "Peric", "sunjkajov.com", "", ""));
 	}
 }

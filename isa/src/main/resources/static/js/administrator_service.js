@@ -1,55 +1,127 @@
-var getCulturalInstitutionsURL = "/myapp/administrators/get_cultural_institutions";
-var getShowingsOfCulturalInstitutionURL = "/myapp/administrators/get_showings_of_cultural_institution";
-var addRequisiteURL = "/myapp/administrators/add_requisite";
-var getRequisitesURL = "/myapp/administrators/get_requisites"; 
-var saveChangesOnProfileSysAdminURL = "/myapp/administrators/save_changes_on_profile";
-var registerAdminURL = "/myapp/administrators/register";
+var getCulturalInstitutionsURL = "/myapp/administrators/admin_funzone/get_cultural_institutions";
+var getShowingsOfCulturalInstitutionURL = "/myapp/administrators/admin_funzone/get_showings_of_cultural_institution";
+var addRequisiteURL = "/myapp/administrators/admin_funzone/add_requisite";
+var getRequisitesURL = "/myapp/administrators/admin_funzone/get_requisites"; 
+var saveChangesOnProfileSysAdminURL = "/myapp/administrators/sys_admin/update_profile";
+var saveChangesOnProfileAdminFunZoneURL = "/myapp/administrators/admin_funzone/update_profile";
+var saveChangesOnProfileadminCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/update_profile";
+var registerAdminURL = "/myapp/administrators/sys_admin/register";
+var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/changes_default_username_password";
+var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/changes_default_username_password";
+var culturalInstitutionAdminChangePasswordURL = "/myapp/administrators/admin_cultural_institution/changes_default_username_password";
+
 
 
 function adminSystemPage(loggedUser) {
 	$("#title").html('SYSTEM ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
 	
-	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/register"> Register administrator </a>');
-	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/logout"> Logout </a>');
+	if(loggedUser.userStatus == 'PENDING')
+	{
+		forceAdminToChangeUsernameAndPassword(sysAdminChangePasswordURL);
+	}
+	else if(loggedUser.userStatus == 'ACTIVATED')
+	{
+		adminSystemMainPage();
+	}
+	else
+	{
+		toastr.error("User is DEACTIVATED!");
+	}
+	
+}
+
+function adminSystemMainPage() {
+	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/sys_admin/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/sys_admin/register"> Register administrator </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
 	$("#id_update_profile").click(function(event) {
 		event.preventDefault();
 		
-		updateProfileSysAdmin(loggedUser);
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		updateProfileSysAdmin();
 	});
+	
 	$("#id_register_admin").click(function(event) {
 		event.preventDefault();
 		
-		registerAdmin(loggedUser);
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		registerAdmin();
 	});
 	
 	$("#id_logout").click(function(event) {
 		event.preventDefault();
 		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
 		logout();
 	});
-	
 }
 
 function adminFunzonePage(loggedUser) {
 	$("#title").html('FUN ZONE ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
 	
-	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/administrators/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="add_requisite" href="/myapp/#/administrators/register_system"> Add requisite </a>');
-	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/get_requisites"> Show requisites </a>');
-	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/administrators/logout"> Logout </a>');
+	if(loggedUser.userStatus == 'PENDING')
+	{
+		forceAdminToChangeUsernameAndPassword(adminFunzoneChangePasswordURL);
+	}
+	else if(loggedUser.userStatus == 'ACTIVATED')
+	{
+		adminFunzoneMainPage();
+	}
+	else
+	{
+		toastr.error("User is DEACTIVATED!");
+	}
+	
+}
+
+function adminCulturalInstitutionsPage(loggedUser) {
+	$("#title").html('CULTURAL INSTITUTIONS ADMIN PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/admins/register_system" class="a_registrer" > Register </a> ');
+	
+	if(loggedUser.userStatus == 'PENDING')
+	{
+		forceAdminToChangeUsernameAndPassword(culturalInstitutionAdminChangePasswordURL);
+	}
+	else if(loggedUser.userStatus == 'ACTIVATED')
+	{
+		adminCulturalInstitutionsMainPage();
+	}
+	else
+	{
+		toastr.error("User is DEACTIVATED!");
+	}
+}
+
+
+function adminFunzoneMainPage() {
+	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/administrators/admin_funzone/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="add_requisite" href="/myapp/#/administrators/admin_funzone/add_requisite"> Add requisite </a>');
+	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/admin_funzone/get_requisites"> Show requisites </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
 	$("#id_update_profile_admin_fan_zone").click(function(event) {
 		event.preventDefault();
 
-		updateProfileFanZone(loggedUser);
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		updateProfileFanZone();
 	});
 	$("#add_requisite").click(function(event) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/administrators/add_requisite"); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
 		}
 		
 		addRequisite();
@@ -59,7 +131,7 @@ function adminFunzonePage(loggedUser) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/administrators/get_requisites"); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
 		}
 		
 		showRequisites();
@@ -68,69 +140,234 @@ function adminFunzonePage(loggedUser) {
 	$("#id_logout").click(function(event) {
 		event.preventDefault();
 		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
 		logout();
 	});
-	
 }
 
-function updateProfileFanZone(loggedUser)
+
+function adminCulturalInstitutionsMainPage()
 {
-	var center = $("#center");
+	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_update_showings" href="/myapp/#/administrators/admin_cultural_institution/update_showings"> Update showings </a>');
+	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
-	deleteAllExceptFirst();
-	
-	center.append(
-			'<form > \
-				<table> \
-					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
-					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
-					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
-				</table> \
-				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
-				</div> \
-				<br/> \
-			</form>');
-	
-	$("#id_btn_save_changes_on_profile").click(function(event) {
+	$("#id_update_profile_cultural_institutions_admin").click(function(event) {
 		event.preventDefault();
 		
-		saveChangesOnProfileSystemAdmin();
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		updateProfileCulturalInstitutionsAdmin();
 	});
+	$("#id_update_showings").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		updateShowings();
+	});
+	
+	$("#id_logout").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		logout();
+	});
+}
+
+function forceAdminToChangeUsernameAndPassword(url)
+{
+	if(window.history.pushState)
+	{
+		window.history.pushState(null, null, $(this).attr('href')); // set URL
+	}
+	$("#center").load("html/partials/admin_change_password.html", null, function() {
+		$("#id_btn_chpwd").click(function() {
+			event.preventDefault();
+			sendChangedUsernameAndPassword(url);
+		});
+	}
+);
+	
+}
+
+function sendChangedUsernameAndPassword(url) {
+	var username = $("#chpwd_username").val();
+	var password = $("#chpwd_password").val();
+	var repeatPassword = $("#chpwd_repassword").val();
+	
+	$.ajax({ 
+	    type: "PUT",
+		url:  url,
+		dataType : "json",
+		 data: JSON.stringify({"username": username, "password": password, "repeatPassword": repeatPassword}),
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(successChanged) {
+					if(successChanged) {
+						successfullyLogged();
+						toastr.success("You have successfully changed username and password!"); 
+					}
+					else {
+						toastr.error("You have unsuccessfully changed username and password!"); 
+					}
+					
+				
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+}
+
+/*$(document).on("click", "#id_btn_chpwd", function(event) {
+	$.ajax({ 
+	    type: "POST",
+		url:  registerAdminURL,
+	    data: JSON.stringify({
+			"password": $("#chpwd_password"),
+			"rePassword": $("#chpwd_repassword")
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(successRegistrate) {
+	    	if(successRegistrate) {
+	    		//$("#id_username").val("");
+	    		//$("#id_password").val("");
+	    		var loggedUser = loadLoggedUser();
+	    		if (loggedUser.userType == "SYS_ADMINISTRATOR") {
+	    			adminSystemPage(loggedUser);
+	    		}
+	    		
+	    		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
+	    			adminFunzonePage(loggedUser);
+	    		}
+	    		
+	    		else if (loggedUser.userType == "INSTITUTION_ADMINISTRATOR") {
+	    			adminCulturalInstitutionsPage(loggedUser);
+	    		}
+	    		toastr.success("You have successfully changed password!");
+	    	}
+	    	else {
+	    		toastr.error("Registration error!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+});*/
+
+function updateProfileFanZone() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+		
+		deleteAllExceptFirst();
+		
+		$("#center").append(
+				'<form > \
+					<table> \
+						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			
+			saveChangesOnProfileAdmin(saveChangesOnProfileadminCulturalInstitutionURL);
+		});
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
+
+function updateProfileCulturalInstitutionsAdmin() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+		
+		deleteAllExceptFirst();
+		
+		$("#center").append(
+				'<form > \
+					<table> \
+						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			
+			saveChangesOnProfileAdmin(saveChangesOnProfileAdminFunZoneURL);
+		});
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 	
 }
 	
 
-function updateProfileSysAdmin(loggedUser) {
-	
-	var center = $("#center");
-	
-	deleteAllExceptFirst();
-	
-	center.append(
-			'<form > \
-				<table> \
-					<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
-					<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
-					<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
-					<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
-					<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
-				</table> \
-				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
-				</div> \
-				<br/> \
-			</form>');
-	
-	$("#id_btn_save_changes_on_profile").click(function(event) {
-		event.preventDefault();
+function updateProfileSysAdmin() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+		deleteAllExceptFirst();
 		
-		saveChangesOnProfileSystemAdmin();
-	});
+		$("#center").append(
+				'<form > \
+					<table> \
+						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			
+			saveChangesOnProfileSystemAdmin();
+		});
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 	
 }
 
@@ -139,10 +376,7 @@ function saveChangesOnProfileSystemAdmin() {
 	var oldPassword = $("#id_old_password").val();
 	var newPassword = $("#id_new_password").val();
 	var repeatNewPassword = $("#id_repeat_new_password").val();
-	var firstName = $("#id_first_name").val();
-	var lastName = $("#id_last_name").val();
-	var email = $("#id_email").val();
-
+	
 	$.ajax({ 
 	    type: "PUT",
 		url:  saveChangesOnProfileSysAdminURL,
@@ -150,10 +384,67 @@ function saveChangesOnProfileSystemAdmin() {
 			"username": username,
 			"oldPassword": oldPassword,
 			"newPassword": newPassword,
+			"repeatNewPassword": repeatNewPassword
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(intValue) {
+	    	switch(intValue) {
+		    	case -1:
+		    		toastr.error("There was a problem. No logged user!");
+		    		break;
+		    	case 0:
+		    		toastr.error("All fields are not filled!");
+		    		break;
+		    	case 1:
+		    		toastr.error("This username already exists!");
+		    		break;
+		    	case 2:
+		    		toastr.error("You did not enter the correct old password!");
+		    		break;
+		    	case 3:
+		    		toastr.error("You are not the first to enter the same new password the second time!");
+		    		break;
+		    	case 4:
+		    		$("#id_old_password").val("")
+		    		$("#id_new_password").val("");
+		    		$("#id_repeat_new_password").val("");
+		    		toastr.success("You have successfully edited the data!");
+		    		break;
+		    	default:
+		    		toastr.error("There was a problem.!");
+		    		break;
+	    	}
+	    	
+    	},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+}
+
+
+function saveChangesOnProfileAdmin(url) {
+	var username = $("#id_username").val();
+	var oldPassword = $("#id_old_password").val();
+	var newPassword = $("#id_new_password").val();
+	var repeatNewPassword = $("#id_repeat_new_password");
+	var firstName = $("#id_first_name").val();
+	var lastName = $("#id_last_name").val();
+	var email = $("#id_email").val();
+	
+	$.ajax({ 
+	    type: "PUT",
+		url:  url,
+	    data: JSON.stringify({
+			"username": username,
+			"oldPassword": oldPassword,
+			"newPassword": newPassword,
 			"repeatNewPassword": repeatNewPassword,
 			"firstName": firstName,
-			"lastName": lastName,
-			"email": email,
+	        "lastName": lastName,
+	        "email": email
 		}),
 	    dataType: "json", 
 	    contentType: "application/json",
@@ -197,77 +488,94 @@ function saveChangesOnProfileSystemAdmin() {
 }
 
 
-function registerAdmin(loggedUser) {
-	
-	var center = $("#center");
-	
-	deleteAllExceptFirst();
-	
-	center.append(
-			'<form > \
-				<table> \
-					<tr>  <td><label for="id_username_a">Username:</label></td>  <td><input type="text" id="id_username_a" /></td>  </tr> \
-					<tr>  <td><label for="id_new_password_a">Password:</label></td>  <td><input type="password" id="id_new_password_a" /></td>  </tr> \
-					<tr>  <td><label for="id_repeat_new_password_a">Repeat password:</label></td>  <td><input type="password" id="id_repeat_new_password_a" /></td>  </tr> \
-					<tr>  <td><label for="id_first_name_a">First name:</label></td>  <td><input type="text" id="id_first_name_a"/></td>  </tr> \
-					<tr>  <td><label for="id_last_name_a">Last name:</label></td>  <td><input type="text" id="id_last_name_a"/></td>  </tr> \
-					<tr>  <td><label for="id_email_a">Email:</label></td>  <td><input type="text" id="id_email_a" /></td>  </tr> \
-					<tr>  <td><label for="id_role_a">Role:</label></td>  <td class = "select"> \
-					<select id="id_role_a"> \
-            		<option value="SA">system admin</option>\
-            		<option value="CIA">Institution admin</option>\
-            		<option value="FZA">fan zone admin</option>\
-            		</select>\
-            		</td> \
-            		</tr> \
-				</table> \
-				<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Register system admin"/> \
-				</div> \
-				<br/> \
-			</form>');
-	
-	$("#id_btn_save_changes_on_profile").click(function(event) {
-		event.preventDefault();
-		saveAdmin();
-	});
+function registerAdmin() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append(
+				'<form > \
+					<table> \
+						<tr id="id_tr_first_name">  <td><label for="id_first_name_a">First name:</label></td>  <td><input type="text" id="id_first_name_a"/></td>  </tr> \
+						<tr id="id_tr_last_name">  <td><label for="id_last_name_a">Last name:</label></td>  <td><input type="text" id="id_last_name_a"/></td>  </tr> \
+						<tr id="id_tr_email">  <td><label for="id_email_a">Email:</label></td>  <td><input type="text" id="id_email_a" /></td>  </tr> \
+						<tr>  <td><label for="id_role_a">Role:</label></td>  <td class = "select"> \
+						<select id="id_role_a"> \
+	            		<option value="SA">system admin</option>\
+	            		<option value="CIA">Institution admin</option>\
+	            		<option value="FZA">fan zone admin</option>\
+	            		</select>\
+	            		</td> \
+	            		</tr> \
+					</table> \
+					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Register administrator"/> \
+					</div> \
+					<br/> \
+				</form>');
+		
+		$("#id_tr_first_name").hide();
+		$("#id_tr_last_name").hide();
+		
+		$("#id_role_a").change(changedAdminRole);
+		
+		$("#id_btn_save_changes_on_profile").click(function(event) {
+			event.preventDefault();
+			saveAdmin();
+		});
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 	
 }
 
+function changedAdminRole() {
+	var adminRole = $("#id_role_a").val();
+	
+	if(adminRole == "SA") {
+		$("#id_tr_first_name").hide();
+		$("#id_tr_last_name").hide();
+	}
+	else {
+		$("#id_tr_first_name").show();
+		$("#id_tr_last_name").show();
+	}
+}
+
 function saveAdmin(){
-	var username = $("#id_username_a").val();
-	var newPassword = $("#id_new_password_a").val();
-	var repeatNewPassword = $("#id_repeat_new_password_a").val();
-	var firstName = $("#id_first_name_a").val();
-	var lastName = $("#id_last_name_a").val();
+	var obj = {};
+	var adminRole = $("#id_role_a").val();
 	var email = $("#id_email_a").val();
-	var role = $("#id_role_a").find('option:selected').val();
+	
+	obj["adminRole"] = adminRole;
+	obj["email"] = email;
+	
+	if(adminRole != "SA") {
+		var firstName = $("#id_first_name_a").val();
+		var lastName = $("#id_last_name_a").val();
+		
+		obj["firstName"] = firstName;
+		obj["lastName"] = lastName;
+	}
 
 	$.ajax({ 
 	    type: "POST",
 		url:  registerAdminURL,
-	    data: JSON.stringify({
-			"username": username,
-			"newPassword": newPassword,
-			"repeatNewPassword": repeatNewPassword,
-			"firstName": firstName,
-			"lastName": lastName,
-			"email": email,
-			"role" : role,
-		}),
+	    data: JSON.stringify(obj),
 	    dataType: "json", 
 	    contentType: "application/json",
 	    success: function(successRegistrate) {
 	    	if(successRegistrate) {
-	    		$("#id_username").val("");
-	    		$("#id_password").val("");
-	    		$("#id_repeat_password").val("");
-	    		$("#id_first_name").val("");
-	    		$("#id_last_name").val("");
-	    		$("#id_email").val("");
-	    		$("#id_city").val("");
-	    		$("#id_phone_number").val("");
+	    		if(adminRole != "SA") {
+	    			$("#id_first_name_a").val("");
+	    			$("#id_last_name_a").val("");
+	    		}
+	    		$("#id_email_a").val("");
 	    		
-	    		toastr.success("You have successfully registered! You will soon receive an email to activate your account.");
+	    		
+	    		toastr.success("You have successfully registered a new administrator. He will soon receive an email with login information.");
 	    	}
 	    	else {
 	    		toastr.error("Registration error!"); 
@@ -280,81 +588,72 @@ function saveAdmin(){
 }
 
 
+function updateShowings()
+{
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		alert('showings!');
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
 
-/*function administratorPage() {
-	$("#title").html('ADMINISTRATOR PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
-	
-	
-	$("#myDropdown").append('<a id="add_requisite" href="/myapp/#/administrators/add_requisite"> Add requisite </a>');
-	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/get_requisites"> Show requisites </a>');
-	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/logout"> Logout </a>');
-	
-	$("#add_requisite").click(function(event) {
-		event.preventDefault();
-		
-		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/administrators/add_requisite"); // set URL
-		}
-		
-		addRequisite();
-	});
-	
-	$("#show_requisites").click(function(event) {
-		event.preventDefault();
-		
-		if(window.history.pushState) {
-		    window.history.pushState(null, null, "/myapp/#/administrators/get_requisites"); // set URL
-		}
-		
-		showRequisites();
-	});
-	
-	$("#id_logout").click(function(event) {
-		event.preventDefault();
-		
-		logout();
-	});
-}*/
 
 function addRequisite() {
-	$('<link>')
-	  .appendTo('head')
-	  .attr({
-	      type: 'text/css', 
-	      rel: 'stylesheet',
-	      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
-	});
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		$('<link>')
+		  .appendTo('head')
+		  .attr({
+		      type: 'text/css', 
+		      rel: 'stylesheet',
+		      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
+		});
+		
+		deleteAllExceptFirst();
+		$("#center").append('<div id="id_add_requisite_page"></div>');
+		
+		$("#id_add_requisite_page").load("html/partials/add_requisite.html", loadAddRequisiteComplete);
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 	
-	deleteAllExceptFirst();
-	$("#center").append('<div id="id_add_requisite_page"></div>');
-	
-	$("#id_add_requisite_page").load("html/partials/add_requisite.html", loadAddRequisiteComplete);
 	
 }
 
 function showRequisites() {
-	deleteAllExceptFirst();
-	$("#center").append('<div><table id="id_requisites"> </table> </div>');
-	
-	var requistes = getRequistes();
-	
-	if(requistes) {
-		if(requistes.length > 0) {
-			$("#id_requisites").append('<tr> <th colspan="5"> <b> REQUISITES </b></th></tr>');
-			$("#id_requisites").append('<tr> <th> Name </th> <th> Description </th> <th> Price </th> <th> Showing name </th> <th> Cultural institution name </th> </tr>');
-			
-			$.each(requistes, function(index, requiste) {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		deleteAllExceptFirst();
+		$("#center").append('<div><table id="id_requisites"> </table> </div>');
+		
+		var requistes = getRequistes();
+		
+		if(requistes) {
+			if(requistes.length > 0) {
+				$("#id_requisites").append('<tr> <th colspan="5"> <b> REQUISITES </b></th></tr>');
+				$("#id_requisites").append('<tr> <th> Name </th> <th> Description </th> <th> Price </th> <th> Showing name </th> <th> Cultural institution name </th> </tr>');
 				
-				$("#id_requisites").append('<tr> <td> ' + (index+1) + '. </td> <td> ' + requiste.name + ' </td> <td> ' + requiste.description + ' </td> <td> ' + requiste.price + ' </td> <td> ' + requiste.showingName + ' </td> <td> ' + requiste.culturalInstitutionName + ' </td> </tr>');
-			});
+				$.each(requistes, function(index, requiste) {
+					
+					$("#id_requisites").append('<tr> <td> ' + (index+1) + '. </td> <td> ' + requiste.name + ' </td> <td> ' + requiste.description + ' </td> <td> ' + requiste.price + ' </td> <td> ' + requiste.showingName + ' </td> <td> ' + requiste.culturalInstitutionName + ' </td> </tr>');
+				});
+			}
+			else {
+				toastr.error("Requisites are not available!");
+			}
 		}
 		else {
 			toastr.error("Requisites are not available!");
 		}
 	}
 	else {
-		toastr.error("Requisites are not available!");
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
 	}
+	
 }
 
 function loadAddRequisiteComplete() {

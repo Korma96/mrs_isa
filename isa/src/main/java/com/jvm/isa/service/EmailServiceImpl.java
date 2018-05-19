@@ -59,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
 	 */
 	@Async
 	@Override
-	public void sendEmailAsync(RegisteredUser user) throws MessagingException {
+	public void sendActivationEmailAsync(RegisteredUser user) throws MessagingException {
 		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 		
 		String idForActivation;
@@ -91,6 +91,45 @@ public class EmailServiceImpl implements EmailService {
 		
 		activation = new Activation(idForActivation, user);
 		activationRepository.save(activation); // cuvanje u bazi
+
+		System.out.println("Email poslat!");
+	}
+	
+	/*
+	 * Anotacija za oznacavanje asinhronog zadatka
+	 * Vise informacija na: https://docs.spring.io/spring/docs/current/spring-framework-reference/integration.html#scheduling
+	 */
+	@Async
+	@Override
+	public void sendNewAdminEmailAsync(String username, String password, String email, String typeOfAdmin) throws MessagingException {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		
+		String idForActivation;
+		Activation activation;
+		do {
+			idForActivation = generateIdForActivation();
+			activation = activationRepository.findByIdForActivation(idForActivation);
+		}
+		while(activation != null);
+		
+		String htmlMsg = "You are registered as a " + typeOfAdmin + " <br/><br/>";
+				htmlMsg += "<h3> Welcome to ISA </h3> <br/><br/>";
+				htmlMsg += "Below are your login details for your new account with ISA: <br/><br/>";
+				htmlMsg += "&nbsp; Email: &nbsp; <b> "+ email +" <b> <br/>";
+				htmlMsg += "&nbsp; Username: &nbsp; <b> " + username + " <b> <br/>";
+				htmlMsg += "&nbsp; Password: &nbsp; <b> " + password + " <b> <br/><br/>";
+				htmlMsg += "After logging in, please change your username and password <br/><br/>";
+				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/login'> http://localhost:8080/myapp/#/users/login </a> <br/><br/>";
+				htmlMsg += "Kind Regards, <br/>";
+				htmlMsg += "ISA Support";
+		mimeMessage.setContent(htmlMsg, "text/html");
+		
+		
+		MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
+		helper.setTo(email);
+		helper.setSubject("ISA Support");
+		helper.setFrom(env.getProperty(emailOfSender, passwordOfSender));
+		javaMailSender.send(mimeMessage);
 
 		System.out.println("Email poslat!");
 	}

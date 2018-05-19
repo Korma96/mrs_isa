@@ -19,6 +19,8 @@ import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.AdministratorDTO;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
+import com.jvm.isa.domain.SysAdministrator;
+import com.jvm.isa.domain.SysAdministratorDTO;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserDTO;
 import com.jvm.isa.domain.UserStatus;
@@ -45,10 +47,20 @@ public class UserController {
 		User user = null;
 		
 		if(username != null) {
+			//user = userService.getUserWithoutProxy(username);
 			user = userService.getUser(username);
 		}
 		
 		return user;
+	}
+	
+	public void setLogged(String username) {
+		String oldUsername = (String) httpSession.getAttribute("loggedUsername");
+		if(oldUsername != null) {
+			if(oldUsername.equals(username)) return;
+		}
+		
+		httpSession.setAttribute("loggedUsername", username); // cuvamo username ulogovanog korisnika na sesiji
 	}
 	
 	@RequestMapping(value = "/is_logged", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,8 +85,8 @@ public class UserController {
 				AdministratorDTO administratorDTO = new AdministratorDTO((Administrator) user);
 				return new ResponseEntity<UserDTO>(administratorDTO, HttpStatus.OK);
 			case SYS_ADMINISTRATOR:
-				userDTO = new UserDTO(user);
-				return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
+				SysAdministratorDTO sysAdministratorDTO = new SysAdministratorDTO((SysAdministrator) user);
+				return new ResponseEntity<UserDTO>(sysAdministratorDTO, HttpStatus.OK);
 
 			default:
 				userDTO = new UserDTO(user);
@@ -105,10 +117,12 @@ public class UserController {
 		
 		if(correct == 6)	{
 			RegisteredUser user = new RegisteredUser(username, password, firstName, lastName, email, city, phoneNumber);
+			user.setUserType(UserType.REGISTERED_USER);
+			user.setUserStatus(UserStatus.PENDING);
 			successRegistrate = userService.registrate(user);
 			
 			try {
-				emailService.sendEmailAsync(user);
+				emailService.sendActivationEmailAsync(user);
 			}
 			catch(Exception e)	{
 				System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
@@ -128,10 +142,23 @@ public class UserController {
 		User user = userService.getUser(hm.get("username"), hm.get("password"));
 		System.out.println("user: " + user);
 		if(user != null) {
-			if(user.getUserStatus() == UserStatus.ACTIVATED) {
-				httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
-				
-				return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			if(user.getUserType() == UserType.REGISTERED_USER)
+			{
+				if(user.getUserStatus() == UserStatus.ACTIVATED) {
+					setLogged(user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
+					
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+				}
+			}
+			else
+			{
+				// kada je admin PENDING to znaci da jos nije promenuo default lozinku
+				if(user.getUserStatus() != UserStatus.DEACTIVATED)
+				{
+					httpSession.setAttribute("loggedUsername", user.getUsername()); // cuvamo username ulogovanog korisnika na sesiji
+					
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+				}
 			}
 			
 		}
@@ -167,11 +194,10 @@ public class UserController {
 				
 				int correct = userService.correctUser(loggedUser, username, oldPassword, newPassword, repeatNewPassword, firstName, lastName, email, city, phoneNumber);
 				if(correct == 6) {
-					if(!loggedUser.getUsername().equals(username)) {
-						httpSession.setAttribute("loggedUsername", username);
-					}
 					loggedUser.setUsername(username);
-					loggedUser.setPassword(newPassword);
+					setLogged(username);
+					
+					if(!repeatNewPassword.equals("")) loggedUser.setPassword(repeatNewPassword);
 					loggedUser.setFirstName(firstName);
 					loggedUser.setLastName(lastName);
 					loggedUser.setEmail(email);

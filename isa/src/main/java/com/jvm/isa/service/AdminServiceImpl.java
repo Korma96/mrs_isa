@@ -10,14 +10,17 @@ import org.springframework.stereotype.Service;
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.Requisite;
-import com.jvm.isa.repository.AdminRepository;
+import com.jvm.isa.domain.User;
 import com.jvm.isa.repository.RequisiteRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
+	//@Autowired
+	//private AdminRepository adminRepository;
+	
 	@Autowired
-	private AdminRepository adminRepository;
+	private UserService userService;
 	
 	@Autowired
 	private RequisiteRepository requisiteRepository;
@@ -26,66 +29,84 @@ public class AdminServiceImpl implements AdminService {
 	private CulturalInstitutionService culturalInstitutionService; 
 
 	@Override
-	public boolean register(Administrator admin) {
-		try {
-			adminRepository.save(admin);
-
-		} catch (Exception e) {
-
-			return false;
-		}
-		return true;
-
+	public boolean register(User admin) {
+			return userService.registrate(admin);
 	}
 
 	@Override
 	public boolean exists(String username) {
 
-		return adminRepository.findByUsername(username) != null;
+		return userService.exists(username);
 
 	}
+	
 	@Override
 	public boolean existsRequisite(String name) {
 		return requisiteRepository.findByName(name) != null;
 	}
 
-	@Override
+	/*@Override
 	public Administrator getUser(String username, String password) {
 
 		return adminRepository.findByUsernameAndPassword(username, password);
-	}
+	}*/
 
 	@Override
 	public int validAdmin(Administrator oldAdmin, String username, String oldPassword, String newPassword,
 			String repeatNewPassword, String firstName, String lastName, String email) {
 
-		if (username.equals("") || newPassword.equals("") || repeatNewPassword.equals("") || firstName.equals("")
-				|| lastName.equals("") || email.equals(""))
+		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0;
+		
+		if (username.equals("") || oldPassword.equals("") || firstName.equals("") || lastName.equals("") || email.equals(""))
 			return 0;
-
-		if (oldPassword != null) {
-			if (oldPassword.equals(""))
-				return 0;
-			if (!oldAdmin.getPassword().equals(oldPassword))
-				return 2;
-		}
-
+		
 		if (oldAdmin != null) {
-			if (exists(username) && !oldAdmin.getUsername().equals(username))
+			if (userService.exists(username) && !oldAdmin.getUsername().equals(username)) {
 				return 1;
-		} else {
-			if (exists(username))
-				return 1;
+			}
+			
+		} 
+		else {
+			if (userService.exists(username)) return 1;
 		}
+		
+		if (!oldAdmin.getPassword().equals(oldPassword))
+			return 2;
 
 		if (!newPassword.equals(repeatNewPassword))
 			return 3;
-		if (!EmailValidator.getInstance().isValid(email))
-			return 4;
 
+		if(!EmailValidator.getInstance().isValid(email)) return 4;
+		
 		return 5;
 	}
 
+	@Override
+	public int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword) {
+		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0;
+		
+		if (username.equals("") || oldPassword.equals(""))
+			return 0;
+		
+		if (oldAdmin != null) {
+			if (userService.exists(username) && !oldAdmin.getUsername().equals(username)) {
+				return 1;
+			}
+			
+		} 
+		else {
+			if (userService.exists(username)) return 1;
+		}
+		
+		if (!oldAdmin.getPassword().equals(oldPassword))
+			return 2;
+
+		if (!newPassword.equals(repeatNewPassword))
+			return 3;
+
+		return 4;
+	}
+	
 	@Override
 	public int correctRequisite(String name, String description, String priceStr, String culturalInstitutionName,
 			String showing) {
@@ -94,7 +115,7 @@ public class AdminServiceImpl implements AdminService {
 			return 0;
 		}
 
-		if (exists(name)) {
+		if (existsRequisite(name)) {
 			return 1;
 		}
 
@@ -152,4 +173,5 @@ public class AdminServiceImpl implements AdminService {
 	public List<Requisite> getRequisites() {
 		return requisiteRepository.findAll();
 	}
+
 }

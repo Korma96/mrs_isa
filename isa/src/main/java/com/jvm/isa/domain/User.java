@@ -3,7 +3,6 @@ package com.jvm.isa.domain;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,7 +17,6 @@ import javax.persistence.InheritanceType;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 //ovom anotacijom se navodi diskriminatorska kolona
 @DiscriminatorColumn(name="type", discriminatorType=DiscriminatorType.STRING)
-@DiscriminatorValue("SA")
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

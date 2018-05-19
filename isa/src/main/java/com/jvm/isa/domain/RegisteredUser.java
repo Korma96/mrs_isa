@@ -11,24 +11,31 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 //ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za 
 //objekte ove klase
 @DiscriminatorValue("RU")
 public class RegisteredUser extends User {
+	@ColumnDefault("''")
 	@Column(name="first_name", unique=false, nullable=false)
 	private String firstName;
 	
+	@ColumnDefault("''")
 	@Column(name="last_name", unique=false, nullable=false)
 	private String lastName;
 	
+	@ColumnDefault("''")
 	@Column(name="email", unique=false, nullable=false)
 	private String email;
 	
-	@Column(name="city", unique=false, nullable = true)
+	@ColumnDefault("''")
+	@Column(name="city", unique=false, nullable = false)
 	private String city;
 	
-	@Column(name="phone_number", unique=false)
+	@ColumnDefault("''")
+	@Column(name="phone_number", unique=false, nullable = false)
 	private String phoneNumber;
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

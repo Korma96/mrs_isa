@@ -95,6 +95,48 @@ var pathname = getPathname();
 	case "/home_page/theaters":
 		showTheaters();
 		break;
+	case "administrators/sys_admin/update_profile":
+	case "administrators/sys_admin/update_profile/":
+	case "/administrators/sys_admin/update_profile/":
+	case "/administrators/sys_admin/update_profile":
+		updateProfileSysAdmin();
+		break;
+	case "administrators/sys_admin/register":
+	case "administrators/sys_admin/register/":
+	case "/administrators/sys_admin/register/":
+	case "/administrators/sys_admin/register":
+		registerAdmin();
+		break;
+	case "administrators/admin_funzone/update_profile":
+	case "administrators/admin_funzone/update_profile/":
+	case "/administrators/admin_funzone/update_profile/":
+	case "/administrators/admin_funzone/update_profile":
+		updateProfileFanZone();
+		break;
+	case "administrators/admin_funzone/add_requisite":
+	case "administrators/admin_funzone/add_requisite/":
+	case "/administrators/admin_funzone/add_requisite/":
+	case "/administrators/admin_funzone/add_requisite":
+		addRequisite();
+		break;
+	case "administrators/admin_funzone/get_requisites":
+	case "administrators/admin_funzone/get_requisites/":
+	case "/administrators/admin_funzone/get_requisites/":
+	case "/administrators/admin_funzone/get_requisites":
+		showRequisites();
+		break;
+	case "administrators/admin_cultural_institution/update_profile":
+	case "administrators/admin_cultural_institution/update_profile/":
+	case "/administrators/admin_cultural_institution/update_profile/":
+	case "/administrators/admin_cultural_institution/update_profile":
+		updateProfileCulturalInstitutionsAdmin();
+		break;
+	case "administrators/admin_cultural_institution/update_showings":
+	case "administrators/admin_cultural_institution/update_showings/":
+	case "/administrators/admin_cultural_institution/update_showings/":
+	case "/administrators/admin_cultural_institution/update_showings":
+		updateProfileCulturalInstitutionsAdmin();
+		break;
 	default:
 		$("#title").empty();
 		$("#center").html(getStringFor404());
@@ -319,23 +361,37 @@ function successfullyLogged() {
 	$("#id_menu").load("html/partials/registered_user_page.html", null, function () {
 		var loggedUser = loadLoggedUser();
 		
-		if (loggedUser.userType == "REGISTERED_USER") {
-			registeredUserPage();
+		if(loggedUser) {
+			if (loggedUser.userType == "REGISTERED_USER") {
+				registeredUserPage();
+				toastr.success('You have successfully logged in!'); 
+			}
+			else if (loggedUser.userType == "SYS_ADMINISTRATOR") {
+				adminSystemPage(loggedUser);
+				toastr.success('You have successfully logged in!'); 
+			}
+			
+			else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
+				adminFunzonePage(loggedUser);
+				toastr.success('You have successfully logged in!'); 
+			}
+			
+			else if (loggedUser.userType == "INSTITUTION_ADMINISTRATOR") {
+				adminCulturalInstitutionsPage(loggedUser);
+				toastr.success('You have successfully logged in!'); 
+			}
+			else {
+				toastr.error('Problem with logging!'); 	
+			}
+			
 		}
-		else if (loggedUser.userType == "SYS_ADMINISTRATOR") {
-			adminSystemPage(loggedUser);
+		else {
+			toastr.error('Problem with logging!'); 
+			
 		}
 		
-		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
-			adminFunzonePage(loggedUser);
-		}
 	});
 	
-	/*$("#center").append('You have successfully logged in.');
-	$("#center").append('<br/> Username: ' + loggedUser.username);
-	$("#center").append('<br/> Password: ' + loggedUser.password);*/
-	
-	toastr.success('You have successfully logged in!'); 
 }
 
 function registeredUserPage() {

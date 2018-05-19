@@ -9,7 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class CulturalInstitution{
@@ -30,13 +30,13 @@ public class CulturalInstitution{
 	@Column(name="type", unique=false, nullable=false)
 	private CulturalInstitutionType type;
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "culturalInstitution"*/)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "culturalInstitution"*/)
 	private List<Auditorium> auditoriums;
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "repertoire"*/)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "repertoire"*/)
 	private List<Showing> showings;
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true/*, mappedBy = "culturalInstitution"*/)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "culturalInstitution"*/)
 	private List<Repertoire> repertoires;
 
 

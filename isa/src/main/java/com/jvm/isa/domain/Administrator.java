@@ -4,18 +4,23 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 // ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za
 // objekte ove klase
 @DiscriminatorValue("AD")
 public class Administrator extends User {
 
+	@ColumnDefault("''")
 	@Column(name = "first_name", unique = false, nullable = false)
 	private String firstName;
 
+	@ColumnDefault("''")
 	@Column(name = "last_name", unique = false, nullable = false)
 	private String lastName;
 
+	@ColumnDefault("''")
 	@Column(name = "email", unique = false, nullable = false)
 	private String email;
 
@@ -23,12 +28,13 @@ public class Administrator extends User {
 		super();
 	}
 	
-	public Administrator(String username, String password, String firstName, String lastName, String email, UserType type, UserStatus status) {
-		super(username, password, type, status);
+	public Administrator(String username, String password, String firstName, String lastName, String email, UserType userType) {
+	super(username, password, userType, UserStatus.PENDING);
 
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		
 	}
 
 	public String getFirstName() {

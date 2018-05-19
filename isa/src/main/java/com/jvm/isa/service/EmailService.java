@@ -9,7 +9,8 @@ public interface EmailService {
 	
 	String generateIdForActivation();
 	
-	void sendEmailAsync(RegisteredUser user) throws MessagingException;
+	void sendActivationEmailAsync(RegisteredUser user) throws MessagingException;
+	void sendNewAdminEmailAsync(String username, String password, String email, String typeOfAdmin) throws MessagingException;
 	
 	boolean activateAccount(String idForActivation);
 }

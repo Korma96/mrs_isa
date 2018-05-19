@@ -3,6 +3,9 @@ package com.jvm.isa.controller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
+
+import javax.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,55 +21,153 @@ import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
+import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.AdminService;
+import com.jvm.isa.service.EmailService;
 
 @RestController
 @RequestMapping(value = "/administrators")
 
 public class AdminController {
 
+	private final String ADMIN_CONST = "admin";
+	private final String ADMIN_PASSWORD = "admin_#password$";
+	private final String[] ADMIN_TYPES = {"fun", "cul", "sys"};
+	
+	private Random random = new Random();
+	
 	@Autowired
 	private AdminService adminService;
 	
 	@Autowired
+	private EmailService emailService;
+	
+	@Autowired
 	private UserController userController;
-
-	@RequestMapping(value = "/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	
+	@RequestMapping(value = "/sys_admin/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
 	public ResponseEntity<Boolean> registerSysAdmin(@RequestBody HashMap<String, String> hm) {
-		String username = hm.get("username");
-		String password = hm.get("newPassword");
-		String repeatPassword = hm.get("repeatNewPassword");
-		String firstName = hm.get("firstName");
-		String lastName = hm.get("lastName");
+		String adminRole = hm.get("adminRole");
 		String email = hm.get("email");
-		String role = hm.get("role");
-		System.out.println("|" + username + " - " + password + " - " + repeatPassword + " - " + firstName + " - "
-				+ lastName + " - " + email + " - " + "|");
-
-		int correct = adminService.validAdmin(null, username, null, password, repeatPassword, firstName, lastName,
-				email);
-		boolean successregister;
-
-		if (correct == 5) {
-			Administrator admin = new Administrator(username, password, firstName, lastName, email, UserType.SYS_ADMINISTRATOR,UserStatus.ACTIVATED);
-			if (role.equals("CIA")) admin.setUserType(UserType.INSTITUTION_ADMINISTRATOR);
-			else if (role.equals("FZA")) admin.setUserType(UserType.FUNZONE_ADMINISTRATOR);
-			successregister = adminService.register(admin);
-
-		} else
-			successregister = false;
+		
+		String username = ADMIN_CONST + "_";
+		String password = ADMIN_PASSWORD + "_" + random.nextInt(10000);
+		String firstName = null;
+		String lastName = null;
+		
+		if(adminRole.equals("SA")) {
+			username += ADMIN_TYPES[2];
+			
+		}
+		else {
+			if(adminRole.equals("CIA")) {
+				username += ADMIN_TYPES[1];
+			}
+			else if(adminRole.equals("FZA")) {
+				username += ADMIN_TYPES[0];
+			}
+			
+			firstName = hm.get("firstName");
+			lastName = hm.get("lastName");
+		}
+		
+		
+		String potentionalUsername;
+		do {
+			potentionalUsername = username + "_" + random.nextInt(10000);
+		}
+		while(adminService.exists(potentionalUsername));
+		
+		boolean successregister = false;
+		String typeOfAdmin = null;
+		
+		if(firstName != null && lastName != null) { 
+			if(!firstName.equals("") && !lastName.equals("")) {
+				UserType userType = null;
+				if(adminRole.equals("CIA")) {
+					typeOfAdmin = "cultural institution administrator";
+					userType = UserType.INSTITUTION_ADMINISTRATOR;
+				}
+				else if(adminRole.equals("FZA")) {
+					typeOfAdmin = "fun zone administrator";
+					userType = UserType.FUNZONE_ADMINISTRATOR;
+				}
+				
+				Administrator admin = new Administrator(potentionalUsername, password, firstName, lastName, email, userType);
+				successregister = adminService.register(admin);
+				
+				if(successregister) {
+					try {
+						emailService.sendNewAdminEmailAsync(potentionalUsername, password, email, typeOfAdmin);
+					} catch (MessagingException e) {
+						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+					}
+				}
+			}
+		}
+		else {
+			typeOfAdmin = "system administrator";
+			SysAdministrator sysAdministrator = new SysAdministrator(potentionalUsername, password, email);
+			successregister = adminService.register(sysAdministrator);
+			
+			if(successregister) {
+				try {
+					emailService.sendNewAdminEmailAsync(potentionalUsername, password, email, typeOfAdmin);
+				} catch (MessagingException e) {
+					System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+				}
+			}
+		}
+		
 
 		return new ResponseEntity<Boolean>(successregister, HttpStatus.OK);
 
 	}
-
-	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Integer> saveChangesOnProfile(@RequestBody HashMap<String, String> hm) {
+	
+	@RequestMapping(value = "/sys_admin/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveChangesOnProfileSystemAdmin(@RequestBody HashMap<String, String> hm) {
 		User user = userController.getLoggedUserLocalMethod();
+		
+		if (user != null) {
+			String username = hm.get("username");
+			String oldPassword = hm.get("oldPassword");
+			String newPassword = hm.get("newPassword");
+			String repeatNewPassword = hm.get("repeatNewPassword");
+
+			int correct = adminService.validSystemAdmin(user, username, oldPassword, newPassword, repeatNewPassword);
+			if (correct == 4) {
+				user.setUsername(username);
+				userController.setLogged(username);
+				if(!newPassword.equals("")) user.setPassword(newPassword);
+				
+
+				adminService.register(user); // cuvanje napravljenih
+													// izmena
+			}
+
+			return new ResponseEntity<Integer>(correct, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_funzone/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveChangesOnProfileAdminFunZone(@RequestBody HashMap<String, String> hm) {
+		return saveChangesOnProfileAdmin(hm);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveChangesOnProfileAdminCulturalInstitution(@RequestBody HashMap<String, String> hm) {
+		return saveChangesOnProfileAdmin(hm);
+	}
+	
+	public ResponseEntity<Integer> saveChangesOnProfileAdmin(HashMap<String, String> hm) {
+		User user = userController.getLoggedUserLocalMethod();
+		
 		if (user != null) {
 			Administrator loggedUser = (Administrator) user;
 			String username = hm.get("username");
@@ -81,7 +182,8 @@ public class AdminController {
 					firstName, lastName, email);
 			if (correct == 5) {
 				loggedUser.setUsername(username);
-				loggedUser.setPassword(newPassword);
+				userController.setLogged(username);
+				if(!repeatNewPassword.equals("")) loggedUser.setPassword(repeatNewPassword);
 				loggedUser.setFirstName(firstName);
 				loggedUser.setLastName(lastName);
 				loggedUser.setEmail(email);
@@ -96,7 +198,7 @@ public class AdminController {
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();
 		
@@ -104,7 +206,7 @@ public class AdminController {
 		
 	}
 	
-	@RequestMapping(value = "/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE,
+	@RequestMapping(value = "/admin_funzone/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE,
 																									produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getShowingsOfCulturalInstitution(@PathVariable("culturalInstitutionName") String culturalInstitutionName) {
 		ArrayList<String> showings = adminService.getShowings(culturalInstitutionName);
@@ -114,7 +216,7 @@ public class AdminController {
 	}
 	
 	
-	@RequestMapping(value = "/add_requisite", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+	@RequestMapping(value = "/admin_funzone/add_requisite", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
 																			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> AddRequisite(@RequestBody HashMap<String, String> hm) {
 		String name = hm.get("name");
@@ -136,7 +238,7 @@ public class AdminController {
 	
 	}
 	
-	@RequestMapping(value = "/get_requisites", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/admin_funzone/get_requisites", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<RequisiteDTO>> getRequisites() {
 		List<Requisite> requisites = adminService.getRequisites();
 		
@@ -150,7 +252,51 @@ public class AdminController {
 	
 	}
 	
+	@RequestMapping(value = "/admin_funzone/changes_default_username_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+																						produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveAdminFunZoneChangedUsernameAndPassword(@RequestBody HashMap<String, String> hm) {
+		return saveChangedUsernameAndPassword(hm);
+	}	
+	
+	@RequestMapping(value = "/admin_cultural_institution/changes_default_username_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+																											produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveCulturalInstitutionAdminChangedUsernameAndPassword(@RequestBody HashMap<String, String> hm) {
+		return saveChangedUsernameAndPassword(hm);
+	}	
+	
+	@RequestMapping(value = "/sys_admin/changes_default_username_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveSysAdminChangedUsernameAndPassword(@RequestBody HashMap<String, String> hm) {
+		return saveChangedUsernameAndPassword(hm);
+	}
+	
+	public ResponseEntity<Boolean> saveChangedUsernameAndPassword(HashMap<String, String> hm) {
+		User user = userController.getLoggedUserLocalMethod();
 		
+		if(user != null) {
+			String username = hm.get("username");
+			String password = hm.get("password");
+			String repeatPassword = hm.get("repeatPassword");
+			
+			int correct = adminService.validSystemAdmin(user, username, user.getPassword(), password, repeatPassword);
+			if (correct == 4) {
+				if(!repeatPassword.equals("")) {
+					user.setUsername(username);
+					userController.setLogged(username);
+					
+					user.setPassword(repeatPassword);
+					user.setUserStatus(UserStatus.ACTIVATED);
+					
+					adminService.register(user);
+					
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+				}
+			}
+			
+		}
+
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
 }
 
 

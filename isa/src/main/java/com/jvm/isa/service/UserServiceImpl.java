@@ -38,14 +38,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User getUser(String username) {
-		User user = userRepository.findByUsernameAndUserStatus(username, UserStatus.ACTIVATED);
+		User user = userRepository.findByUsername(username);
 		return user;
 	}
+	
 	
 	@Override
 	public User getUser(String username, String password) {
 		User user = userRepository.findByUsernameAndPassword(username, password);
-		
 		return user;
 	}
 	
@@ -62,7 +62,9 @@ public class UserServiceImpl implements UserService {
 	 * */
 	@Override
 	public int correctUser(User oldUser, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email, String city, String phoneNumber) {
-		if(username.equals("") || newPassword.equals("") || repeatNewPassword.equals("") || firstName.equals("") || lastName.equals("") || email.equals("") || city.equals("") || phoneNumber.equals("")) return 0;
+		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0; // xor, tj. jedno od polja je ostalo prazno
+		
+		if(username.equals("") || firstName.equals("") || lastName.equals("") || email.equals("") || city.equals("") || phoneNumber.equals("")) return 0;
 		
 		if(oldPassword != null) {
 			if(oldPassword.equals("")) return 0;
@@ -77,6 +79,7 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		if(!newPassword.equals(repeatNewPassword)) return 3;
+		
 		if(!EmailValidator.getInstance().isValid(email)) return 4;
 		
 		try { Integer.parseInt(phoneNumber); }
