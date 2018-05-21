@@ -15,8 +15,27 @@ import com.jvm.isa.repository.CulturalInstitutionRepository;
 public class CulturalInstitutionServiceImpl implements CulturalInstitutionService
 {
 	@Autowired
-
 	private CulturalInstitutionRepository  culturalInstitutionRepository;
+	
+	@Override
+	public boolean exists(String name)
+	{
+		return culturalInstitutionRepository.findByName(name) != null;
+	}
+	
+	@Override
+	public boolean save(CulturalInstitution ci)
+	{
+		try 
+		{
+			culturalInstitutionRepository.save(ci);
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
 	
 	@Override
 	public List<CulturalInstitution> getCulturalInstitutionsByType(CulturalInstitutionType type) 

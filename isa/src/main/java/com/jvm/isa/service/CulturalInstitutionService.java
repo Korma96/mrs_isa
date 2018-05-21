@@ -8,6 +8,10 @@ import com.jvm.isa.domain.CulturalInstitutionType;
 
 public interface CulturalInstitutionService {
 	
+	boolean exists(String name);
+	
+	boolean save(CulturalInstitution ci);
+	
 	CulturalInstitution getCulturalInstitution(String name);
 
 	List<CulturalInstitution> getCulturalInstitutionsByType(CulturalInstitutionType type);

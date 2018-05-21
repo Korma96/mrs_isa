@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
+import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.SysAdministrator;
@@ -26,6 +27,7 @@ import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.AdminService;
+import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
 
 @RestController
@@ -44,6 +46,9 @@ public class AdminController {
 	
 	@Autowired
 	private EmailService emailService;
+	
+	@Autowired
+	private CulturalInstitutionService culturalInstitutionService;
 	
 	@Autowired
 	private UserController userController;
@@ -226,6 +231,24 @@ public class AdminController {
 	public ResponseEntity<Integer> saveAdminCulturalInstitutionChangedPassword(@RequestBody HashMap<String, String> hm) {
 		return userController.saveChangedPassword(hm);
 	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/add_new_cultural_institution", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveCulturalInstitution(@RequestBody HashMap<String, String> hm)
+	{
+		String name = hm.get("name");
+		String address = hm.get("address");
+		String description = hm.get("description");
+		String role = hm.get("role");
+		CulturalInstitutionType ciType = CulturalInstitutionType.valueOf(role);
+		CulturalInstitution ci = new CulturalInstitution(name, address, description, ciType);
+		if(!culturalInstitutionService.exists(ci.getName()))
+		{
+			culturalInstitutionService.save(ci);
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}	
 	
 	@RequestMapping(value = "/sys_admin/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)

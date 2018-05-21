@@ -54,6 +54,14 @@ public class CulturalInstitution{
 		this.showings = showings;
 		//this.repertoires = repertoires;
 	}
+	
+	public CulturalInstitution(String name, String address, String description, CulturalInstitutionType type)
+	{
+		this.name = name;
+		this.address = address;
+		this.description = description;
+		this.type = type;
+	}
 
 	public Long getId() {
 		return id;

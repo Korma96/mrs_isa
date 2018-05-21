@@ -134,11 +134,17 @@ var pathname = getPathname();
 	case "/administrators/admin_cultural_institution/update_profile":
 		updateProfileCulturalInstitutionsAdmin();
 		break;
-	case "administrators/admin_cultural_institution/update_showings":
-	case "administrators/admin_cultural_institution/update_showings/":
-	case "/administrators/admin_cultural_institution/update_showings/":
-	case "/administrators/admin_cultural_institution/update_showings":
-		updateProfileCulturalInstitutionsAdmin();
+	case "administrators/admin_cultural_institution/showings":
+	case "administrators/admin_cultural_institution/showings/":
+	case "/administrators/admin_cultural_institution/showings/":
+	case "/administrators/admin_cultural_institution/showings":
+		showings();
+		break;
+	case "administrators/admin_cultural_institution/culturalInstitutions":
+	case "administrators/admin_cultural_institution/culturalInstitutions/":
+	case "/administrators/admin_cultural_institution/culturalInstitutions/":
+	case "/administrators/admin_cultural_institution/culturalInstitutions":
+		culturalInstitutions();
 		break;
 	default:
 		$("#title").empty();

@@ -12,6 +12,7 @@ var culturalInstitutionAdminChangeUsernameAndPasswordURL = "/myapp/administrator
 var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/save_changed_password";
 var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/save_changed_password";
 var culturalInstitutionAdminChangePasswordURL = "/myapp/administrators/admin_cultural_institution/save_changed_password";
+var addNewCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/add_new_cultural_institution";
 
 
 
@@ -175,9 +176,9 @@ function adminFunzoneMainPage() {
 
 
 function adminCulturalInstitutionsMainPage() {
-	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/admin_cultural_institution/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="id_update_showings" href="/myapp/#/administrators/admin_cultural_institution/update_showings"> Update showings </a>');
+	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
+	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
 	$("#id_change_password").click(function(event) {
@@ -199,14 +200,25 @@ function adminCulturalInstitutionsMainPage() {
 		
 		updateProfileCulturalInstitutionsAdmin();
 	});
-	$("#id_update_showings").click(function(event) {
+	
+	$("#id_cultural_institutions").click(function(event) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
 		    window.history.pushState(null, null, $(this).attr('href')); // set URL
 		}
 		
-		updateShowings();
+		culturalInstitutions();
+	});
+	
+	$("#id_showings").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		showings();
 	});
 	
 	$("#id_logout").click(function(event) {
@@ -626,7 +638,7 @@ function saveAdmin(){
 }
 
 
-function updateShowings()
+function showings()
 {
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
@@ -636,6 +648,103 @@ function updateShowings()
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);
 	}
 	
+}
+
+function culturalInstitutions()
+{
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+
+		deleteAllExceptFirst();
+		
+		$("#center").append('<div><div id="cinemas_div"> \
+			<img  style="width:50.62%;height:75%;float:left;position:static" src="images/cinema.jpg" class="cinema" alt="Cinemas "title="Cinemas"/> \
+			</div> \
+			<div id="theaters_div"> \
+			<img style="width:49.38%;height:75%;float:right" src="images/theater.jpg" class="theater" alt="Theaters" title="Theaters"/> \
+			</div> \
+			</div>');
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function addCulturalInstitution()
+{
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var loggedUser = loadLoggedUser();
+
+		deleteAllExceptFirst();
+		
+		$("#center").append(
+				'<form > \
+				<table> \
+					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
+					<tr><td><label for="id_address">Last name:</label></td><td><input type="text" id="id_address"/></td></tr> \
+					<tr><td><label for="id_description">Email:</label></td><td><input type="text" id="id_description"/></td></tr> \
+					<tr><td><label for="id_institution_role">Role:</label></td><td class = "select"> \
+					<select id="id_institution_role"> \
+            		<option value="CINEMA">CINEMA</option>\
+            		<option value="THEATER">THEATER</option>\
+            		</select>\
+            		</td> \
+            		</tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
+				</div> \
+				<br/> \
+			</form>');
+		
+		$("#id_btn_save_new_institution").click(function(event) {
+			event.preventDefault();
+			
+			addCulturalInstitutionAjax();
+		});
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function addCulturalInstitutionAjax()
+{
+	var obj = {};
+	var name = $("#id_institution_name").val();
+	var address = $("#id_address").val();
+	var description = $("#id_description").val();
+	var role = $("#id_institution_role").val();
+
+	obj["name"] = name;
+	obj["address"] = address;	
+	obj["description"] = description;
+	obj["role"] = role;
+	
+	$.ajax({ 
+	    type: "POST",
+		url:  addNewCulturalInstitutionURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(success) {
+	    	if(success) {
+	    		$("#id_institution_name").val("");
+	    		$("#id_address").val("");
+	    		$("#id_description").val("");		
+	    		
+	    		toastr.success("You have successfully added new institution!");
+	    	}
+	    	else {
+	    		toastr.error("Wrong data!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
 }
 
 

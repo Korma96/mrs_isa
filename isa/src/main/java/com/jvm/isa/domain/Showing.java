@@ -43,6 +43,9 @@ public class Showing {
 	@Column(name="short_description", unique=false, nullable=false)
 	private String shortDescription;
 	
+	@Column(name="type", unique=false, nullable=false)
+	private ShowingType showingType;
+	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	private List<Term> terms;
 
