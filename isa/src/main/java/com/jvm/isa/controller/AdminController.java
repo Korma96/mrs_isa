@@ -233,7 +233,7 @@ public class AdminController {
 		return userController.saveChangedPassword(hm);
 	}
 	
-	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/admin_funzone/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();
 		

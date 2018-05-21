@@ -1,6 +1,7 @@
 package com.jvm.isa.domain;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -19,11 +21,18 @@ public class Term {
 	private Long id;
 	
 	//@Temporal(TemporalType.DATE)
-	@Column(name="date_and_time", unique=false, nullable=false)
-	private LocalDateTime dateAndTime;
+	@Column(name="date", unique=false, nullable=false)
+	private LocalDate date;
 	
+	@Column(name="time", unique=false, nullable=false)
+	private LocalTime time;
+	
+	@Lob
 	@Column(name="seats", unique=false, nullable=false)
-	private boolean[][] seats;
+	private Boolean[] seats;
+	
+	@OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	private CulturalInstitution culturalInstitution;
 	
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
 	private Auditorium auditorium;
@@ -38,14 +47,17 @@ public class Term {
 	
 	
 	
-	public Term(LocalDateTime dateAndTime, boolean[][] seats, Auditorium auditorium, Showing showing) {
-		this.dateAndTime = dateAndTime;
-		this.seats = seats;
+	public Term(LocalDate date, LocalTime time, CulturalInstitution culturalInstitution,  Auditorium auditorium, Showing showing) {
+		this.date = date;
+		this.time = time;
+		this.seats = new Boolean[auditorium.getNumOfRows() * auditorium.getNumOfCols()];
+		for (int i = 0; i < seats.length; i++) {
+			seats[i] = false;
+		}
+		this.culturalInstitution = culturalInstitution;
 		this.auditorium = auditorium;
 		this.showing = showing;
 	}
-
-
 
 	public Long getId() {
 		return id;
@@ -56,25 +68,40 @@ public class Term {
 	}
 
 	
-	public LocalDateTime getDateAndTime() {
-		return dateAndTime;
+	public LocalDate getDate() {
+		return date;
 	}
 
 
-	public void setDateAndTime(LocalDateTime dateAndTime) {
-		this.dateAndTime = dateAndTime;
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 
-	public boolean[][] getSeats() {
+	public LocalTime getTime() {
+		return time;
+	}
+
+
+	public void setTime(LocalTime time) {
+		this.time = time;
+	}
+	
+	public Boolean[] getSeats() {
 		return seats;
 	}
 
-
-	public void setSeats(boolean[][] seats) {
+	public void setSeats(Boolean[] seats) {
 		this.seats = seats;
 	}
 
+	public CulturalInstitution getCulturalInstitution() {
+		return culturalInstitution;
+	}
+
+	public void setCulturalInstitution(CulturalInstitution culturalInstitution) {
+		this.culturalInstitution = culturalInstitution;
+	}
 
 	public Auditorium getAuditorium() {
 		return auditorium;

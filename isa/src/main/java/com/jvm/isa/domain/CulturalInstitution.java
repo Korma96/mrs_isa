@@ -36,8 +36,8 @@ public class CulturalInstitution{
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "repertoire"*/)
 	private List<Showing> showings;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "culturalInstitution"*/)
-	private List<Repertoire> repertoires;
+	//@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "culturalInstitution"*/)
+	//private List<Repertoire> repertoires;
 
 
 	
@@ -45,15 +45,14 @@ public class CulturalInstitution{
 		
 	}
 	
-	public CulturalInstitution(String name, String address, String description, CulturalInstitutionType type, List<Showing> showings, List<Auditorium> auditoriums,
-			List<Repertoire> repertoires) {
+	public CulturalInstitution(String name, String address, String description, CulturalInstitutionType type, List<Showing> showings, List<Auditorium> auditoriums/*, List<Repertoire> repertoires*/) {
 		this.name = name;
 		this.address = address;
 		this.description = description;
 		this.type = type;
 		this.auditoriums = auditoriums;
 		this.showings = showings;
-		this.repertoires = repertoires;
+		//this.repertoires = repertoires;
 	}
 
 	public Long getId() {
@@ -112,13 +111,13 @@ public class CulturalInstitution{
 		this.showings = showings;
 	}
 
-	public List<Repertoire> getRepertoires() {
+	/*public List<Repertoire> getRepertoires() {
 		return repertoires;
 	}
 
 	public void setRepertoires(List<Repertoire> repertoires) {
 		this.repertoires = repertoires;
-	}
+	}*/
 
 	public boolean containsShowing(String showingName) {
 		for (Showing showing : showings) {

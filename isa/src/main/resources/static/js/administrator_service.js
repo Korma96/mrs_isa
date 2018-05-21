@@ -695,6 +695,18 @@ function showRequisites() {
 }
 
 function loadAddRequisiteComplete() {
+	loadCulturalInstitutionsAndShowings();
+
+	$( "#id_price" ).val("0");
+	
+	$("#id_btn_add_requisite").click(function(event) {
+		event.preventDefault();
+		
+		sendAddedRequisite();
+	});
+}
+
+function loadCulturalInstitutionsAndShowings() {
 	var culturalInstitutions = getCulturalInstitutions();
 	if(culturalInstitutions) {
 		if(culturalInstitutions.length > 0) {
@@ -742,18 +754,6 @@ function loadAddRequisiteComplete() {
 		toastr.error("Cultural institutions are not available!");
 	}
 	
-	
-	
-	$( function() {
-	    var spinner = $( "#spinner" ).spinner();
-	    spinner.spinner( "value", 0 );
-	});
-	
-	$("#id_btn_add_requisite").click(function(event) {
-		event.preventDefault();
-		
-		sendAddedRequisite();
-	});
 }
 
 function changedCulturalInstitution() {
@@ -852,7 +852,7 @@ function getRequistes() {
 function sendAddedRequisite() {
 	var name = $("#id_name").val();
 	var description = $("#id_description").val();
-	var price = $( "#spinner" ).spinner( "value" );
+	var price = $("#id_price").val();
 	var culturalInstitution = $("#id_cultural_institution").val();
 	var showing = $("#id_showing").val();
 	
@@ -873,7 +873,7 @@ function sendAddedRequisite() {
 	    	if(successAdd) {
 	    		$("#id_name").val("");
 	    		$("#id_description").val("");
-	    		$( "#spinner" ).spinner( "value", 0 );
+	    		$("#id_price").val("0");
 	    		$("#id_cultural_institution").val("");
 	    		$("#id_showing").val("");
 	    		

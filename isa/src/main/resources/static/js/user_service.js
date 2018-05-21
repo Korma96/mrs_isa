@@ -13,6 +13,8 @@ var declineRequestFriendURL = "/myapp/users/decline_request_friend";
 var isLoggedURL = "/myapp/users/is_logged";
 var removeFriendURL = "/myapp/users/remove_friend";
 var saveChangedPasswordURL = "/myapp/users/save_changed_password";
+var bookSelectedSeatsURL = "/myapp/users/book_selected_seats";
+var getIndexesOfBusySeatsAndRowsColsURL = "/myapp/users/get_indexes_of_busy_seats_and_rows_cols";
 
 
 
@@ -359,11 +361,11 @@ function successfullyLogged() {
 	  .attr({
 	      type: 'text/css', 
 	      rel: 'stylesheet',
-	      href: 'css/registered_user_page.css'
+	      href: 'css/menu.css'
 	  });
 	
 	$("#center").prepend('<div id="id_menu"></div><br/><br/>');
-	$("#id_menu").load("html/partials/registered_user_page.html", null, function () {
+	$("#id_menu").load("html/partials/menu.html", null, function () {
 		var loggedUser = loadLoggedUser();
 		
 		if(loggedUser) {
@@ -410,10 +412,21 @@ function registeredUserPage() {
 	
 	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
 	
+	$("#myDropdown").append('<a id="id_seats_reservation" href="/myapp/#/users/seats_reservation"> Seats reservation </a>');
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/users/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/users/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_friends" href="/myapp/#/users/friends"> Friends </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	$("#id_seats_reservation").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		reservationSeats();
+	});
 	
 	$("#id_change_password").click(function(event) {
 		event.preventDefault();
@@ -716,8 +729,16 @@ function workWithFriends() {
 	// podesavanje za autocomplete
 	$( function() {
 	    $( "#id_new_friend" ).autocomplete({
-	      source: people
-	    });
+	      source: people,
+	      minLength: 0
+	    }).focus(function(){            
+            // The following works only once.
+            // $(this).trigger('keydown.autocomplete');
+            // As suggested by digitalPBK, works multiple times
+            // $(this).data("autocomplete").search($(this).val());
+            // As noted by Jonny in his answer, with newer versions use uiAutocomplete
+            $(this).data("uiAutocomplete").search($(this).val());
+        });
 	});
 	
 	
@@ -1133,7 +1154,8 @@ function sortTable(n, id_for_table) {
 	          shouldSwitch= true;
 	          break;
 	        }
-	      } else if (dir == "desc") {
+	      } 
+	      else if (dir == "desc") {
 	        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
 	          // If so, mark as a switch and break the loop:
 	          shouldSwitch= true;
@@ -1148,7 +1170,8 @@ function sortTable(n, id_for_table) {
 	      switching = true;
 	      // Each time a switch is done, increase this count by 1:
 	      switchcount ++; 
-	    } else {
+	    } 
+	    else {
 	      /* If no switching has been done AND the direction is "asc",
 	      set the direction to "desc" and run the while loop again. */
 	      if (switchcount == 0 && dir == "asc") {
@@ -1157,4 +1180,225 @@ function sortTable(n, id_for_table) {
 	      }
 	    }
 	  }
+}
+
+
+function reservationSeats() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		$('<link>')
+		  .appendTo('head')
+		  .attr({
+		      type: 'text/css', 
+		      rel: 'stylesheet',
+		      href: 'css/seat_reservation.css'
+		});
+		
+		deleteAllExceptFirst();
+		
+		$("#center").append('<div id="id_seat_reservation_page"></div>');
+		$("#id_seat_reservation_page").load("html/partials/reservation_page.html", loadReservationPageComplete);
+		
 	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
+
+function loadReservationPageComplete() {
+	
+	loadCulturalInstitutionsAndShowings();
+	
+	
+	$("#id_cultural_institution").change(function() { $("#id_seats").remove(); })
+	$("#id_showing").change(function() { $("#id_seats").remove(); })
+	$("#id_date").change(function() { $("#id_seats").remove(); })
+	$("#id_time").change(function() { $("#id_seats").remove(); })
+	
+	$('#id_btn_show_seats').click(function (event) {
+		event.preventDefault();
+		
+		$("#id_seats").remove();
+		
+		var indexesOfBusySeatsAndRowsCols = getIndexesOfBusySeatsAndRowsCols();
+		if(indexesOfBusySeatsAndRowsCols) {
+			$("#center").append('<div id="id_seats"></div>');
+			$("#id_seats").load("html/partials/seat_reservation.html", function () {
+						settings.rows = indexesOfBusySeatsAndRowsCols[indexesOfBusySeatsAndRowsCols.length - 2];
+						settings.cols = indexesOfBusySeatsAndRowsCols[indexesOfBusySeatsAndRowsCols.length - 1];
+						var reservedSeat = indexesOfBusySeatsAndRowsCols.slice(0, indexesOfBusySeatsAndRowsCols.length-2);
+						
+						
+						$("#holder").width(settings.cols * settings.seatWidth + 25);
+						$("#holder").height(settings.rows * settings.seatHeight + 25);
+						init(reservedSeat);
+						
+						$('.' + settings.seatCss).click(function () {
+							event.preventDefault();
+							
+							if ($(this).hasClass(settings.selectedSeatCss)) {
+							    toastr.error('This seat is already reserved');
+							}
+							else{
+							    $(this).toggleClass(settings.selectingSeatCss);
+						    }
+						});
+						 
+						$('#id_btn_book_selected_seats').click(function (event) {
+							event.preventDefault();
+							
+						    var str = [], item;
+						    $.each($('#place li.' + settings.selectingSeatCss + ' a'), function (index, value) {
+						        item = $(this).attr('title');                   
+						        str.push(item);                   
+						    });
+						    var selectedSeats = str.join(',');
+						    
+						    bookSelectedSeats(selectedSeats);
+						});
+			});
+		}
+		else {
+			toastr.error('There is no term for the selected parameters!');
+		}
+		
+	});
+	
+}
+
+var settings = {
+   rows: 5,  // default
+   cols: 15, // default
+   rowCssPrefix: 'row-',
+   colCssPrefix: 'col-',
+   seatWidth: 35,
+   seatHeight: 35,
+   seatCss: 'seat',
+   selectedSeatCss: 'selectedSeat',
+   selectingSeatCss: 'selectingSeat'
+};
+
+function getIndexesOfBusySeatsAndRowsCols() {
+	var indexesOfBusySeatsAndRowsCols = null;
+	
+	var date = $("#id_date").val();
+	var time = $("#id_time").val();
+	var culturalInstitution = $("#id_cultural_institution").val();
+	var showing = $("#id_showing").val();
+	
+	$.ajax({ 
+		async: false,
+	    type: "PUT",
+		url: getIndexesOfBusySeatsAndRowsColsURL,
+		dataType : "json",
+		data: JSON.stringify({"date": date.trim(), 
+								"time": time.trim(), 
+								"culturalInstitution": culturalInstitution.trim(), 
+								"showing": showing.trim()}),
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(retValue) {
+	    	if(retValue.existsTerm) {
+	    		indexesOfBusySeatsAndRowsCols =  retValue.indexOfBusySeatsAndRowsCols;
+	    	}
+	    	
+				
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return indexesOfBusySeatsAndRowsCols;
+}
+
+function bookSelectedSeats(selectedSeats) {
+	if(selectedSeats!== "") {
+		var date = $("#id_date").val();
+		var time = $("#id_time").val();
+		var culturalInstitution = $("#id_cultural_institution").val();
+		var showing = $("#id_showing").val();
+		
+		$.ajax({ 
+		    type: "PUT",
+			url: bookSelectedSeatsURL,
+			dataType : "json",
+			data: JSON.stringify({"date": date.trim(), 
+									"time": time.trim(), 
+									"culturalInstitution": culturalInstitution.trim(), 
+									"showing": showing.trim(),
+									"selectedSeats": selectedSeats.trim()}),
+		    contentType: "application/json",
+		    cache: false,
+		    success: function(ret) {
+		    	if(ret.error) {
+		    		toastr.error("Reservation error!"); 
+		    	}
+		    	else {
+		    		switchSelectedToReserved(selectedSeats.trim(), ret.bookSeats);
+		    	}
+					
+		   },
+			error : function(XMLHttpRequest, textStatus, errorThrown) { 
+						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+			}
+		});
+	}
+	else {
+		toastr.error("No seat was selected!"); 
+	}
+}
+
+function switchSelectedToReserved(selectedSeats, successBookSeats) {
+	var tokens = selectedSeats.split(",");
+	var message = [];
+	var thereWasConflict = false;
+	
+	 $.each(successBookSeats, function(index, success) {
+	      /*if (openDropdown.classList.contains('show')) {
+	        openDropdown.classList.remove('show');
+	      }*/
+		 if ($("#id_seat_" + tokens[index]).hasClass(settings.selectingSeatCss)) {
+			 $("#id_seat_" + tokens[index]).removeClass(settings.selectingSeatCss);
+		 }
+		 
+		 if(success) {
+			 $("#id_seat_" + tokens[index]).toggleClass(settings.selectedSeatCss);
+			 message.push("seat " + tokens[index] + " - successfully booked");
+		 }
+		 else {
+			 message.push("seat " + tokens[index] + " - unsuccessfully booked");
+			 thereWasConflict = true;
+		 }
+	 });
+	 
+	 toastr.info(message.join(', '));
+	 if(thereWasConflict) {
+		 toastr.info('There was a conflict. Please show the seats again.!!!');
+	 }
+}
+
+function init(reservedSeat) {
+    var str = [], seatNo, className;
+    
+    
+	for (i = 0; i < settings.rows; i++) {
+		for (j = 0; j < settings.cols; j++) {
+            seatNo = (i*settings.cols + j + 1); // i + j * settings.rows + 1
+            className = settings.seatCss + ' ' + settings.rowCssPrefix + i.toString() + ' ' + settings.colCssPrefix + j.toString();
+            if ($.isArray(reservedSeat) && $.inArray(seatNo, reservedSeat) != -1) {
+                className += ' ' + settings.selectedSeatCss;
+            }
+            str.push('<li id="id_seat_' + seatNo + '" class="' + className + '"' +
+                      'style="top:' + (i * settings.seatHeight).toString() + 'px;left:' + (j * settings.seatWidth).toString() + 'px">' +
+                      '<a title="' + seatNo + '">' + seatNo + '</a>' +
+                      '</li>');
+        }
+    }
+    $('#place').html(str.join(''));
+}
+
+
+
+

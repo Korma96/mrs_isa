@@ -22,6 +22,7 @@ import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
 import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.SysAdministratorDTO;
+import com.jvm.isa.domain.Term;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserDTO;
 import com.jvm.isa.domain.UserStatus;
@@ -448,6 +449,53 @@ public class UserController {
 		}
 		
 		return new ResponseEntity<>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/book_selected_seats", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> bookSelectedSeats(@RequestBody HashMap<String, String> hm) {
+		HashMap<String, Object> hmReturn = new HashMap<String, Object>();
+		
+		String dateStr = hm.get("date").trim();
+		String timeStr = hm.get("time").trim();
+		String culturalInstitutionName = hm.get("culturalInstitution").trim();
+		String showingName = hm.get("showing").trim();
+		String selectedSeats = hm.get("selectedSeats").trim();
+		if(!selectedSeats.equals("")) {
+			hmReturn.put("error", false);
+			Boolean[] bookSeats = userService.bookSelectedSeats(dateStr, timeStr, culturalInstitutionName, showingName, selectedSeats);
+			hmReturn.put("bookSeats", bookSeats);
+		}
+		else {
+			hmReturn.put("error", true);
+		}
+		
+		
+		return new ResponseEntity<HashMap<String, Object>>(hmReturn, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/get_indexes_of_busy_seats_and_rows_cols", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getIndexesOfBusySeatsAndRowsCols(@RequestBody HashMap<String, String> hm) {
+		String dateStr = hm.get("date").trim();
+		String timeStr = hm.get("time").trim();
+		String culturalInstitutionName = hm.get("culturalInstitution").trim();
+		String showingName = hm.get("showing").trim();
+		
+		HashMap<String, Object> hmReturn = new HashMap<String, Object>();
+		
+		
+		Term term = userService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName);
+		if(term != null) {
+			ArrayList<Integer> indexOfBusySeatsAndRowsCols = userService.getIndexOfBusySeatsAndRowsCols(term);
+			hmReturn.put("existsTerm", true);
+			hmReturn.put("indexOfBusySeatsAndRowsCols", indexOfBusySeatsAndRowsCols);
+		}
+		else {
+			hmReturn.put("existsTerm", false);
+		}
+		
+		return new ResponseEntity<HashMap<String, Object>>(hmReturn, HttpStatus.OK);
 	}
 	
 }
