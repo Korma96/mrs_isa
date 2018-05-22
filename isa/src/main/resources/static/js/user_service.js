@@ -15,7 +15,7 @@ var removeFriendURL = "/myapp/users/remove_friend";
 var saveChangedPasswordURL = "/myapp/users/save_changed_password";
 var bookSelectedSeatsURL = "/myapp/users/book_selected_seats";
 var getIndexesOfBusySeatsAndRowsColsURL = "/myapp/users/get_indexes_of_busy_seats_and_rows_cols";
-
+var sendSeatsAndFriendsURL = "/myapp/users/send_seats_and_friends";
 
 
 $(document).ready(function() {
@@ -55,7 +55,12 @@ function reactionOnChangeUrl() {
 var pathname = getPathname();
 	
 	switch(pathname) {
+	case "":
 	case "/":
+	case "/#":
+	case "#/":
+	case "/#/":
+	case "#":
 	case "/home_page":
 	case "home_page/":
 	case "/home_page/":
@@ -188,15 +193,21 @@ function activateAccount(pathname) {
 }
 
 function getPathname() {
-	var url = window.location.href;     // Returns full URL
+	var url = window.location.href.trim();     // Returns full URL
 	
-	var tokens = url.trim().split("#");
+	var tokens = url.split("#");
 	var pathname;
 	if(tokens.length == 2) {
 		pathname = tokens[1];
 	}
 	else {
-		pathname = "go to default";
+		if(url == "http://localhost:8080/myapp/" || url == "http://localhost:8080/myapp") {
+			pathname = "";
+		}
+		else {
+			pathname = "go to default";
+		}
+		
 	}
 	
 	return pathname
@@ -368,7 +379,15 @@ function successfullyLogged() {
 	      type: 'text/css', 
 	      rel: 'stylesheet',
 	      href: 'css/menu.css'
-	  });
+	});
+	
+	$('<link>')
+	  .appendTo('head')
+	  .attr({
+	      type: 'text/css', 
+	      rel: 'stylesheet',
+	      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
+	});
 	
 	$("#center").prepend('<div id="id_menu"></div><br/><br/>');
 	$("#id_menu").load("html/partials/menu.html", null, function () {
@@ -671,13 +690,6 @@ function saveChangedPassword(changePasswordUrl) {
 function friendsPage() {
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
-		$('<link>')
-		  .appendTo('head')
-		  .attr({
-		      type: 'text/css', 
-		      rel: 'stylesheet',
-		      href: '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css'
-		});
 		
 		deleteAllExceptFirst();
 		$("#center").append('<div id="id_friends_page"></div>');
@@ -1216,6 +1228,7 @@ function loadReservationPageComplete() {
 	
 	loadCulturalInstitutionsAndShowings();
 	
+	$("#center").append('<div id="dialog" class="ui-front" title="Invite friends..."><table id="id_invite_friends" class="ui-widget"></table></div>');
 	
 	$("#id_cultural_institution").change(function() { $("#id_seats").remove(); })
 	$("#id_showing").change(function() { $("#id_seats").remove(); })
@@ -1229,7 +1242,7 @@ function loadReservationPageComplete() {
 		
 		var indexesOfBusySeatsAndRowsCols = getIndexesOfBusySeatsAndRowsCols();
 		if(indexesOfBusySeatsAndRowsCols) {
-			$("#center").append('<div id="id_seats"></div>');
+			$("#id_seat_reservation_page").after('<div id="id_seats"></div>');
 			$("#id_seats").load("html/partials/seat_reservation.html", function () {
 						settings.rows = indexesOfBusySeatsAndRowsCols[indexesOfBusySeatsAndRowsCols.length - 2];
 						settings.cols = indexesOfBusySeatsAndRowsCols[indexesOfBusySeatsAndRowsCols.length - 1];
@@ -1359,12 +1372,22 @@ function bookSelectedSeats(selectedSeats) {
 function switchSelectedToReserved(selectedSeats, successBookSeats) {
 	var tokens = selectedSeats.split(",");
 	var message = [];
-	var thereWasConflict = false;
+	var leastOneConflict = false;
+	var leastOneSuccessful = false;
+	
+	$("#id_invite_friends").empty();
+	
+	var friends = getFriends();
+	if(friends) {
+		if(friends.length == 0) {
+			toastr.info('You currently do not have any friends.');
+		}
+	}
+	else {
+		toastr.info('You currently do not have any friends.');
+	}
 	
 	 $.each(successBookSeats, function(index, success) {
-	      /*if (openDropdown.classList.contains('show')) {
-	        openDropdown.classList.remove('show');
-	      }*/
 		 if ($("#id_seat_" + tokens[index]).hasClass(settings.selectingSeatCss)) {
 			 $("#id_seat_" + tokens[index]).removeClass(settings.selectingSeatCss);
 		 }
@@ -1372,22 +1395,98 @@ function switchSelectedToReserved(selectedSeats, successBookSeats) {
 		 if(success) {
 			 $("#id_seat_" + tokens[index]).toggleClass(settings.selectedSeatCss);
 			 message.push("seat " + tokens[index] + " - successfully booked");
+			 leastOneSuccessful = true;
+			 
+			 $("#id_invite_friends").append('<tr> <td><label for="'+ tokens[index] +'">Seat_' + tokens[index] + ': </label></td>  <td><input class="autocomplete" type="text" id="'+ tokens[index] +'" /></td> </tr>');
 		 }
 		 else {
 			 message.push("seat " + tokens[index] + " - unsuccessfully booked");
-			 thereWasConflict = true;
+			 leastOneConflict = true;
 		 }
 	 });
 	 
 	 toastr.info(message.join(', '));
-	 if(thereWasConflict) {
+	 
+	 if(leastOneConflict) {
 		 toastr.info('There was a conflict. Please show the seats again.!!!');
 	 }
+	 
+	 if(leastOneSuccessful && friends.length > 0) {
+		 $( "#dialog" ).dialog({
+			  dialogClass: "no-close",
+			  width: 500,
+			  height: 500,
+			  modal: true,
+			  buttons: [
+			    {
+			      text: "Invite friends",
+			      click: function() {
+			    	  		sendSeatsAndFriends();
+			    	  		$( this ).dialog( "close" );
+			      }
+			    }
+			  ]
+		});
+		 $( function() {
+			    $('.autocomplete').autocomplete({
+			      source: friends,
+			      minLength: 0,
+			      appendTo: '#dialog'
+			      /*open: function () {
+			          autoComplete.css('z-index', $("#dialog").css('z-index')+1);
+			      }*/
+			    }).focus(function(){            
+		            // The following works only once.
+		            // $(this).trigger('keydown.autocomplete');
+		            // As suggested by digitalPBK, works multiple times
+		            // $(this).data("autocomplete").search($(this).val());
+		            // As noted by Jonny in his answer, with newer versions use uiAutocomplete
+		            $(this).data("uiAutocomplete").search($(this).val());
+		        });
+		});
+	 }
+}
+
+function sendSeatsAndFriends() {
+	var obj = {};
+	var seatsAndFriends = {};
+	
+	$('.autocomplete').each(function() {
+		seatsAndFriends[$(this).attr('id')] =  $(this).val().split("-")[0].trim(); // usernameOfFriend	
+	});
+	
+	obj["culturalInstitution"] = $("#id_cultural_institution").val();
+	obj["showing"] = $("#id_showing").val();
+	obj["date"] = $("#id_date").val();
+	obj["time"] = $("#id_time").val();
+	obj["seatsAndFriends"] = seatsAndFriends;
+	
+	
+	$.ajax({ 
+	    type: "POST",
+		url:  sendSeatsAndFriendsURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(success) {
+	    		if(success) {
+	    			toastr.success("You have successfully invite friends!");
+	    		}
+	    		else {
+	    			toastr.error("The problem with inviting your friends!");
+	    		}
+	    		
+	    
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
 }
 
 function init(reservedSeat) {
     var str = [], seatNo, className;
-    
     
 	for (i = 0; i < settings.rows; i++) {
 		for (j = 0; j < settings.cols; j++) {

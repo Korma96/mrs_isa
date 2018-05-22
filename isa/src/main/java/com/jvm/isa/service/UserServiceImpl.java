@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.validator.routines.EmailValidator;
@@ -250,6 +251,17 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		return returnValue;
+	}
+	
+	@Override
+	public boolean thereAreRepetitions(Collection<String> values) {
+		Object[] valuesArray = values.toArray();
+		for (int i = 0; i < valuesArray.length; i++) {
+			for (int j = i+1; j < valuesArray.length; j++) {
+				if(((String)valuesArray[i]).equals(((String)valuesArray[j]))) return true;
+			}
+		}
+		return false;
 	}
 	
 }

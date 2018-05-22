@@ -45,3 +45,9 @@ padding-left:35px;
 height:35px;
 float:left;
 }
+
+
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
