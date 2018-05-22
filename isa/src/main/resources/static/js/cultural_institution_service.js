@@ -1,3 +1,6 @@
+var addNewCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/add_new_cultural_institution";
+var updateCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/update_cultural_institution";
+var deleteCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/delete_cultural_institution";
 var showCulturalInstitutionsPath = "/myapp/home_page/cultural_institutions";
 var cultural_institutions = null;
 
@@ -17,10 +20,10 @@ $(document).on("click", "#cinemas_div", function(event)
         // call from home page
         if(window.history.pushState)
         {
-            window.history.pushState(null, null, "/myapp/#/home_page/cinemas"); // set URL
+            window.history.pushState(null, null, $(this).attr('href')); // set URL
         }
-        
-        showCinemas();
+        $("#center").html('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+        get_data("0");
     }
 });
 
@@ -40,10 +43,10 @@ $(document).on("click", "#theaters_div", function(event)
         // call from home page
         if(window.history.pushState)
         {
-            window.history.pushState(null, null, "/myapp/#/home_page/theaters"); // set URL
+            window.history.pushState(null, null, $(this).attr('href')); // set URL
         }
-        
-        showTheaters();
+        $("#center").html('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+        get_data("1");
     }
 });
 
@@ -61,6 +64,7 @@ function get_data(param)
 {
 	$.ajax({
 	    type: "POST",
+	    async: false,
 		url:  showCulturalInstitutionsPath,
 		data: JSON.stringify({"type" : param}),
 		dataType : "json",
@@ -87,6 +91,7 @@ function get_data_extended(param)
 {
 	$.ajax({
 	    type: "POST",
+	    async: false,
 		url:  showCulturalInstitutionsPath,
 		data: JSON.stringify({"type" : param}),
 		dataType : "json",
@@ -111,13 +116,224 @@ function get_data_extended(param)
 
 function update_institution()
 {
-	var index = this.id.slice(-1);
-	alert(cultural_institutions[parseInt(index)].name);
+	var logged = isLogged();
+	if (logged) 
+	{	
+		var button_id = this.id;
+		var numb = button_id.match(/\d/g);
+		numb = numb.join("");
+		var ci = cultural_institutions[parseInt(numb)];
+		
+		deleteAllExceptFirst();
+		
+		$("#center").append(
+				'<form > \
+				<table> \
+					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name" value="' + ci.name + '" /></td></tr> \
+					<tr><td><label for="id_address">Last name:</label></td><td><input type="text" id="id_address" value="' + ci.address + '" /></td></tr> \
+					<tr><td><label for="id_description">Email:</label></td><td><input type="text" id="id_description" value="' + ci.description + '" /></td></tr> \
+	        		</td> \
+	        		</tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons" value="Save institution"/> \
+				</div> \
+				<br/> \
+			</form>');
+		
+		$("#id_btn_update_institution").click(function(event) {
+			event.preventDefault();
+			
+			updateCulturalInstitutionAjax(ci.name, ci.type);
+		});
+	}
+	else
+	{
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 }
 
-function delete_institution(x)
+function updateCulturalInstitutionAjax(old_name, type)
 {
-	alert(cultural_institutions[x].name);
+	var obj = {};
+	var name = $("#id_institution_name").val();
+	var address = $("#id_address").val();
+	var description = $("#id_description").val();
+
+	obj["name"] = name;
+	obj["old_name"] = old_name;
+	obj["address"] = address;	
+	obj["description"] = description;
+
+	$.ajax({ 
+	    type: "POST",
+	    async: false,
+		url:  updateCulturalInstitutionURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(success) {
+	    	if(success) {
+	    		$("#id_institution_name").val("");
+	    		$("#id_address").val("");
+	    		$("#id_description").val("");		
+	    		
+	    		toastr.success("You have successfully updated institution!");
+	    		if(type == "CINEMA")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('0');
+	    		}
+	    		if(type == "THEATER")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('1');
+	    		}
+	    	}
+	    	else {
+	    		toastr.error("Wrong data!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+}
+
+function addCulturalInstitution(type)
+{
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+
+		deleteAllExceptFirst();
+		
+		$("#center").append(
+				'<form > \
+				<table> \
+					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
+					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address"/></td></tr> \
+					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
+					<tr><td><label for="id_institution_role">Role:</label></td><td class = "select"> \
+					<select id="id_institution_role"> \
+            		<option value="' + type + '">' + type + '</option>\
+            		</select>\
+            		</td> \
+            		</tr> \
+				</table> \
+				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
+				</div> \
+				<br/> \
+			</form>');
+		
+		$("#id_btn_save_new_institution").click(function(event) {
+			event.preventDefault();
+			
+			addCulturalInstitutionAjax();
+		});
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function addCulturalInstitutionAjax()
+{
+	var obj = {};
+	var name = $("#id_institution_name").val();
+	var address = $("#id_address").val();
+	var description = $("#id_description").val();
+	var role = $("#id_institution_role").val();
+
+	obj["name"] = name;
+	obj["address"] = address;	
+	obj["description"] = description;
+	obj["role"] = role;
+	
+	$.ajax({ 
+	    type: "POST",
+	    async: false,
+		url:  addNewCulturalInstitutionURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(success) {
+	    	if(success) {
+	    		$("#id_institution_name").val("");
+	    		$("#id_address").val("");
+	    		$("#id_description").val("");		
+	    		
+	    		toastr.success("You have successfully added new institution!");
+	    		if(role == "CINEMA")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('0');
+	    		}
+	    		if(role == "THEATER")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('1');
+	    		}
+	    	}
+	    	else {
+	    		toastr.error("Wrong data!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+}
+
+function delete_institution()
+{
+	var button_id = this.id;
+	var numb = button_id.match(/\d/g);
+	numb = numb.join("");
+	var ci = cultural_institutions[parseInt(numb)];
+
+	var obj = {};
+	obj["name"] = ci.name;
+	obj["address"] = ci.address;	
+	obj["description"] = ci.description;
+	obj["role"] = ci.type;
+	
+	$.ajax({ 
+	    type: "POST",
+	    async: false,
+		url:  deleteCulturalInstitutionURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(success) {
+	    	if(success) {
+	    		toastr.success("You have successfully deleted institution!");
+	    		// refresh page
+	    		if(ci.type == "CINEMA")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('0');
+	    		}
+	    		if(ci.type == "THEATER")
+	    		{
+	    	        deleteAllExceptFirst();
+	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    	        get_data_extended('1');
+	    		}
+	    	}
+	    	else {
+	    		toastr.error("Wrong data!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
 }
 
 function put_data_in_html(data)
@@ -165,8 +381,9 @@ function put_data_in_html_extended(data)
 		var update_button_id = 'id_btn_update_institution' + counter.toString();
 		html_string += update_button_id;
 		html_string += '" class="buttons">Update</button>';
-		html_string += '<button id="id_btn_delete_institution';
-		html_string += counter.toString();
+		html_string += '<button id="';
+		var delete_button_id = 'id_btn_delete_institution' + counter.toString();
+		html_string += delete_button_id;
 		html_string += '" class="buttons">Delete</button>';
 		html_string += "</td>";
 		html_string += "</tr>";
@@ -179,7 +396,15 @@ function put_data_in_html_extended(data)
 	{
 		var id = "id_btn_update_institution" + newCounter.toString();
 		document.getElementById(id).onclick = update_institution;
+		var id2 = "id_btn_delete_institution" + newCounter.toString();
+		document.getElementById(id2).onclick = delete_institution;
 		newCounter++;
 	}
-
+	
+	$("#id_btn_add_new_institution").click(function(event) {
+		event.preventDefault();
+		
+		addCulturalInstitution(data[0].type);
+	});
+	
 }

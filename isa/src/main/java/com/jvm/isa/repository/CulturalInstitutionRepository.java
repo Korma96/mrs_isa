@@ -17,4 +17,6 @@ public interface CulturalInstitutionRepository  extends Repository<CulturalInsti
 	CulturalInstitution findByName(String name);
 	
 	CulturalInstitution save(CulturalInstitution culturalInstitution);
+	
+	void delete(CulturalInstitution ci);
 }

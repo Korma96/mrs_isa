@@ -95,6 +95,21 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		
 		return showings;
 	}
+	
+	@Override
+	public boolean delete(CulturalInstitution ci)
+	{
+		try
+		{
+			culturalInstitutionRepository.delete(ci);	
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		
+	}
 
 
 }

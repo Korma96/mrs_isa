@@ -232,7 +232,7 @@ public class AdminController {
 		return userController.saveChangedPassword(hm);
 	}
 	
-	@RequestMapping(value = "/admin_cultural_institution/add_new_cultural_institution", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
+	@RequestMapping(value = "/admin_cultural_institution/add_new_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> saveCulturalInstitution(@RequestBody HashMap<String, String> hm)
 	{
@@ -249,6 +249,40 @@ public class AdminController {
 		}
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}	
+	
+	@RequestMapping(value = "/admin_cultural_institution/update_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateCulturalInstitution(@RequestBody HashMap<String, String> hm)
+	{
+		String oldName = hm.get("old_name");
+		String name = hm.get("name");
+		String address = hm.get("address");
+		String description = hm.get("description");
+		CulturalInstitution ci = culturalInstitutionService.getCulturalInstitution(oldName);
+		if(ci != null)
+		{
+			ci.setName(name);
+			ci.setAddress(address);
+			ci.setDescription(description);
+			culturalInstitutionService.save(ci);
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/delete_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> deleteCulturalInstitution(@RequestBody HashMap<String, String> hm)
+	{
+		String name = hm.get("name");
+		CulturalInstitution ci = culturalInstitutionService.getCulturalInstitution(name);
+		boolean success = culturalInstitutionService.delete(ci);
+		if(success)
+		{
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
 	
 	@RequestMapping(value = "/sys_admin/save_changed_password", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
