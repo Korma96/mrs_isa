@@ -210,27 +210,27 @@ function getStringFor404() {
 }
 
 function loadHomePageComplete() {
-	$("#title").html('HOME PAGE &nbsp;&nbsp; <a href="/myapp/#/users/registrate" class="a_registrate"> Registrate </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#title").html('HOME PAGE &nbsp;&nbsp; <a href="/myapp/#/users/registrate" class="a_registrate"> Register </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
 function loadRegisterComplete() {
-	$("#title").html('REGISTRATE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#title").html('REGISTER &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
 function loadLoginComplete() {
-	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Register </a> ');
 }
 
 function loadUpadteProfileComplete() {
-	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Register </a> ');
 }
 
 function loadChangedPasswordComplete() {
-	$("#title").html('CHANGE PASSWORD &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('CHANGE PASSWORD &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Register </a> ');
 }
 
 function loadFriendsPageComplete() {
-	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a>  ');
+	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Register </a>  ');
 }
 
 $(document).on("click", ".a_registrate", function(event) {
@@ -416,7 +416,7 @@ function registeredUserPage() {
 	      href: 'css/friends_page.css'
 	});
 	
-	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Register </a> ');
 	
 	$("#myDropdown").append('<a id="id_seats_reservation" href="/myapp/#/users/seats_reservation"> Seats reservation </a>');
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/users/change_password"> Change password </a>');
@@ -814,7 +814,7 @@ function sendRemoveFriend(friendForRemove) {
 		    cache: false, 
 			success : function(successRemove) { 
 				if(successRemove) {
-					toastr.success("You've been successful remove friend!"); 
+					toastr.success("You've successfully removed a friend!"); 
 				}
 				else {
 					toastr.error(friendForRemove + " has already deleted your friendship!"); 
@@ -828,7 +828,7 @@ function sendRemoveFriend(friendForRemove) {
 		});
 	}
 	else {
-		toastr.error("Unsuccessful remove friendship with " + newFriend + "!"); 
+		toastr.error("Unsuccessful removal of friendship with " + newFriend + "!"); 
 	}
 	
 	return retValue;
@@ -1017,7 +1017,7 @@ function logout() {
 		type : "DELETE",
 		url : logOutURL,
 		success : function() { 
-			toastr.success("You've been successful logout!"); 
+			toastr.success("You've been successfully logged out!"); 
 
 			$("#center").load("html/partials/login.html", null, loadLoginComplete);			
 		},

@@ -121,6 +121,7 @@ function adminFunzoneMainPage() {
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/admin_funzone/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile_admin_fan_zone" href="/myapp/#/administrators/admin_funzone/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="add_requisite" href="/myapp/#/administrators/admin_funzone/add_requisite"> Add requisite </a>');
+	$("#myDropdown").append('<a id="edit_requisite" href="/myapp/#/administrators/admin_funzone/edit_requisite"> Edit requisite </a>');
 	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/admin_funzone/get_requisites"> Show requisites </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
@@ -151,6 +152,16 @@ function adminFunzoneMainPage() {
 		}
 		
 		addRequisite();
+	});
+	
+	$("#edit_requisite").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		editRequisite();
 	});
 	
 	$("#show_requisites").click(function(event) {
@@ -782,11 +793,11 @@ function showRequisites() {
 		if(requistes) {
 			if(requistes.length > 0) {
 				$("#id_requisites").append('<tr> <th colspan="5"> <b> REQUISITES </b></th></tr>');
-				$("#id_requisites").append('<tr> <th> Name </th> <th> Description </th> <th> Price </th> <th> Showing name </th> <th> Cultural institution name </th> </tr>');
+				$("#id_requisites").append('<tr> <th> id </th> <th> Name </th> <th> Description </th> <th> Price </th> <th> Showing name </th> <th> Cultural institution name </th> </tr>');
 				
 				$.each(requistes, function(index, requiste) {
 					
-					$("#id_requisites").append('<tr> <td> ' + (index+1) + '. </td> <td> ' + requiste.name + ' </td> <td> ' + requiste.description + ' </td> <td> ' + requiste.price + ' </td> <td> ' + requiste.showingName + ' </td> <td> ' + requiste.culturalInstitutionName + ' </td> </tr>');
+					$("#id_requisites").append('<tr> <td> <div>' + (index+1) + '. </td> <td> ' + requiste.name + ' </td> <td> ' + requiste.description + ' </td> <td> ' + requiste.price + ' </td> <td> ' + requiste.showingName + ' </td> <td> ' + requiste.culturalInstitutionName + ' </td>  <div></tr>');
 				});
 			}
 			else {
@@ -814,6 +825,7 @@ function loadAddRequisiteComplete() {
 		sendAddedRequisite();
 	});
 }
+
 
 function loadCulturalInstitutionsAndShowings() {
 	var culturalInstitutions = getCulturalInstitutions();
