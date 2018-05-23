@@ -498,4 +498,45 @@ public class UserController {
 		return new ResponseEntity<HashMap<String, Object>>(hmReturn, HttpStatus.OK);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/send_seats_and_friends", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+																				produces = MediaType.APPLICATION_JSON_VALUE)
+	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
+	public ResponseEntity<Boolean> sendSeatsAndFriends(@RequestBody HashMap<String, Object> hm) { 
+		User loggedUser = getLoggedUserLocalMethod();
+		if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
+			RegisteredUser loggedRegisteredUser = (RegisteredUser) loggedUser;
+			
+			String dateStr = ((String) hm.get("date")).trim();
+			String timeStr = ((String) hm.get("time")).trim();
+			String culturalInstitutionName = ((String) hm.get("culturalInstitution")).trim();
+			String showingName = ((String) hm.get("showing")).trim();
+			HashMap<String, String> seatsAndFriends = (HashMap<String, String>) hm.get("seatsAndFriends");
+			
+			if(userService.thereAreRepetitions(seatsAndFriends.values())) { // ako ima ponavljanja
+				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+			}
+			
+			RegisteredUser friend;
+			User user;
+			
+			for (String seat : seatsAndFriends.keySet()) {
+				user = userService.getUser(seatsAndFriends.get(seat));
+				if(user.getUserType() == UserType.REGISTERED_USER) {
+					friend = (RegisteredUser) user;
+					try {
+						emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, seat, loggedRegisteredUser, friend);
+					} catch (MessagingException e) {
+						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+					}
+				}
+			}
+			
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		}
+		
+		
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
 }

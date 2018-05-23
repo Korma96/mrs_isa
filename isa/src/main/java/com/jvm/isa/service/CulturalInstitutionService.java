@@ -19,4 +19,6 @@ public interface CulturalInstitutionService {
 	ArrayList<String> getCulturalInstitutions();
 	
 	ArrayList<String> getShowings(String culturalInstitutionName);
+	
+	boolean delete(CulturalInstitution ci);
 }

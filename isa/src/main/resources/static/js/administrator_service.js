@@ -11,8 +11,6 @@ var adminFunzoneChangeUsernameAndPasswordURL = "/myapp/administrators/admin_funz
 var culturalInstitutionAdminChangeUsernameAndPasswordURL = "/myapp/administrators/admin_cultural_institution/changes_default_username_password";
 var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/save_changed_password";
 var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/save_changed_password";
-var culturalInstitutionAdminChangePasswordURL = "/myapp/administrators/admin_cultural_institution/save_changed_password";
-var addNewCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/add_new_cultural_institution";
 
 
 
@@ -680,82 +678,6 @@ function culturalInstitutions()
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);
 	}
-}
-
-function addCulturalInstitution()
-{
-	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
-		var loggedUser = loadLoggedUser();
-
-		deleteAllExceptFirst();
-		
-		$("#center").append(
-				'<form > \
-				<table> \
-					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
-					<tr><td><label for="id_address">Last name:</label></td><td><input type="text" id="id_address"/></td></tr> \
-					<tr><td><label for="id_description">Email:</label></td><td><input type="text" id="id_description"/></td></tr> \
-					<tr><td><label for="id_institution_role">Role:</label></td><td class = "select"> \
-					<select id="id_institution_role"> \
-            		<option value="CINEMA">CINEMA</option>\
-            		<option value="THEATER">THEATER</option>\
-            		</select>\
-            		</td> \
-            		</tr> \
-				</table> \
-				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
-				</div> \
-				<br/> \
-			</form>');
-		
-		$("#id_btn_save_new_institution").click(function(event) {
-			event.preventDefault();
-			
-			addCulturalInstitutionAjax();
-		});
-		
-	}
-	else {
-		$("#center").load("html/partials/login.html", null, loadLoginComplete);
-	}
-}
-
-function addCulturalInstitutionAjax()
-{
-	var obj = {};
-	var name = $("#id_institution_name").val();
-	var address = $("#id_address").val();
-	var description = $("#id_description").val();
-	var role = $("#id_institution_role").val();
-
-	obj["name"] = name;
-	obj["address"] = address;	
-	obj["description"] = description;
-	obj["role"] = role;
-	
-	$.ajax({ 
-	    type: "POST",
-		url:  addNewCulturalInstitutionURL,
-	    data: JSON.stringify(obj),
-	    dataType: "json", 
-	    contentType: "application/json",
-	    success: function(success) {
-	    	if(success) {
-	    		$("#id_institution_name").val("");
-	    		$("#id_address").val("");
-	    		$("#id_description").val("");		
-	    		
-	    		toastr.success("You have successfully added new institution!");
-	    	}
-	    	else {
-	    		toastr.error("Wrong data!"); 
-	    	}
-	   },
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-		}
-	});
 }
 
 
