@@ -1503,7 +1503,3 @@ function init(reservedSeat) {
     }
     $('#place').html(str.join(''));
 }
-
-
-
-

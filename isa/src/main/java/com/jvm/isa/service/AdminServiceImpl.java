@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.Requisite;
+import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.repository.RequisiteRepository;
 
@@ -130,11 +131,13 @@ public class AdminServiceImpl implements AdminService {
 			String showing) {
 		
 		if(culturalInstitutionName == null || showing == null) {
+			System.out.println("bozeee");
 			return 0;
 		}
 		
 		if (name.equals("") || description.equals("") || priceStr.equals("") || culturalInstitutionName.equals("")
 				|| showing.equals("")) {
+			System.out.println("honestly");
 			return 0;
 		}
 
@@ -196,5 +199,29 @@ public class AdminServiceImpl implements AdminService {
 	public List<Requisite> getRequisites() {
 		return requisiteRepository.findAll();
 	}
+
+	@Override
+	public void deleteRequisite(Requisite req) {
+		requisiteRepository.delete(req);
+	}
+
+	@Override
+	public Requisite getRequisite(String name) {
+		return requisiteRepository.findByName(name);
+	}
+
+	@Override
+	public boolean saveRequisite(Requisite req) {
+			try {
+				requisiteRepository.save(req);
+			}
+			catch(Exception e) {
+				return false;
+			}
+			
+			return true;
+		}
+
+	
 
 }
