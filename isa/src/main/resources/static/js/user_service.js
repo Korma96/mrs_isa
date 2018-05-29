@@ -884,7 +884,7 @@ function sendRemoveFriend(friendForRemove) {
 		    cache: false, 
 			success : function(successRemove) { 
 				if(successRemove) {
-					toastr.success("You've been successful remove friend!"); 
+					toastr.success("You've successfully removed a friend!"); 
 				}
 				else {
 					toastr.error(friendForRemove + " has already deleted your friendship!"); 
@@ -898,7 +898,7 @@ function sendRemoveFriend(friendForRemove) {
 		});
 	}
 	else {
-		toastr.error("Unsuccessful remove friendship with " + newFriend + "!"); 
+		toastr.error("Unsuccessful removal of friendship with " + newFriend + "!"); 
 	}
 	
 	return retValue;
@@ -1146,7 +1146,7 @@ function logout() {
 		type : "DELETE",
 		url : logOutURL,
 		success : function() { 
-			toastr.success("You've been successful logout!"); 
+			toastr.success("You've been successfully logged out!"); 
 
 			$("#center").load("html/partials/login.html", null, loadLoginComplete);			
 		},

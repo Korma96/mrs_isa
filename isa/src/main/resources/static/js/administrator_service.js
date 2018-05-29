@@ -11,6 +11,9 @@ var adminFunzoneChangeUsernameAndPasswordURL = "/myapp/administrators/admin_funz
 var culturalInstitutionAdminChangeUsernameAndPasswordURL = "/myapp/administrators/admin_cultural_institution/changes_default_username_password";
 var sysAdminChangePasswordURL = "/myapp/administrators/sys_admin/save_changed_password";
 var adminFunzoneChangePasswordURL = "/myapp/administrators/admin_funzone/save_changed_password";
+var removeRequisiteURL = "/myapp/administrators/admin_funzone/remove_requisite";
+var loadRequisiteURL =  "/myapp/administrators/admin_funzone/load_requisite";
+var saveChangesRequisiteURL = "/myapp/administrators/admin_funzone/save_changes_requisite";
 
 
 
@@ -42,7 +45,8 @@ function adminSystemMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		changePassword(sysAdminChangePasswordURL);
@@ -52,7 +56,8 @@ function adminSystemMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		updateProfileSysAdmin();
@@ -62,7 +67,8 @@ function adminSystemMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		registerAdmin();
@@ -72,7 +78,8 @@ function adminSystemMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		logout();
@@ -126,7 +133,8 @@ function adminFunzoneMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		changePassword(adminFunzoneChangePasswordURL);
@@ -136,7 +144,8 @@ function adminFunzoneMainPage() {
 		event.preventDefault();
 
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		updateProfileFanZone();
@@ -145,7 +154,8 @@ function adminFunzoneMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		addRequisite();
@@ -155,17 +165,19 @@ function adminFunzoneMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
-		showRequisites();
+		requisitesPage();
 	});
 	
 	$("#id_logout").click(function(event) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		logout();
@@ -183,7 +195,8 @@ function adminCulturalInstitutionsMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		changePassword(culturalInstitutionAdminChangePasswordURL);
@@ -193,7 +206,8 @@ function adminCulturalInstitutionsMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		updateProfileCulturalInstitutionsAdmin();
@@ -203,7 +217,8 @@ function adminCulturalInstitutionsMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		culturalInstitutions();
@@ -213,7 +228,8 @@ function adminCulturalInstitutionsMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		showings();
@@ -223,7 +239,8 @@ function adminCulturalInstitutionsMainPage() {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
-		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
 		}
 		
 		logout();
@@ -275,47 +292,29 @@ function sendChangedUsernameAndPassword(url) {
 	});
 }
 
-/*$(document).on("click", "#id_btn_chpwd", function(event) {
-	$.ajax({ 
-	    type: "POST",
-		url:  registerAdminURL,
-	    data: JSON.stringify({
-			"password": $("#chpwd_password"),
-			"rePassword": $("#chpwd_repassword")
-		}),
-	    dataType: "json", 
-	    contentType: "application/json",
-	    success: function(successRegistrate) {
-	    	if(successRegistrate) {
-	    		//$("#id_username").val("");
-	    		//$("#id_password").val("");
-	    		var loggedUser = loadLoggedUser();
-	    		if (loggedUser.userType == "SYS_ADMINISTRATOR") {
-	    			adminSystemPage(loggedUser);
-	    		}
-	    		
-	    		else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
-	    			adminFunzonePage(loggedUser);
-	    		}
-	    		
-	    		else if (loggedUser.userType == "INSTITUTION_ADMINISTRATOR") {
-	    			adminCulturalInstitutionsPage(loggedUser);
-	    		}
-	    		toastr.success("You have successfully changed password!");
-	    	}
-	    	else {
-	    		toastr.error("Registration error!"); 
-	    	}
-	   },
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-		}
-	});
-});*/
+/*
+ * $(document).on("click", "#id_btn_chpwd", function(event) { $.ajax({ type:
+ * "POST", url: registerAdminURL, data: JSON.stringify({ "password":
+ * $("#chpwd_password"), "rePassword": $("#chpwd_repassword") }), dataType:
+ * "json", contentType: "application/json", success: function(successRegistrate) {
+ * if(successRegistrate) { //$("#id_username").val("");
+ * //$("#id_password").val(""); var loggedUser = loadLoggedUser(); if
+ * (loggedUser.userType == "SYS_ADMINISTRATOR") { adminSystemPage(loggedUser); }
+ * 
+ * else if (loggedUser.userType == "FUNZONE_ADMINISTRATOR") {
+ * adminFunzonePage(loggedUser); }
+ * 
+ * else if (loggedUser.userType == "INSTITUTION_ADMINISTRATOR") {
+ * adminCulturalInstitutionsPage(loggedUser); } toastr.success("You have
+ * successfully changed password!"); } else { toastr.error("Registration
+ * error!"); } }, error : function(XMLHttpRequest, textStatus, errorThrown) {
+ * toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); } });
+ * });
+ */
 
 function updateProfileFanZone() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		var loggedUser = loadLoggedUser();
 		
 		deleteAllExceptFirst();
@@ -351,7 +350,7 @@ function updateProfileFanZone() {
 
 function updateProfileCulturalInstitutionsAdmin() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		var loggedUser = loadLoggedUser();
 		
 		deleteAllExceptFirst();
@@ -387,7 +386,7 @@ function updateProfileCulturalInstitutionsAdmin() {
 
 function updateProfileSysAdmin() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		var loggedUser = loadLoggedUser();
 		deleteAllExceptFirst();
 		
@@ -538,7 +537,7 @@ function saveChangesOnProfileAdmin(url) {
 
 function registerAdmin() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		var center = $("#center");
 		
 		deleteAllExceptFirst();
@@ -639,7 +638,7 @@ function saveAdmin(){
 function showings()
 {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		alert('showings!');
 	}
 	else {
@@ -651,7 +650,7 @@ function showings()
 function culturalInstitutions()
 {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		var loggedUser = loadLoggedUser();
 
 		deleteAllExceptFirst();
@@ -672,7 +671,7 @@ function culturalInstitutions()
 
 function addRequisite() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { // ako je ulogovan
 		$('<link>')
 		  .appendTo('head')
 		  .attr({
@@ -693,37 +692,190 @@ function addRequisite() {
 	
 }
 
-function showRequisites() {
+function loadRequisite(nameOfRequisite) {	
+	var currentRequisite = null;	
+	$.ajax({
+		async: false,     
+		type : "GET",
+		url : loadRequisiteURL + "/" + nameOfRequisite,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(requisite){ 
+						
+				currentRequisite = requisite;
+						
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " +  + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return currentRequisite; 
+}
+
+function requisitesPage() {
 	var logged = isLogged();
-	if (logged) { // ako je  ulogovan
+	if (logged) { 
+		
 		deleteAllExceptFirst();
-		$("#center").append('<div><table id="id_requisites"> </table> </div>');
-		
-		var requistes = getRequistes();
-		
-		if(requistes) {
-			if(requistes.length > 0) {
-				$("#id_requisites").append('<tr> <th colspan="5"> <b> REQUISITES </b></th></tr>');
-				$("#id_requisites").append('<tr> <th> Name </th> <th> Description </th> <th> Price </th> <th> Showing name </th> <th> Cultural institution name </th> </tr>');
-				
-				$.each(requistes, function(index, requiste) {
-					
-					$("#id_requisites").append('<tr> <td> ' + (index+1) + '. </td> <td> ' + requiste.name + ' </td> <td> ' + requiste.description + ' </td> <td> ' + requiste.price + ' </td> <td> ' + requiste.showingName + ' </td> <td> ' + requiste.culturalInstitutionName + ' </td> </tr>');
-				});
-			}
-			else {
-				toastr.error("Requisites are not available!");
-			}
-		}
-		else {
-			toastr.error("Requisites are not available!");
-		}
+		$("#center").append('<div id="id_requisites_page"></div>');
+		$("#id_requisites_page").load("html/partials/requisites_page.html", showRequisites);
+
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);
 	}
 	
 }
+
+var indexOfRequisite = 0;
+
+function showRequisites() {
+	
+	var logged = isLogged();
+	if (logged) { 
+		
+	var requisites = getrequisites();
+	
+		
+	if(requisites) {
+		if(requisites.length > 0) {
+			
+			for (var i in requisites) {
+				  $("#id_table_requisites" ).append('<tr id="id_requisite_row_' + indexOfRequisite + '"> <td></td> <td> <b>' + requisites[i].name + " " + requisites[i].description +' </b></td><td><input type="button" id="id_edit_requisite_' + indexOfRequisite + '" class="buttons_edit" value="Edit requisite"/></td> <td><input type="button" id="id_remove_requisite_' + indexOfRequisite + '" class="buttons_remove" value="Remove requisite"/></td> </tr>');
+				  $("#id_remove_requisite_" + indexOfRequisite).on("click", {index: indexOfRequisite, removeRequisite: requisites[i].name}, removeRequisite);
+				  $("#id_edit_requisite_" + indexOfRequisite).on("click", {index: indexOfRequisite, editRequisite: requisites[i].name}, editRequisite);
+				  indexOfRequisite++;  
+			}
+		}
+		else {
+			toastr.error("Requisites are not available!");
+			}
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+		}
+	}
+	else{
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+		}
+	
+}
+
+function removeRequisite(event) {
+	event.preventDefault();
+	removeRequisiteRequest(event.data.removeRequisite);
+	$( "#id_requisite_row_" + event.data.index ).remove();
+	
+}
+
+function removeRequisiteRequest(requisiteForRemoval) {
+	var retValue = false;
+	$.ajax({
+		async: false,
+		type : "DELETE",
+		url : removeRequisiteURL,
+		data: JSON.stringify({"name": requisiteForRemoval}),
+		dataType : "json",
+	    contentType: "application/json",
+	    cache: false, 
+		success : function(successRemove) { 
+			if(successRemove) {
+				toastr.success("You've successfully removed a requisite!"); 
+			}
+			else {
+				toastr.error("Requisite has been deleted already"); 
+			}
+			retValue = successRemove;
+		
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+/*
+ * } else { toastr.error("Unsuccessful removal of requisite!"); }
+ */
+	
+	return retValue;
+}
+function editRequisite(event){
+	
+	event.preventDefault();
+	editRequisiteRequest(event.data.editRequisite);
+}
+
+function editRequisiteRequest(requisiteName){
+	var requisite = loadRequisite(requisiteName);
+	deleteAllExceptFirst();
+	
+	$("#center").append(
+			'<form id="id_add_requisite_form" class="forma"> \
+			<table>\
+			<tr>  <td><label for="id_name_req">Name:</label></td>  <td><input type="text" id="id_name_req" value = "' + requisite.name + '" /></td>  </tr> \
+			<tr>  <td><label for="id_desc_req">Description:</label></td>  <td><input type="text" id="id_desc_req" value = "' + requisite.description + '" /> </td>  </tr> \
+			<tr>  <td> <label for="id_price_req"> Price: </label></td>  <td><input id="id_price_req"  value = "' + requisite.price + '" type="number"/></td>  </tr> \
+			<tr>  <td><label for="id_cultural_institution_req">Cultural institution:</label></td>  <td > <input type="text" id="id_cultural_institution_req" value = "' + requisite.culturalInstitutionName + '" readonly/> </td>  </tr> \
+			<tr>  <td><label for="id_showing_req">Showing:</label></td> <td > <input type="text" id="id_showing_req" value = "' + requisite.showingName + '" readonly/> </td>   </tr> \
+		</table> \
+		<div align="center"> \
+			<input type="button" id="id_btn_save_changes_requisite" class="buttons" value="Save changes"/> \
+		</div>\
+		<br/>\
+	</form>');
+	
+	$('#id_cultural_institution_req :input').attr('readonly','readonly');
+	
+	$("#id_btn_save_changes_requisite").click(function(event) {
+		event.preventDefault();
+		saveChangesRequisite(requisiteName);
+	});
+		
+};
+
+function saveChangesRequisite(requisiteName)
+{
+	var oldName = requisiteName;
+	var name = $("#id_name_req").val();
+	var description = $("#id_desc_req").val();
+	var price = $("#id_price_req").val();
+	var culturalInstitution = $("#id_cultural_institution_req").val();
+	var showing = $("#id_showing_req").val();
+	
+	$.ajax({ 
+	    type: "POST",
+		url:  saveChangesRequisiteURL,
+	    data: JSON.stringify({
+	    	
+	    	"oldName": oldName,
+			"name": name,
+			"description": description,
+			"price": price,
+			"culturalInstitution": culturalInstitution,
+			"showing": showing
+		}),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(successAdd) {
+	    	if(successAdd) {
+	    		toastr.success("You have successfully saved changes!");
+	    		showRequisites();
+	    	}
+	    	else {
+	    		toastr.error("You did not successfully edit requisite!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+}
+	
+	
 
 function loadAddRequisiteComplete() {
 	loadCulturalInstitutionsAndShowings();
@@ -736,6 +888,7 @@ function loadAddRequisiteComplete() {
 		sendAddedRequisite();
 	});
 }
+
 
 function loadCulturalInstitutionsAndShowings() {
 	var culturalInstitutions = getCulturalInstitutions();
@@ -858,8 +1011,8 @@ function getCulturalInstitutions() {
 	return culturalInstitutions;
 }
 
-function getRequistes() {
-	var requistes = null;
+function getrequisites() {
+	var requisites = null;
 	
 	$.ajax({
 		async: false,
@@ -868,8 +1021,8 @@ function getRequistes() {
 		dataType : "json",
 		contentType: "application/json",
 		cache: false,
-		success : function(receiveRequistes) {
-			requistes = receiveRequistes;
+		success : function(receiverequisites) {
+			requisites = receiverequisites;
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
@@ -877,7 +1030,7 @@ function getRequistes() {
 		}
 	});
 	
-	return requistes;
+	return requisites;
 }
 
 function sendAddedRequisite() {

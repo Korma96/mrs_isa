@@ -12,5 +12,9 @@ public interface RequisiteRepository extends Repository<Requisite, Long> {
 	
 	Requisite findByName(String name);
 	
+	Requisite findById(Long id);
+	
 	List<Requisite> findAll();
+	
+	Requisite delete(Requisite requisite);
 }
