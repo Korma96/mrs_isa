@@ -1,12 +1,14 @@
 package com.jvm.isa.domain;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class Ticket {
@@ -15,19 +17,35 @@ public class Ticket {
 	@Column(name="id", unique=true, nullable=false)
 	private Long id;
 	
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	private Term term;
 	
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	private CulturalInstitution culturalInstitution;
-
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	private RegisteredUser owner;
+	
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	private RegisteredUser reservedBy;
+	
+	@Column(name="reserved_date_and_time", unique=false, nullable=false)
+	private LocalDateTime reservedDateAndTime;
+	
+	@Column(name="seat", unique=false, nullable=false)
+	private int seat;
+	
+	@Column(name="price", unique=false, nullable=false)
+	private double price;
+	
 	public Ticket() {
 		
 	}
 	
-	public Ticket(Term term, CulturalInstitution culturalInstitution) {
+	public Ticket(Term term, RegisteredUser owner, RegisteredUser reservedBy, int seat, double price) {
 		this.term = term;
-		this.culturalInstitution = culturalInstitution;
+		this.owner = owner;
+		this.reservedBy = reservedBy;
+		this.seat = seat;
+		this.price = price;
+		this.reservedDateAndTime = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -46,12 +64,44 @@ public class Ticket {
 		this.term = term;
 	}
 
-	public CulturalInstitution getCulturalInstitution() {
-		return culturalInstitution;
+	public RegisteredUser getOwner() {
+		return owner;
 	}
 
-	public void setCulturalInstitution(CulturalInstitution culturalInstitution) {
-		this.culturalInstitution = culturalInstitution;
+	public void setOwner(RegisteredUser owner) {
+		this.owner = owner;
+	}
+	
+	public RegisteredUser getReservedBy() {
+		return reservedBy;
+	}
+
+	public void setReservedBy(RegisteredUser reservedBy) {
+		this.reservedBy = reservedBy;
+	}
+
+	public LocalDateTime getReservedDateAndTime() {
+		return reservedDateAndTime;
+	}
+
+	public void setReservedDateAndTime(LocalDateTime reservedDateAndTime) {
+		this.reservedDateAndTime = reservedDateAndTime;
+	}
+
+	public int getSeat() {
+		return seat;
+	}
+
+	public void setSeat(int seat) {
+		this.seat = seat;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 	
 }

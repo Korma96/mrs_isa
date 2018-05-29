@@ -163,8 +163,8 @@ public class EmailServiceImpl implements EmailService {
 	
 	@Async
 	@Override
-	public void sendInviteForShowing(String culturalInstitutionName, String showingName, String dateStr, String timeStr,
-			String seat, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws MessagingException {
+	public void sendInviteForShowing(String culturalInstitutionName, String showingName, String dateStr, String timeStr, String auditoriumName,
+			String seat, double price, int duration, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws MessagingException {
 		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 		
 		String htmlMsg = "Dear " + friend.getFirstName() + ", <br/><br/>";
@@ -173,9 +173,11 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Showing: &nbsp; <b> " + showingName + " </b> <br/>";
 				htmlMsg += "&nbsp; Date: &nbsp; <b> " + dateStr + " </b> <br/>";
 				htmlMsg += "&nbsp; Time: &nbsp; <b> " + timeStr + " </b> <br/>";
-				htmlMsg += "&nbsp; Your seat: &nbsp; <b> " + seat + " </b> <br/><br/>";
-				htmlMsg += "To activate your account, please click on the following link (if the link is disabled Copy and Paste the URL into your Browser): <br/>";
-				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/activate?culturalInstitutionName=" + culturalInstitutionName + "&showingName=" + showingName + "&dateStr=" + dateStr + "&timeStr=" + timeStr + "'> Reject invitation </a> <br/><br/>";
+				htmlMsg += "&nbsp; Auditorium: &nbsp; <b> " + auditoriumName + " </b> <br/>";
+				htmlMsg += "&nbsp; Your seat: &nbsp; <b> " + seat + " </b> <br/>";
+				htmlMsg += "&nbsp; Duration: &nbsp; <b> " + duration + " min </b> <br/>";
+				htmlMsg += "&nbsp; Price: &nbsp; <b> " + price + " </b> <br/><br/>";
+				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/invitations_and_tickets'> Go to invitations and tickets page </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");

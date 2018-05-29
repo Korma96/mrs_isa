@@ -50,7 +50,10 @@ public class RegisteredUser extends User {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Offer> offerss;
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Ticket> invitations;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Ticket> tickets;
 
 	public RegisteredUser() {
@@ -142,6 +145,14 @@ public class RegisteredUser extends User {
 
 	public void setOfferss(List<Offer> offerss) {
 		this.offerss = offerss;
+	}
+	
+	public List<Ticket> getInvitations() {
+		return invitations;
+	}
+
+	public void setInvitations(List<Ticket> invitations) {
+		this.invitations = invitations;
 	}
 
 	public List<Ticket> getTickets() {

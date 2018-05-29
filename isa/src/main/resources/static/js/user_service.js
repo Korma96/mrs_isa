@@ -16,12 +16,29 @@ var saveChangedPasswordURL = "/myapp/users/save_changed_password";
 var bookSelectedSeatsURL = "/myapp/users/book_selected_seats";
 var getIndexesOfBusySeatsAndRowsColsURL = "/myapp/users/get_indexes_of_busy_seats_and_rows_cols";
 var sendSeatsAndFriendsURL = "/myapp/users/send_seats_and_friends";
+var getCulturalInstitutionsForReservationURL = "/myapp/users/get_cultural_institutions";
+var getShowingsOfCulturalInstitutionForReservationURL = "/myapp/users/get_showings_of_cultural_institution";
+var getAuditoriumsAndTimesURL = "/myapp/users/get_auditoriums_and_times";
+var getDatesURL = "/myapp/users/get_dates";
+var invitationsURL = "/myapp/users/get_invitations";
+var ticketsURL = "/myapp/users/get_tickets";
+var acceptInvitationURL = "/myapp/users/accept_invitation";
+var declineInvitationURL = "/myapp/users/decline_invitation";
+var removeTicketURL = "/myapp/users/remove_ticket";
 
 
-$(document).ready(function() {
-	$("#center").load("html/partials/home_page.html", null, loadHomePageComplete);
 	
-	if (window.history && window.history.pushState) {
+var indexOfFriends = 0;
+var indexOfRequests = 0;
+var indexOfTickets = 0;
+var indexOfInvitations = 0;
+var fastLogin;
+	
+	
+$(document).ready(function() {
+	//$("#center").load("html/partials/home_page.html", null, loadHomePageComplete);
+	
+	/*if (window.history && window.history.pushState) {
 		var url = window.location.href;     // Returns full URL
 		var pathname;
 		if (url.indexOf("#") >= 0) {
@@ -36,11 +53,14 @@ $(document).ready(function() {
 		reactionOnChangeUrl();
 		//activateAccount(pathname);
 		
-	    /*$(window).on('popstate', function() {
+	    $(window).on('popstate', function() {
 	    	toastr.info('Back button was pressed.');
-	    });*/
+	    });
 
-	}
+		
+	}*/
+	
+	reactionOnChangeUrl();
 	
 });
 
@@ -71,12 +91,13 @@ var pathname = getPathname();
 	case "users/login/":
 	case "/users/login/":
 	case "/users/login":
-		loadLogin()
+		fastLogin = false;
+		loadLogin();
 		break;
-	case "users/registrate":
-	case "users/registrate/":
-	case "/users/registrate/":
-	case "/users/registrate":
+	case "users/register":
+	case "users/register/":
+	case "/users/register/":
+	case "/users/register":
 		$("#center").load("html/partials/register.html", null, loadRegisterComplete);
 		break;
 	case "users/update_profile":
@@ -85,11 +106,23 @@ var pathname = getPathname();
 	case "/users/update_profile":
 		updateProfile();
 		break;
-	case "users/friends_page":
-	case "users/friends_page/":
-	case "/users/friends_page/":
-	case "/users/friends_page":
+	case "users/friends":
+	case "users/friends/":
+	case "/users/friends/":
+	case "/users/friends":
 		friendsPage();
+		break;
+	case "users/seats_reservation":
+	case "users/seats_reservation/":
+	case "/users/seats_reservation/":
+	case "/users/seats_reservation":
+		reservationSeats();
+	case "users/invitations_and_tickets":
+	case "users/invitations_and_tickets/":
+	case "/users/invitations_and_tickets/":
+	case "/users/invitations_and_tickets":
+		fastLogin = true;
+		loadLogin();
 		break;
 	case "home_page/cinemas":
 	case "home_page/cinemas/":
@@ -221,36 +254,40 @@ function getStringFor404() {
 }
 
 function loadHomePageComplete() {
-	$("#title").html('HOME PAGE &nbsp;&nbsp; <a href="/myapp/#/users/registrate" class="a_registrate"> Registrate </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#title").html('HOME PAGE &nbsp;&nbsp; <a href="/myapp/#/users/register" class="a_register"> Register </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
 function loadRegisterComplete() {
-	$("#title").html('REGISTRATE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
+	$("#title").html('REGISTER &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
 function loadLoginComplete() {
-	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 }
 
 function loadUpadteProfileComplete() {
-	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('UPDATE PROFILE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 }
 
 function loadChangedPasswordComplete() {
-	$("#title").html('CHANGE PASSWORD &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('CHANGE PASSWORD &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 }
 
 function loadFriendsPageComplete() {
-	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a>  ');
+	$("#title").html('FRIENDS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
 }
 
-$(document).on("click", ".a_registrate", function(event) {
+function loadInvitationsAndTicketsPageComplete() {
+	$("#title").html('INVITATIONS AND TICKETS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
+}
+
+$(document).on("click", ".a_register", function(event) {
 	event.preventDefault();
 	
 	 if(window.history.pushState) {
 	    window.history.pushState(null, null, $(this).attr('href')); // set URL
 	 }
-	//window.history.pushState({urlPath:'/myapp/#/registrate'},"",'/myapp/#/registrate');
+	//window.history.pushState({urlPath:'/myapp/#/register'},"",'/myapp/#/register');
 	
 	$("#center").load("html/partials/register.html", null, loadRegisterComplete);
 });
@@ -264,6 +301,7 @@ $(document).on("click", ".a_login", function(event) {
 	  }
 	//window.history.pushState({urlPath:'/myapp/#/login'},"",'/myapp/#/login');
 	
+	fastLogin = false;
 	loadLogin();
 });
 
@@ -357,6 +395,7 @@ function attemptToLog(username, password) {
 	    success: function(logged) {
 					if(logged) { 
 						successfullyLogged();
+						
 					}
 					else {
 						toastr.error("Invalid username or password!");
@@ -379,6 +418,14 @@ function successfullyLogged() {
 	      type: 'text/css', 
 	      rel: 'stylesheet',
 	      href: 'css/menu.css'
+	});
+	
+	$('<link>')
+	  .appendTo('head')
+	  .attr({
+	      type: 'text/css', 
+	      rel: 'stylesheet',
+	      href: 'css/invitations_and_tickets.css'
 	});
 	
 	$('<link>')
@@ -435,9 +482,10 @@ function registeredUserPage() {
 	      href: 'css/friends_page.css'
 	});
 	
-	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/registrate" class="a_registrate" > Registrate </a> ');
+	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 	
 	$("#myDropdown").append('<a id="id_seats_reservation" href="/myapp/#/users/seats_reservation"> Seats reservation </a>');
+	$("#myDropdown").append('<a id="id_invitations_and_tickets" href="/myapp/#/users/invitations_and_tickets"> Invitations and tickets </a>');
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/users/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/users/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_friends" href="/myapp/#/users/friends"> Friends </a>');
@@ -451,6 +499,16 @@ function registeredUserPage() {
 		}
 		
 		reservationSeats();
+	});
+	
+	$("#id_invitations_and_tickets").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		invitationsAndTickets();
 	});
 	
 	$("#id_change_password").click(function(event) {
@@ -493,6 +551,9 @@ function registeredUserPage() {
 		logout();
 	});
 	
+	if(fastLogin) {	
+		invitationsAndTickets();
+	}
 }
 
 function updateProfile() {
@@ -702,9 +763,6 @@ function friendsPage() {
 	
 }
 
-var indexOfFriends = 0;
-var indexOfRequests = 0;
-
 function workWithFriends() {
 	var people = getPeople();
 	var friends = getFriends();
@@ -720,6 +778,12 @@ function workWithFriends() {
 			  
 			  indexOfRequests++;  
 		}
+		
+		$("#id_header_requests").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(1, "id_table_requests");
+		});
 	}
 	
 	//popunjavanje tabele prijatelja 
@@ -730,12 +794,6 @@ function workWithFriends() {
 			  
 			  indexOfFriends++;  
 		}
-		
-		$("#id_header_requests").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(1, "id_table_requests");
-		});
 		
 		$("#id_header_friends").click(function(event) {
 			event.preventDefault();
@@ -980,6 +1038,65 @@ function getPeople() {
 	return people;
 }
 
+function getAuditoriumsAndTimes() {
+	var auditoriumsAndTimes = null;
+	
+	var culturalInstitution = $("#id_cultural_institution").val();
+	var showing = $("#id_showing").val();
+	var date = $("#id_date").val();
+	
+	$.ajax({
+		async: false,
+		type : "PUT",
+		url : getAuditoriumsAndTimesURL,
+		dataType : "json",
+		data: JSON.stringify({"culturalInstitution": culturalInstitution.trim(), 
+			                  "showing": showing.trim(),
+			                  "date": date
+         }),
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveAuditoriumsAndTimes) {
+			auditoriumsAndTimes = receiveAuditoriumsAndTimes;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return auditoriumsAndTimes;
+}
+
+function getDates() {
+	var dates = null;
+	
+	var culturalInstitution = $("#id_cultural_institution").val();
+	var showing = $("#id_showing").val();
+	
+	$.ajax({
+		async: false,
+		type : "PUT",
+		url : getDatesURL,
+		dataType : "json",
+		data: JSON.stringify({"culturalInstitution": culturalInstitution.trim(), 
+			"showing": showing.trim()
+         }),
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveDates) {
+			dates = receiveDates;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return dates;
+}
+
+
 function getFriends() {
 	var friends = null;
 	
@@ -1064,7 +1181,7 @@ $(document).on("click", "#id_btn_login", function(event) {
 	}
 });
 
-$(document).on("click", "#id_btn_registrate", function(event) {
+$(document).on("click", "#id_btn_register", function(event) {
 	event.preventDefault();
 	
 	registrateUser();
@@ -1224,16 +1341,328 @@ function reservationSeats() {
 	
 }
 
+
+function getShowingsOfCulturalInstitutionForReservation(culturalInstitutionName) {
+	var showingsOfCulturalInstitution = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : getShowingsOfCulturalInstitutionForReservationURL + "/" + culturalInstitutionName,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveShowingsOfCulturalInstitution) {
+			showingsOfCulturalInstitution = receiveShowingsOfCulturalInstitution;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return showingsOfCulturalInstitution;
+}
+
+
+function getCulturalInstitutionsForReservation() {
+	var culturalInstitutions = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : getCulturalInstitutionsForReservationURL,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveCulturalInstitutions) {
+			culturalInstitutions = receiveCulturalInstitutions;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return culturalInstitutions;
+}
+
+function loadAllForReservation() {
+	var culturalInstitutions = getCulturalInstitutionsForReservation();
+	if(culturalInstitutions) {
+		if(culturalInstitutions.length > 0) {
+			var selected;
+			
+			$.each(culturalInstitutions, function(index, culturalInstitution) {
+				if(index == 0) {
+					selected = "selected";
+				}
+				else{
+					selected = "";
+				}
+				$("#id_cultural_institution").append("<option " + selected + "> " + culturalInstitution + " </option>");
+			});
+			
+			$("#id_cultural_institution").change(changedCulturalInstitutionForReservation);
+			
+			var showingsOfCulturalInstitution = getShowingsOfCulturalInstitutionForReservation(culturalInstitutions[0]);
+			if(showingsOfCulturalInstitution) {
+				if (showingsOfCulturalInstitution.length > 0) {
+					$.each(showingsOfCulturalInstitution, function(index2, showing) {
+						if(index2 == 0) {
+							selected = "selected";
+						}
+						else{
+							selected = "";
+						}
+						$("#id_showing").append("<option " + selected + "> " + showing + " </option>");
+					});
+					
+					
+					var dates = getDates(culturalInstitutions[0], showingsOfCulturalInstitution[0]);
+					if(dates) {
+						if (dates.length > 0) {
+							$.each(dates, function(index3, date) {
+								if(index3 == 0) {
+									selected = "selected";
+								}
+								else{
+									selected = "";
+								}
+								$("#id_date").append("<option " + selected + "> " + date + " </option>");
+							});
+							
+							
+							var auditoriumsAndTimes = getAuditoriumsAndTimes(culturalInstitutions[0], showingsOfCulturalInstitution[0], dates[0]);
+							if(auditoriumsAndTimes) {
+								if (auditoriumsAndTimes.length > 0) {
+									$.each(auditoriumsAndTimes, function(index4, auditoriumAndTime) {
+										if(index4 == 0) {
+											selected = "selected";
+										}
+										else{
+											selected = "";
+										}
+										$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+									});
+								}
+								else {
+									toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+								}
+							}
+							else {
+								toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+							}
+							
+						}
+						else {
+							toastr.error("Dates, for selected cultural institution and showing, are not available!");
+						}
+					}
+					else {
+						toastr.error("Dates, for selected cultural institution and showing, are not available!");
+					}
+					
+				}
+				else {
+					toastr.error("Showings, for selected cultural institution, are not available!");
+				}
+			}
+			else {
+				toastr.error("Showings, for selected cultural institution, are not available!");
+			}
+			
+		}
+		else {
+			toastr.error("Cultural institutions are not available!");
+		}
+	}
+	else {
+		toastr.error("Cultural institutions are not available!");
+	}
+	
+}
+
+function changedCulturalInstitutionForReservation() {
+	$("#id_seats").remove();
+	
+	var currentCulturalInstitution = $("#id_cultural_institution").val();
+	$("#id_showing").empty();
+	$("#id_date").empty();
+	$("#id_auditorium_and_time").empty();
+	
+	var showingsOfCulturalInstitution = getShowingsOfCulturalInstitutionForReservation(currentCulturalInstitution);
+	if(showingsOfCulturalInstitution) {
+		if (showingsOfCulturalInstitution.length > 0) {
+			$.each(showingsOfCulturalInstitution, function(index, showing) {
+				if(index == 0) {
+					selected = "selected";
+				}
+				else{
+					selected = "";
+				}
+				$("#id_showing").append("<option " + selected + "> " + showing + " </option>");
+			});
+			
+			var dates = getDates(currentCulturalInstitution, showingsOfCulturalInstitution[0]);
+			if(dates) {
+				if (dates.length > 0) {
+					$.each(dates, function(index2, date) {
+						if(index2 == 0) {
+							selected = "selected";
+						}
+						else{
+							selected = "";
+						}
+						$("#id_date").append("<option " + selected + "> " + date + " </option>");
+					});
+					
+					
+					var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, showingsOfCulturalInstitution[0], dates[0]);
+					if(auditoriumsAndTimes) {
+						if (auditoriumsAndTimes.length > 0) {
+							$.each(auditoriumsAndTimes, function(index3, auditoriumAndTime) {
+								if(index3 == 0) {
+									selected = "selected";
+								}
+								else{
+									selected = "";
+								}
+								$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+							});
+							
+							
+						}
+						else {
+							toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+						}
+					}
+					else {
+						toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+					}
+					
+					
+				}
+				else {
+					toastr.error("Dates, for selected cultural institution and showing, are not available!");
+				}
+			}
+			else {
+				toastr.error("Dates, for selected cultural institution and showing, are not available!");
+			}
+			
+		}
+		else {
+			toastr.error("Showings, for selected cultural institution, are not available!");
+		}
+	}
+	else {
+		toastr.error("Showings, for selected cultural institution, are not available!");
+	}
+	
+}
+
+
+function changedShowingForReservation() {
+	$("#id_seats").remove();
+	
+	var currentCulturalInstitution = $("#id_cultural_institution").val();
+	var currentShowing = $("#id_showing").val();
+	$("#id_date").empty();
+	$("#id_auditorium_and_time").empty();
+	
+	var dates = getDates(currentCulturalInstitution, currentShowing);
+	if(dates) {
+		if (dates.length > 0) {
+			$.each(dates, function(index, date) {
+				if(index == 0) {
+					selected = "selected";
+				}
+				else{
+					selected = "";
+				}
+				$("#id_date").append("<option " + selected + "> " + date + " </option>");
+			});
+			
+			
+			var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, currentShowing, dates[0]);
+			if(auditoriumsAndTimes) {
+				if (auditoriumsAndTimes.length > 0) {
+					$.each(auditoriumsAndTimes, function(index2, auditoriumAndTime) {
+						if(index2 == 0) {
+							selected = "selected";
+						}
+						else{
+							selected = "";
+						}
+						$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+					});
+					
+					
+				}
+				else {
+					toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+				}
+			}
+			else {
+				toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+			}
+			
+			
+		}
+		else {
+			toastr.error("Dates, for selected cultural institution and showing, are not available!");
+		}
+	}
+	else {
+		toastr.error("Dates, for selected cultural institution and showing, are not available!");
+	}
+	
+}
+
+function changedDatesForReservation() {
+	$("#id_seats").remove();
+	
+	var currentCulturalInstitution = $("#id_cultural_institution").val();
+	var currentShowing = $("#id_showing").val();
+	var currentDate = $("#id_date").val();
+	$("#id_auditorium_and_time").empty();
+	
+	var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, currentShowing, currentDate);
+	if(auditoriumsAndTimes) {
+		if (auditoriumsAndTimes.length > 0) {
+			$.each(auditoriumsAndTimes, function(index, auditoriumAndTime) {
+				if(index == 0) {
+					selected = "selected";
+				}
+				else{
+					selected = "";
+				}
+				$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+			});
+			
+			
+		}
+		else {
+			toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+		}
+	}
+	else {
+		toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+	}
+	
+}
+
 function loadReservationPageComplete() {
 	
-	loadCulturalInstitutionsAndShowings();
+	loadAllForReservation();
 	
 	$("#center").append('<div id="dialog" class="ui-front" title="Invite friends..."><table id="id_invite_friends" class="ui-widget"></table></div>');
 	
-	$("#id_cultural_institution").change(function() { $("#id_seats").remove(); })
-	$("#id_showing").change(function() { $("#id_seats").remove(); })
-	$("#id_date").change(function() { $("#id_seats").remove(); })
-	$("#id_time").change(function() { $("#id_seats").remove(); })
+	$("#id_cultural_institution").change(changedCulturalInstitutionForReservation);
+	$("#id_showing").change(changedShowingForReservation);
+	$("#id_date").change(changedDatesForReservation);
+	$("#id_auditorium_and_time").change(function() { $("#id_seats").remove(); });
 	
 	$('#id_btn_show_seats').click(function (event) {
 		event.preventDefault();
@@ -1302,7 +1731,7 @@ function getIndexesOfBusySeatsAndRowsCols() {
 	var indexesOfBusySeatsAndRowsCols = null;
 	
 	var date = $("#id_date").val();
-	var time = $("#id_time").val();
+	var time = $("#id_auditorium_and_time").val().split(",")[1].trim();
 	var culturalInstitution = $("#id_cultural_institution").val();
 	var showing = $("#id_showing").val();
 	
@@ -1335,7 +1764,7 @@ function getIndexesOfBusySeatsAndRowsCols() {
 function bookSelectedSeats(selectedSeats) {
 	if(selectedSeats!== "") {
 		var date = $("#id_date").val();
-		var time = $("#id_time").val();
+		var time = $("#id_auditorium_and_time").val().split(",")[1].trim();
 		var culturalInstitution = $("#id_cultural_institution").val();
 		var showing = $("#id_showing").val();
 		
@@ -1350,12 +1779,13 @@ function bookSelectedSeats(selectedSeats) {
 									"selectedSeats": selectedSeats.trim()}),
 		    contentType: "application/json",
 		    cache: false,
-		    success: function(ret) {
-		    	if(ret.error) {
-		    		toastr.error("Reservation error!"); 
+		    success: function(success) {
+		    	if(success) {
+		    		toastr.success("You have successfully booked a seat!");
+		    		switchSelectedToReserved(selectedSeats.trim());
 		    	}
 		    	else {
-		    		switchSelectedToReserved(selectedSeats.trim(), ret.bookSeats);
+		    		toastr.info('There was a conflict. Please show the seats again.!!!');
 		    	}
 					
 		   },
@@ -1369,120 +1799,139 @@ function bookSelectedSeats(selectedSeats) {
 	}
 }
 
-function switchSelectedToReserved(selectedSeats, successBookSeats) {
+function switchSelectedToReserved(selectedSeats) {
 	var tokens = selectedSeats.split(",");
-	var message = [];
-	var leastOneConflict = false;
-	var leastOneSuccessful = false;
 	
 	$("#id_invite_friends").empty();
 	
-	var friends = getFriends();
-	if(friends) {
-		if(friends.length == 0) {
+	var people = getFriends();
+	if(people) {
+		if(people.length == 0) {
 			toastr.info('You currently do not have any friends.');
+		}
+		else {
+			if(tokens.length == 1) {
+				people = [];
+			}
 		}
 	}
 	else {
+		people = [];
 		toastr.info('You currently do not have any friends.');
 	}
 	
-	 $.each(successBookSeats, function(index, success) {
-		 if ($("#id_seat_" + tokens[index]).hasClass(settings.selectingSeatCss)) {
-			 $("#id_seat_" + tokens[index]).removeClass(settings.selectingSeatCss);
+	var loggedUser = loadLoggedUser();
+	people.push("me - " + loggedUser.firstName + " " + loggedUser.lastName);
+	
+	 $.each(tokens, function(index, seat) {
+		 if ($("#id_seat_" + seat).hasClass(settings.selectingSeatCss)) {
+			 $("#id_seat_" + seat).removeClass(settings.selectingSeatCss);
 		 }
 		 
-		 if(success) {
-			 $("#id_seat_" + tokens[index]).toggleClass(settings.selectedSeatCss);
-			 message.push("seat " + tokens[index] + " - successfully booked");
-			 leastOneSuccessful = true;
-			 
-			 $("#id_invite_friends").append('<tr> <td><label for="'+ tokens[index] +'">Seat_' + tokens[index] + ': </label></td>  <td><input class="autocomplete" type="text" id="'+ tokens[index] +'" /></td> </tr>');
-		 }
-		 else {
-			 message.push("seat " + tokens[index] + " - unsuccessfully booked");
-			 leastOneConflict = true;
-		 }
+		 $("#id_seat_" + seat).toggleClass(settings.selectedSeatCss);
+		 
+		 $("#id_invite_friends").append('<tr> <td><label for="'+ seat +'">Seat_' + seat + ': </label></td>  <td><input class="autocomplete" type="text" id="'+ seat +'" value="'+people[people.length - 1]+'"/></td> </tr>');
+		 
 	 });
 	 
-	 toastr.info(message.join(', '));
+	 $( "#dialog" ).dialog({
+		  dialogClass: "no-close",
+		  width: 500,
+		  height: 500,
+		  modal: true,
+		  buttons: [
+		    {
+		      text: "Save and send invitations",
+		      click: function() {
+		    	  		var retValue = sendSeatsAndFriendsAndMe(loggedUser);
+		    	  		if(retValue == 0) {
+		    	  			$( this ).dialog( "close" );
+		    	  		}
+		    	  		
+		      }
+		    }
+		  ]
+	});
 	 
-	 if(leastOneConflict) {
-		 toastr.info('There was a conflict. Please show the seats again.!!!');
-	 }
-	 
-	 if(leastOneSuccessful && friends.length > 0) {
-		 $( "#dialog" ).dialog({
-			  dialogClass: "no-close",
-			  width: 500,
-			  height: 500,
-			  modal: true,
-			  buttons: [
-			    {
-			      text: "Invite friends",
-			      click: function() {
-			    	  		sendSeatsAndFriends();
-			    	  		$( this ).dialog( "close" );
-			      }
-			    }
-			  ]
-		});
-		 $( function() {
-			    $('.autocomplete').autocomplete({
-			      source: friends,
-			      minLength: 0,
-			      appendTo: '#dialog'
-			      /*open: function () {
-			          autoComplete.css('z-index', $("#dialog").css('z-index')+1);
-			      }*/
-			    }).focus(function(){            
-		            // The following works only once.
-		            // $(this).trigger('keydown.autocomplete');
-		            // As suggested by digitalPBK, works multiple times
-		            // $(this).data("autocomplete").search($(this).val());
-		            // As noted by Jonny in his answer, with newer versions use uiAutocomplete
-		            $(this).data("uiAutocomplete").search($(this).val());
-		        });
-		});
-	 }
+	 $( function() {
+		    $('.autocomplete').autocomplete({
+		      source: people,
+		      minLength: 0,
+		      appendTo: '#dialog'
+		      /*open: function () {
+		          autoComplete.css('z-index', $("#dialog").css('z-index')+1);
+		      }*/
+		    }).focus(function(){            
+	            // The following works only once.
+	            // $(this).trigger('keydown.autocomplete');
+	            // As suggested by digitalPBK, works multiple times
+	            // $(this).data("autocomplete").search($(this).val());
+	            // As noted by Jonny in his answer, with newer versions use uiAutocomplete
+	            $(this).data("uiAutocomplete").search($(this).val());
+	        });
+	});
+	
 }
 
-function sendSeatsAndFriends() {
+function sendSeatsAndFriendsAndMe(loggedUser) {
 	var obj = {};
 	var seatsAndFriends = {};
 	
+	var success = -1;
+	
 	$('.autocomplete').each(function() {
-		seatsAndFriends[$(this).attr('id')] =  $(this).val().split("-")[0].trim(); // usernameOfFriend	
+		var username = $(this).val().split("-")[0].trim(); // usernameOfFriend
+		if (username == "me") {
+			username = loggedUser.username;
+		}
+		seatsAndFriends[$(this).attr('id')] = username;	
 	});
 	
 	obj["culturalInstitution"] = $("#id_cultural_institution").val();
 	obj["showing"] = $("#id_showing").val();
 	obj["date"] = $("#id_date").val();
-	obj["time"] = $("#id_time").val();
+	obj["time"] = $("#id_auditorium_and_time").val().split(",")[1].trim();
 	obj["seatsAndFriends"] = seatsAndFriends;
 	
 	
 	$.ajax({ 
+		async: false,
 	    type: "POST",
 		url:  sendSeatsAndFriendsURL,
 	    data: JSON.stringify(obj),
 	    dataType: "json", 
 	    contentType: "application/json",
 	    cache: false,
-	    success: function(success) {
-	    		if(success) {
-	    			toastr.success("You have successfully invite friends!");
-	    		}
-	    		else {
-	    			toastr.error("The problem with inviting your friends!");
-	    		}
+	    success: function(retValue) {
+	    		success = retValue;
+	    	
+	    		switch(retValue) {
+		    	case -1:
+		    		toastr.error("There was a problem. No logged user!");
+		    		break;
+		    	case 0:
+		    		toastr.success("You have successfully invite friends!");
+		    		break;
+		    	case 1:
+		    		toastr.error("You did not assign any seat to yourself!");
+		    		break;
+		    	case 2:
+		    		toastr.error("There are repetitions!");
+		    		break;
+		    	default:
+		    		toastr.error("There was a problem.!");
+		    		break;
+	    	}
 	    		
 	    
 	   },
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					success = -1;
 		}
 	});
+	
+	return success;
 }
 
 function init(reservedSeat) {
@@ -1505,5 +1954,322 @@ function init(reservedSeat) {
 }
 
 
+function invitationsAndTickets() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		
+		deleteAllExceptFirst();
+		$("#center").append('<div id="id_invitations_and_tickets_page"></div>');
+		
+		$("#id_invitations_and_tickets_page").load("html/partials/invitations_and_tickets.html", workWithInvitationsAndTickets);
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function workWithInvitationsAndTickets() {
+	var invitations = getInvitations();
+	var tickets = getTickets();
+	
+	//popunjavanje tabele poziva
+	if(invitations) {
+		for (var i in invitations) {
+			  $( "#id_table_invitations" ).append('<tr id="id_invitation_row_' + indexOfInvitations + '"> <td></td> <td> ' + invitations[i].showing + ' </td> <td>' + invitations[i].culturalInstitution + ' </td> <td> ' + invitations[i].date + '</td> <td>'+ invitations[i].time +'</td> <td> '+ invitations[i].auditorium +' </td> <td> '+invitations[i].seat+' </td> <td>'+invitations[i].price+'</td> <td>'+invitations[i].reservedBy+'</td> <td> '+ invitations[i].reservedDateAndTime+' </td> <td><input type="button" id="id_accept_invitation_' + indexOfInvitations + '" class="buttons" value="Accept invitation"/></td> <td><input type="button" id="id_decline_invitation_' + indexOfInvitations + '" class="buttons_remove" value="Decline invitation"/></td> </tr>');
+			  $("#id_decline_invitation_" + indexOfInvitations).on("click", {index: indexOfInvitations, invitation: invitations[i]}, declineInvitation);
+			  
+			  $("#id_accept_invitation_" + indexOfInvitations).on("click", {index: indexOfInvitations, invitation: invitations[i]}, acceptInvitation);
+			  
+			  indexOfInvitations++;  
+		}
+		
+		$("#id_invitations_header_showing").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(1, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_cultural_institution").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(2, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_date").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(3, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_time").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(4, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_auditorium").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(5, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_seat").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(6, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_price").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(7, "id_table_invitations");
+		});
+		
+		$("#id_invitations_header_reserved_by").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(8, "id_table_invitations");
+		});
+		
+		$("#id_invitations_reserved_reserved_date_and_time").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(9, "id_table_invitations");
+		});
+	}
+	
+	//popunjavanje tabele karata
+	if(tickets) {
+		for (var i in tickets) {
+			  $( "#id_table_tickets" ).append('<tr id="id_ticket_row_' + indexOfTickets + '"> <td></td> <td> ' + tickets[i].showing + ' </td> <td>' + tickets[i].culturalInstitution + ' </td> <td> ' + tickets[i].date + '</td> <td>'+ tickets[i].time +'</td> <td> '+ tickets[i].auditorium +' </td> <td> '+tickets[i].seat+' </td> <td>'+tickets[i].price+'</td> <td>'+tickets[i].reservedBy+' </td> <td> '+tickets[i].reservedDateAndTime+' </td>  <td><input type="button" id="id_remove_ticket_' + indexOfTickets + '" class="buttons_remove" value="Remove ticket"/></td> </tr>');
+			  $("#id_remove_ticket_" + indexOfTickets).on("click", {index: indexOfTickets, removeTicket: tickets[i]}, removeTicket);
+			  
+			  indexOfTickets++;  
+		}
+		
+		$("#id_tickets_header_showing").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(1, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_cultural_institution").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(2, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_date").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(3, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_time").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(4, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_auditorium").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(5, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_seat").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(6, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_price").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(7, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_reserved_by").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(8, "id_table_tickets");
+		});
+		
+		$("#id_tickets_header_reserved_reserved_date_and_time").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(9, "id_table_tickets");
+		});
+	}
+	
+	loadInvitationsAndTicketsPageComplete();
+}
 
 
+function declineInvitation(event) {
+	event.preventDefault();
+	var retValue = declineInvitationTicket(event.data.invitation);
+	if(retValue) {
+		$( "#id_invitation_row_" + event.data.index ).remove();
+		//indexOfInvitations--;
+	}
+}
+
+function acceptInvitation(event) {
+	event.preventDefault();
+	
+	var retValue = acceptInvitationTicket(event.data.invitation);
+	if(retValue) {
+		$( "#id_invitation_row_" + event.data.index ).remove();
+		//indexOfRequests--;
+		
+		$( "#id_tickets_tr_header_tickets" ).after('<tr id="id_ticket_row_' + indexOfTickets + '"> <td></td>  <td> ' + event.data.invitation.showing + ' </td> <td>' + event.data.invitation.culturalInstitution + ' </td> <td> ' + event.data.invitation.date + '</td> <td>'+ event.data.invitation.time +'</td> <td> '+ event.data.invitation.auditorium +' </td> <td> '+event.data.invitation.seat+' </td> <td>'+event.data.invitation.price+'</td> <td>'+event.data.invitation.reservedBy+' </td> <td> '+event.data.invitation.reservedDateAndTime+' </td>  <td><input type="button" id="id_remove_ticket_' + indexOfTickets + '" class="buttons_remove" value="Remove ticket"/></td> </tr>');
+		$("#id_remove_ticket_" + indexOfTickets).on("click", {index: indexOfTickets, removeTicket: event.data.invitation}, removeTicket);
+		
+		indexOfFriends++;
+	}
+}
+
+function removeTicket(event) {
+	event.preventDefault();
+	
+	var retValue = sendRemoveTicket(event.data.removeTicket);
+	if(retValue) {
+		$( "#id_ticket_row_" + event.data.index ).remove();
+	}
+	
+	
+}
+
+function sendRemoveTicket(ticketForRemove) {
+	var retValue = false;
+	
+	$.ajax({
+		async: false,
+		type : "DELETE",
+		url : removeTicketURL,
+		data: JSON.stringify(ticketForRemove),
+		dataType : "json",
+	    contentType: "application/json",
+	    cache: false, 
+		success : function(successRemove) { 
+			if(successRemove) {
+				toastr.success("You've been successful remove ticket!"); 
+			}
+			else {
+				toastr.error("You've been unsuccessful remove ticket!"); 
+			}
+			retValue = successRemove;
+		
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return retValue;
+}
+
+
+function acceptInvitationTicket(newInvitationTicket) {
+	var retValue = false;
+		
+	$.ajax({ 
+		async: false,
+	    type: "PUT",
+		url:  acceptInvitationURL,
+		data: JSON.stringify(newInvitationTicket),
+		dataType : "json",
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(successAcceptInvitationTicket) {
+	    	if(successAcceptInvitationTicket) {
+	    		toastr.success("You accepted an invitation for showing " + newInvitationTicket.showing + "!"); 
+	    	}
+	    	else {
+	    		toastr.error("Unsuccessful acceptance of the invitation showing " + newInvitationTicket.showing + "!"); 
+	    	}
+	    	retValue = successAcceptInvitationTicket;
+				
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return retValue;
+}
+
+function declineInvitationTicket(newInvitationTicket) {
+	var retValue = false;
+	
+	$.ajax({ 
+		async: false,
+	    type: "PUT",
+		url:  declineInvitationURL,
+		data: JSON.stringify(newInvitationTicket),
+		dataType : "json",
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(successDeclineInvitationTicket) {
+	    	if(successDeclineInvitationTicket) {
+	    		toastr.success("You declined an invitation for friendship with " + newInvitationTicket.showing + "!"); 
+	    	}
+	    	else {
+	    		toastr.error("Unsuccessful decline of the invitation showing " + newInvitationTicket.showing + "!"); 
+	    	}
+	    	retValue = successDeclineInvitationTicket;
+				
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return retValue;
+}
+
+
+function getInvitations() {
+	var invitations = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : invitationsURL,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveInvitations) {
+					invitations = receiveInvitations;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return invitations;
+}
+
+function getTickets() {
+	var tickets = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : ticketsURL,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveTickets) {
+					tickets = receiveTickets;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return tickets;
+}

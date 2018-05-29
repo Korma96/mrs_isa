@@ -1,0 +1,8 @@
+#id_table_invitations, #id_table_tickets {
+    border: 5px solid #008000;
+}
+
+#id_tr_header_invitations, #id_tickets_tr_header_tickets {
+    border: 3px solid #008000;
+    background: #ffff00;
+}

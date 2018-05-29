@@ -119,5 +119,12 @@ public class Term {
 		this.showing = showing;
 	}
 	
-	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Term) {
+			return id == ((Term) obj).id;
+		}
+		
+		return false;
+	}
 }

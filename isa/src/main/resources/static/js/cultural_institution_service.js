@@ -130,12 +130,12 @@ function update_institution()
 				'<form > \
 				<table> \
 					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name" value="' + ci.name + '" /></td></tr> \
-					<tr><td><label for="id_address">Last name:</label></td><td><input type="text" id="id_address" value="' + ci.address + '" /></td></tr> \
-					<tr><td><label for="id_description">Email:</label></td><td><input type="text" id="id_description" value="' + ci.description + '" /></td></tr> \
+					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address" value="' + ci.address + '" /></td></tr> \
+					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" value="' + ci.description + '" /></td></tr> \
 	        		</td> \
 	        		</tr> \
 				</table> \
-				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons" value="Save institution"/> \
+				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons_update" value="Save institution"/> \
 				</div> \
 				<br/> \
 			</form>');
@@ -214,12 +214,6 @@ function addCulturalInstitution(type)
 					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
 					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address"/></td></tr> \
 					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
-					<tr><td><label for="id_institution_role">Role:</label></td><td class = "select"> \
-					<select id="id_institution_role"> \
-            		<option value="' + type + '">' + type + '</option>\
-            		</select>\
-            		</td> \
-            		</tr> \
 				</table> \
 				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
 				</div> \
@@ -229,7 +223,7 @@ function addCulturalInstitution(type)
 		$("#id_btn_save_new_institution").click(function(event) {
 			event.preventDefault();
 			
-			addCulturalInstitutionAjax();
+			addCulturalInstitutionAjax(type);
 		});
 		
 	}
@@ -238,13 +232,13 @@ function addCulturalInstitution(type)
 	}
 }
 
-function addCulturalInstitutionAjax()
+function addCulturalInstitutionAjax(type)
 {
 	var obj = {};
 	var name = $("#id_institution_name").val();
 	var address = $("#id_address").val();
 	var description = $("#id_description").val();
-	var role = $("#id_institution_role").val();
+	var role = type; //$("#id_institution_role").val();
 
 	obj["name"] = name;
 	obj["address"] = address;	
@@ -265,16 +259,16 @@ function addCulturalInstitutionAjax()
 	    		$("#id_description").val("");		
 	    		
 	    		toastr.success("You have successfully added new institution!");
+	    		
+	    		deleteAllExceptFirst();
+    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+    	        
 	    		if(role == "CINEMA")
 	    		{
-	    	        deleteAllExceptFirst();
-	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
 	    	        get_data_extended('0');
 	    		}
-	    		if(role == "THEATER")
+	    		else if(role == "THEATER")
 	    		{
-	    	        deleteAllExceptFirst();
-	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
 	    	        get_data_extended('1');
 	    		}
 	    	}
@@ -311,17 +305,17 @@ function delete_institution()
 	    success: function(success) {
 	    	if(success) {
 	    		toastr.success("You have successfully deleted institution!");
+	    		
 	    		// refresh page
+	    		deleteAllExceptFirst();
+    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+	    		
 	    		if(ci.type == "CINEMA")
 	    		{
-	    	        deleteAllExceptFirst();
-	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
 	    	        get_data_extended('0');
 	    		}
-	    		if(ci.type == "THEATER")
+	    		else f(ci.type == "THEATER")
 	    		{
-	    	        deleteAllExceptFirst();
-	    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
 	    	        get_data_extended('1');
 	    		}
 	    	}
@@ -380,11 +374,11 @@ function put_data_in_html_extended(data)
 		html_string += '<button id="';
 		var update_button_id = 'id_btn_update_institution' + counter.toString();
 		html_string += update_button_id;
-		html_string += '" class="buttons">Update</button>';
+		html_string += '" class="buttons_update">Update</button>';
 		html_string += '<button id="';
 		var delete_button_id = 'id_btn_delete_institution' + counter.toString();
 		html_string += delete_button_id;
-		html_string += '" class="buttons">Delete</button>';
+		html_string += '" class="buttons_remove">Delete</button>';
 		html_string += "</td>";
 		html_string += "</tr>";
 		counter += 1;

@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 @Entity
 public class CulturalInstitution{
@@ -35,6 +36,9 @@ public class CulturalInstitution{
 	
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "repertoire"*/)
 	private List<Showing> showings;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Ticket> tickets;
 	
 	//@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL/*, mappedBy = "culturalInstitution"*/)
 	//private List<Repertoire> repertoires;
@@ -118,6 +122,8 @@ public class CulturalInstitution{
 	public void setShowings(List<Showing> showings) {
 		this.showings = showings;
 	}
+	
+	
 
 	/*public List<Repertoire> getRepertoires() {
 		return repertoires;
@@ -127,6 +133,14 @@ public class CulturalInstitution{
 		this.repertoires = repertoires;
 	}*/
 
+	public List<Ticket> getTickets() {
+		return tickets;
+	}
+
+	public void setTickets(List<Ticket> tickets) {
+		this.tickets = tickets;
+	}
+
 	public boolean containsShowing(String showingName) {
 		for (Showing showing : showings) {
 			if (showing.getName().equals(showingName)) {
@@ -135,6 +149,16 @@ public class CulturalInstitution{
 		}
 		
 		return false;
+	}
+	
+	public Ticket getTicket(Term term, int seat) {
+		for (Ticket ticket : tickets) {
+			if (ticket.getTerm().equals(term) && ticket.getSeat() == seat) {
+				return ticket;
+			}
+		}
+		
+		return null;
 	}
 	
 	public Showing getShowing(String showingName) {

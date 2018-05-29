@@ -16,6 +16,6 @@ public interface EmailService {
 
 	void sendUserChangedEmail(String username, String password, String email) throws MessagingException;
 
-	void sendInviteForShowing(String culturalInstitutionName, String showingName, String dateStr, String timeStr,
-			String seat, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws MessagingException;
+	void sendInviteForShowing(String culturalInstitutionName, String showingName, String dateStr, String timeStr, String auditoriumName,
+			String seat, double price, int duration, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws MessagingException;
 }

@@ -1,26 +1,16 @@
 package com.jvm.isa.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jvm.isa.domain.Auditorium;
-import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
-import com.jvm.isa.domain.Showing;
-import com.jvm.isa.domain.Term;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
-import com.jvm.isa.repository.AuditoriumRepository;
-import com.jvm.isa.repository.TermRepository;
 import com.jvm.isa.repository.UserRepository;
 
 @Service
@@ -28,15 +18,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
     private UserRepository userRepository;
-	
-	@Autowired
-	private TermRepository termRepository;
-
-	@Autowired
-	private AuditoriumRepository auditoriumRepository;
-	
-	@Autowired
-	private CulturalInstitutionService culturalInstitutionService;
 	
 	
 	@Override
@@ -135,133 +116,6 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		return people;
-	}
-
-	@Override
-	public Boolean[] bookSelectedSeats(String dateStr, String timeStr, String culturalInstitutionName, String showingName, String selectedSeats) {
-		String[] tokens = selectedSeats.split(",");
-		
-		LocalDate date = null;
-		LocalTime time = null;
-		
-		try {
-			date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE);
-			time = LocalTime.parse(timeStr, DateTimeFormatter.ISO_TIME);
-		} catch (Exception e) {
-			// nijedno sediste nije uspesno rezervisano
-			return unsuccessfullyBookSelectedSeats(tokens.length);
-		}
-		
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
-		if(culturalInstitution == null) {
-			// nijedno sediste nije uspesno rezervisano
-			return unsuccessfullyBookSelectedSeats(tokens.length);
-		}
-		
-		Showing showing = culturalInstitution.getShowing(showingName);
-		if(showing == null) {
-			// nijedno sediste nije uspesno rezervisano
-			return unsuccessfullyBookSelectedSeats(tokens.length);
-		}
-		
-		//Auditorium auditorium = auditoriumRepository.save(new Auditorium("Sala na Klisi", 10, 10));
-		//termRepository.save(new Term(LocalDateTime.now(), auditorium, showing));
-		
-		Term term = termRepository.findByDateAndCulturalInstitutionAndShowing(date, culturalInstitution, showing);
-		
-		Boolean[] returnValue = new Boolean[tokens.length];
-		
-		int num;
-		for (int k = 0; k < tokens.length; k++) {
-			try {
-				num =Integer.parseInt(tokens[k]);
-			} catch (NumberFormatException e) {
-				returnValue[k] = false;
-				continue;
-			}
-			
-			if(!term.getSeats()[num-1]) { // na frontendu indeksi krecu od 1
-				term.getSeats()[num-1] = true;
-				returnValue[k] = true;
-			}
-			else {
-				returnValue[k] = false;
-			}
-		}
-		
-		termRepository.save(term);
-		
-		return returnValue;
-	}
-	
-	public Term getTerm(String dateStr, String timeStr, String culturalInstitutionName, String showingName) {
-		LocalDate date = null;
-		LocalTime time = null;
-		
-		try {
-			date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE);
-			time = LocalTime.parse(timeStr, DateTimeFormatter.ISO_TIME);
-		} catch (Exception e) {
-		
-		}
-		
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
-		Showing showing = culturalInstitution.getShowing(showingName);
-		
-		//Auditorium auditorium = auditoriumRepository.findByName("Sala 1");
-		//termRepository.save(new Term(date, time, culturalInstitution, auditorium, showing));
-		
-		Term term = termRepository.findByDateAndCulturalInstitutionAndShowing(date, culturalInstitution, showing);
-		
-		return term;
-	}
-	
-	@Override
-	public ArrayList<Integer> getIndexOfBusySeatsAndRowsCols(Term term) {
-		
-		
-		Boolean[] seats = term.getSeats();
-		ArrayList<Integer> indexes = getIndexesOfBusySeats(seats);
-		
-		Auditorium auditorium = term.getAuditorium();
-		indexes.add(auditorium.getNumOfRows());
-		indexes.add(auditorium.getNumOfCols());
-		
-		return indexes;
-	}
-	
-	private ArrayList<Integer> getIndexesOfBusySeats(Boolean[] seats) {
-		ArrayList<Integer> indexes = new ArrayList<Integer>();
-		
-		for (int i = 0; i < seats.length; i++) {
-			if(seats[i]) {
-				indexes.add(i+1); // na frontendu indeksi krecu od 1
-			}
-		}
-		
-		return indexes;
-	}
-
-	private Boolean[] unsuccessfullyBookSelectedSeats(int length) {
-		Boolean[] returnValue = new Boolean[length];
-		
-		// nijedno sediste nije uspesno rezervisano
-		for (int i = 0; i < returnValue.length; i++) {
-			returnValue[i] = false;
-		}
-		
-		return returnValue;
-	}
-	
-	@Override
-	public boolean thereAreRepetitions(Collection<String> values) {
-		Object[] valuesArray = values.toArray();
-		for (int i = 0; i < valuesArray.length; i++) {
-			for (int j = i+1; j < valuesArray.length; j++) {
-				if(((String)valuesArray[i]).equals(((String)valuesArray[j]))) return true;
-			}
-		}
-		return false;
 	}
 	
 }
