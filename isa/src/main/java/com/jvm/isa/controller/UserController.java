@@ -3,6 +3,7 @@ package com.jvm.isa.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.AdministratorDTO;
+import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
+import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.SysAdministratorDTO;
 import com.jvm.isa.domain.Term;
@@ -630,7 +633,7 @@ public class UserController {
 		Showing showing1 = culturalInstitution.getShowing("Repo Man");
 		Showing showing2 = culturalInstitution2.getShowing("Repo Man");
 		
-		Auditorium auditorium1 = auditoriumRepository.findByName("Sala 3");
+		Auditorium auditorium1 = auditoriumRepository.findByName("Sala 8");
 		termRepository.save(new Term(LocalDate.now(), LocalTime.parse("19:00", DateTimeFormatter.ISO_TIME), culturalInstitution, auditorium1, showing1));
 		Auditorium auditorium2 = auditoriumRepository.findByName("Sala 4");
 		termRepository.save(new Term(LocalDate.now(), LocalTime.parse("16:00", DateTimeFormatter.ISO_TIME), culturalInstitution, auditorium2, showing1));

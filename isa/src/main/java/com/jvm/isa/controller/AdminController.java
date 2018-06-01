@@ -18,18 +18,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.Administrator;
+import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
+import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
-import com.jvm.isa.repository.RequisiteRepository;
 import com.jvm.isa.service.AdminService;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
+import com.jvm.isa.service.TermService;
 
 @RestController
 @RequestMapping(value = "/administrators")
@@ -53,6 +55,9 @@ public class AdminController {
 
 	@Autowired
 	private UserController userController;
+	
+	@Autowired
+	private TermService termService;
 
 	@RequestMapping(value = "/sys_admin/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
@@ -172,7 +177,40 @@ public class AdminController {
 	public ResponseEntity<Integer> saveChangesOnProfileAdminFunZone(@RequestBody HashMap<String, String> hm) {
 		return saveChangesOnProfileAdmin(hm);
 	}
+	
+	
+	@RequestMapping(value = "/admin_cultural_institution/get_showings", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<Showing>> getShowings() 
+	{
+		ArrayList<Showing> returnList = culturalInstitutionService.getShowings();
+		return new ResponseEntity<ArrayList<Showing>>(returnList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/get_auditoriums_for_ci", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<String>> getAuditoriumsForCulturalInstitution(@RequestBody HashMap<String, String> hm) 
+	{
+		String ciName = hm.get("ciName");
+		List<Auditorium> auditoriums = culturalInstitutionService.getAuditoriums(ciName);
+		List<String> returnList = new ArrayList<String>();
+		for(Auditorium a : auditoriums)
+		{
+			returnList.add(a.getName());
+		}
+		return new ResponseEntity<List<String>>(returnList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/get_terms", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<String>> getTerms(@RequestBody HashMap<String, String> hm) 
+	{
+		String showingName = hm.get("showing");
+		String auditoriumName = hm.get("auditorium");
+		String date = hm.get("date");
+		
+		List<String> returnList = termService.getTermsByDateAndAuditoriumAndShowing(date, auditoriumName, showingName);
 
+		return new ResponseEntity<List<String>>(returnList, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/admin_cultural_institution/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfileAdminCulturalInstitution(
 			@RequestBody HashMap<String, String> hm) {
@@ -280,7 +318,7 @@ public class AdminController {
 		return userController.saveChangedPassword(hm);
 	}
 
-	@RequestMapping(value = "/admin_funzone/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();
 

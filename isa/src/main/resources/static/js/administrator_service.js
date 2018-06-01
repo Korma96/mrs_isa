@@ -189,6 +189,7 @@ function adminCulturalInstitutionsMainPage() {
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
 	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
+	$("#myDropdown").append('<a id="id_repertoires" href="/myapp/#/administrators/admin_cultural_institution/repertoires"> Repertoires </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
 	$("#id_change_password").click(function(event) {
@@ -233,6 +234,17 @@ function adminCulturalInstitutionsMainPage() {
 		}
 		
 		showings();
+	});
+	
+	$("#id_repertoires").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
+		}
+		
+		repertoires();
 	});
 	
 	$("#id_logout").click(function(event) {
@@ -634,6 +646,45 @@ function saveAdmin(){
 	});
 }
 
+
+function repertoires()
+{
+	var logged = isLogged();
+	if (logged) { // ako je ulogovan
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append(
+				'<div style="display:flex"><div> \
+				<form> \
+				<table> \
+					<tr> <td> \
+							<table class="ui-widget"> \
+								<tr>  <td><label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select></td>  </tr> \
+								<tr>  <td><label for="id_showing">Showing:</label></td>  <td><select id="id_showing"></select></td>  </tr> \
+								<tr> <td><label for="id_date"> Date: </label></td>  <td><input type="text" id="id_date"/></td> </tr> \
+								<tr> <td><label for="id_auditorium"> Auditorium: </label></td>  <td><select id="id_auditorium"></select></td> </tr> \
+							</table> \
+						</td>  \
+					</tr> \
+				</table> \
+			</form></div> \
+			<div id="div_for_terms"></div> \
+			</div>'
+		);
+
+		repertoireMainPageComplete();
+		
+		$( function() {
+		    $( "#id_date" ).datepicker();
+		  } );
+
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
 
 function showings()
 {

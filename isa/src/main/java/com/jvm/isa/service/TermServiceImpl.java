@@ -15,6 +15,8 @@ import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.Term;
+import com.jvm.isa.repository.AuditoriumRepository;
+import com.jvm.isa.repository.ShowingRepository;
 import com.jvm.isa.repository.TermRepository;
 
 @Service
@@ -25,6 +27,12 @@ public class TermServiceImpl implements TermService {
 	
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
+	
+	@Autowired
+	private ShowingRepository showingRepository;
+	
+	@Autowired
+	private AuditoriumRepository auditoriumRepository;
 	
 	@Override
 	public Boolean bookSelectedSeats(String dateStr, String timeStr, String culturalInstitutionName, String showingName, String selectedSeats, RegisteredUser owner) {
@@ -240,6 +248,32 @@ public class TermServiceImpl implements TermService {
 		}
 		
 		return auditoriumsAndTimes;
+	}
+
+	@Override
+	public List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium,
+			String showing) {
+		
+		Showing showingDB = showingRepository.findByName(showing);
+		
+		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
+		
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditoriumDB, showingDB);
+		
+		int duration = showingDB.getDuration();
+		List<String> termsReturn = new ArrayList<String>();
+		for(Term t : terms)
+		{			
+			String term = t.getId().toString() + "*" + t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
+			termsReturn.add(term);
+		}
+		
+		return termsReturn;
 	}
 	
 }

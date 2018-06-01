@@ -6,10 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.repository.CulturalInstitutionRepository;
+import com.jvm.isa.repository.ShowingRepository;
 
 @Service
 public class CulturalInstitutionServiceImpl implements CulturalInstitutionService
@@ -17,10 +19,19 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Autowired
 	private CulturalInstitutionRepository  culturalInstitutionRepository;
 	
+	@Autowired
+	private ShowingRepository  showingRepository;
+	
 	@Override
 	public boolean exists(String name)
 	{
 		return culturalInstitutionRepository.findByName(name) != null;
+	}
+	
+	@Override
+	public ArrayList<Showing> getShowings()
+	{
+		return showingRepository.findAll();
 	}
 	
 	@Override
@@ -38,6 +49,13 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	}
 	
 	@Override
+	public List<Auditorium> getAuditoriums(String culturalInstitutionName) {
+		CulturalInstitution ci = culturalInstitutionRepository.findByName(culturalInstitutionName);
+		List<Auditorium> auditoriums = ci.getAuditoriums();
+		return auditoriums;
+	}
+	
+	@Override
 	public List<CulturalInstitution> getCulturalInstitutionsByType(CulturalInstitutionType type) 
 	{
 		return this.culturalInstitutionRepository.findByType(type);
@@ -46,6 +64,12 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 
 	public CulturalInstitution getCulturalInstitution(String name) {
 		return culturalInstitutionRepository.findByName(name);
+	}
+	
+	@Override
+	public ArrayList<CulturalInstitution> getAllCulturalInstitutions()
+	{
+		return (ArrayList<CulturalInstitution>) culturalInstitutionRepository.findAll();
 	}
 	
 	@Override
