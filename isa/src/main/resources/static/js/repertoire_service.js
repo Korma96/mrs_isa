@@ -2,6 +2,8 @@ var getAllCulturalInstitutionsURL = "/myapp/administrators/admin_cultural_instit
 var getShowingsURL = "/myapp/administrators/admin_cultural_institution/get_showings";
 var getAuditoriumsURL = "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_ci";
 var getTermsURL = "/myapp/administrators/admin_cultural_institution/get_terms";
+var addTermURL = "/myapp/administrators/admin_cultural_institution/add_term";
+var deleteTermURL = "/myapp/administrators/admin_cultural_institution/delete_term";
 
 function getShowings() {
 	var showings = null;
@@ -207,12 +209,85 @@ function addTermsToUI(receivedTerms)
 
 function addTerm()
 {
-	var str = $("#id_time").val();
-	alert(str);
+	var time = $("#id_time").val();
+	if(time == "")
+		return;
+	var ci = $("#id_cultural_institution").find(":selected").text().trim();
+	if(ci == "-- select an option --")
+		return;
+	var showing = $("#id_showing").find(":selected").text().trim();
+	if(showing == "-- select an option --")
+		return;
+	var auditorium = $("#id_auditorium").find(":selected").text().trim();
+	if(auditorium == "-- select an option --")
+		return;
+	var date = $("#id_date").val();
+	if(date == "")
+		return;
+	var date = date.split("/");
+	var date = date[2] + "-" + date[0] + "-" + date[1];
+	var showing = showing.split(" - ");
+	var showing = showing[0];
+	
+	var obj = {}
+	obj["ci"] = ci;
+	obj["showing"] = showing;
+	obj["auditorium"] = auditorium;
+	obj["date"] = date;
+	obj["time"] = time;
+	
+	$.ajax({
+		type: "POST",
+		url : addTermURL,
+		dataType : "json",
+		contentType: "application/json",
+		data: JSON.stringify(obj),
+		cache: false,
+		success : function(success) {
+			if(success)
+			{
+				toastr.success("Term added successfully!"); 
+				searchTerms();
+			}
+			else
+			{
+				toastr.error("Time not set properly!");
+			}
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	
+	});
 }
 
 function deleteTerm()
 {
 	var termId = this.id;
-	alert(termId);
+	
+	$.ajax({
+		async: false,
+		type : "POST",
+		url : deleteTermURL,
+		dataType : "json",
+		contentType: "application/json",
+		data: JSON.stringify({"id" : termId}),
+		cache: false,
+		success : function(success) {
+			if(success)
+			{
+				toastr.success("Term deleted successfully!"); 
+				searchTerms();
+			}
+			else
+			{
+				toastr.error("Error while deleting!");
+			}
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
 }

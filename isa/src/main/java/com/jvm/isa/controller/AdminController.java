@@ -210,6 +210,31 @@ public class AdminController {
 
 		return new ResponseEntity<List<String>>(returnList, HttpStatus.OK);
 	}
+		
+	@RequestMapping(value = "/admin_cultural_institution/add_term", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> addTerm(@RequestBody HashMap<String, String> hm) 
+	{
+		String culturalInstitution = hm.get("ci");
+		String showingName = hm.get("showing");
+		String auditoriumName = hm.get("auditorium");
+		String date = hm.get("date");
+		String time = hm.get("time");
+		
+		boolean success = termService.addTerm(culturalInstitution, date, auditoriumName, showingName, time);
+		if(success)
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/delete_term", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> deleteTerm(@RequestBody HashMap<String, String> hm) 
+	{
+		String id = hm.get("id");
+		boolean success = termService.deleteTerm(id);
+		if(success)
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfileAdminCulturalInstitution(

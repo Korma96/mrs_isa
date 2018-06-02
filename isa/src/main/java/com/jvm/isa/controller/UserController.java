@@ -637,7 +637,7 @@ public class UserController {
 		termRepository.save(new Term(LocalDate.now(), LocalTime.parse("19:00", DateTimeFormatter.ISO_TIME), culturalInstitution, auditorium1, showing1));
 		Auditorium auditorium2 = auditoriumRepository.findByName("Sala 4");
 		termRepository.save(new Term(LocalDate.now(), LocalTime.parse("16:00", DateTimeFormatter.ISO_TIME), culturalInstitution, auditorium2, showing1));
-		Auditorium auditorium3= auditoriumRepository.findByName("Sala 4");
+		Auditorium auditorium3= auditoriumRepository.findByName("Sala 3");
 		termRepository.save(new Term(LocalDate.now(), LocalTime.parse("21:00", DateTimeFormatter.ISO_TIME), culturalInstitution2, auditorium2, showing2));
 		*/
 		

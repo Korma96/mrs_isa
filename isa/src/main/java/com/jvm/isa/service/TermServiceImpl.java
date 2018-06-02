@@ -275,5 +275,63 @@ public class TermServiceImpl implements TermService {
 		
 		return termsReturn;
 	}
+
+	@Override
+	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
+			String time) {
+		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+		
+		Showing showing = showingRepository.findByName(showingName);
+		
+		Auditorium auditorium = auditoriumRepository.findByName(auditoriumName);
+		
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditorium, showing);
+		
+		int duration = showing.getDuration();
+		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
+		LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
+		for(Term t : terms)
+		{			
+			LocalTime startTime = t.getTime();
+			LocalTime endTime = t.getTime().plusMinutes(duration);
+			if(insertedTimeStart.compareTo(startTime) <= 0)
+			{
+				if(insertedTimeEnd.compareTo(startTime) >= 0)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if(insertedTimeStart.compareTo(endTime) < 0)
+				{
+					return false;
+				}
+			}
+		}
+		
+		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing);
+		termRepository.save(term);
+		return true;
+	}
+
+	@Override
+	public boolean deleteTerm(String id) {
+		try
+		{
+			Term t = termRepository.findById(Long.parseLong(id));
+			termRepository.delete(t);
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+	}
 	
 }
