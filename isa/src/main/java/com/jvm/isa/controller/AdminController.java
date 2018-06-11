@@ -24,6 +24,7 @@ import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.Showing;
+import com.jvm.isa.domain.ShowingType;
 import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
@@ -317,7 +318,12 @@ public class AdminController {
 		String address = hm.get("address");
 		String description = hm.get("description");
 		CulturalInstitution ci = culturalInstitutionService.getCulturalInstitution(oldName);
-		if (ci != null) {
+		if (ci != null) 
+		{
+			if(!name.equals(oldName) && culturalInstitutionService.exists(name))
+			{
+				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+			}
 			ci.setName(name);
 			ci.setAddress(address);
 			ci.setDescription(description);
@@ -348,6 +354,85 @@ public class AdminController {
 		ArrayList<String> culturalInstitutions = adminService.getCulturalInstitutions();
 
 		return new ResponseEntity<ArrayList<String>>(culturalInstitutions, HttpStatus.OK);
+
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/add_new_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> addNewShowing(@RequestBody HashMap<String, String> hm)
+	{
+		String name = hm.get("name");
+		if (!culturalInstitutionService.showingExists(name)) 
+		{
+			String type = hm.get("type");
+			String genre = hm.get("genre");
+			String duration = hm.get("duration");
+			String rating = hm.get("rating");
+			String actors = hm.get("actors");
+			String director = hm.get("director");
+			String description = hm.get("description");
+			ShowingType shType = ShowingType.valueOf(type);
+			try
+			{
+			Showing sh = new Showing(name, genre, actors, director, new Integer(duration), "", new Double(rating), description, shType);
+			boolean success = culturalInstitutionService.save(sh);
+			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+			}
+			catch(Exception e)
+			{
+				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+			}
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/update_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateShowing(@RequestBody HashMap<String, String> hm)
+	{
+		String oldName = hm.get("old_name");
+		String name = hm.get("name");
+		String type = hm.get("type");
+		String genre = hm.get("genre");
+		String duration = hm.get("duration");
+		String rating = hm.get("rating");
+		String actors = hm.get("actors");
+		String director = hm.get("director");
+		String description = hm.get("description");
+		ShowingType shType = ShowingType.valueOf(type);
+		Showing s = culturalInstitutionService.getShowing(oldName);
+		if (s != null) 
+		{
+			if(!name.equals(oldName) && culturalInstitutionService.showingExists(name))
+			{
+				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+			}
+			s.setName(name);
+			try
+			{
+			s.setAverageRating(new Double(rating));
+			s.setDuration(new Integer(duration));
+			}
+			catch(Exception e)
+			{
+				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+			}
+			s.setGenre(genre);
+			s.setListOfActors(actors);
+			s.setNameOfDirector(director);
+			s.setPoster("");
+			s.setShortDescription(description);
+			s.setType(shType);
+			boolean success = culturalInstitutionService.save(s);
+			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/delete_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> deleteShowing(@RequestBody HashMap<String, String> hm)
+	{
+		String name = hm.get("name");
+		boolean success = culturalInstitutionService.deleteShowing(name);
+		return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 
 	}
 

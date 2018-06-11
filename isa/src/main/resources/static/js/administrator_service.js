@@ -689,8 +689,10 @@ function repertoires()
 function showings()
 {
 	var logged = isLogged();
-	if (logged) { // ako je ulogovan
-		alert('showings!');
+	if (logged) {  
+		deleteAllExceptFirst();
+        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+		showingsMainPage();
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);

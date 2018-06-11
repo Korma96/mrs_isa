@@ -28,5 +28,13 @@ public interface CulturalInstitutionService {
 	
 	ArrayList<Showing> getShowings();
 	
+	Showing getShowing(String name);
+	
+	boolean showingExists(String name);
+	
+	boolean deleteShowing(String name);
+	
+	boolean save(Showing sh);
+	
 	boolean delete(CulturalInstitution ci);
 }

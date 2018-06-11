@@ -135,5 +135,50 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		
 	}
 
+	@Override
+	public boolean showingExists(String name)
+	{
+		return showingRepository.findByName(name) != null;
+	}
+
+	@Override
+	public boolean deleteShowing(String name)
+	{
+		try
+		{
+			Showing showing = showingRepository.findByName(name);
+			if(showing == null)
+			{
+				return false;
+			}
+			showingRepository.delete(showing);	
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}		
+	}
+
+	@Override
+	public boolean save(Showing sh)
+	{
+		try 
+		{
+			showingRepository.save(sh);
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public Showing getShowing(String name)
+	{
+		return showingRepository.findByName(name);
+	}
+
 
 }
