@@ -135,7 +135,7 @@ function update_institution()
 	        		</td> \
 	        		</tr> \
 				</table> \
-				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons_update" value="Save institution"/> \
+				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons_update" value="Update institution"/> \
 				</div> \
 				<br/> \
 			</form>');

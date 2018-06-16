@@ -17,6 +17,8 @@ import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.Term;
+import com.jvm.isa.repository.AuditoriumRepository;
+import com.jvm.isa.repository.ShowingRepository;
 import com.jvm.isa.repository.TermRepository;
 
 @Service
@@ -27,6 +29,12 @@ public class TermServiceImpl implements TermService {
 	
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
+	
+	@Autowired
+	private ShowingRepository showingRepository;
+	
+	@Autowired
+	private AuditoriumRepository auditoriumRepository;
 	
 	@Override
 	public Boolean bookSelectedSeats(String dateStr, String timeStr, String culturalInstitutionName, String showingName, String selectedSeats, RegisteredUser owner) {
@@ -249,6 +257,90 @@ public class TermServiceImpl implements TermService {
 		}
 		
 		return auditoriumsAndTimes;
+	}
+
+	@Override
+	public List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium,
+			String showing) {
+		
+		Showing showingDB = showingRepository.findByName(showing);
+		
+		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
+		
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditoriumDB, showingDB);
+		
+		int duration = showingDB.getDuration();
+		List<String> termsReturn = new ArrayList<String>();
+		for(Term t : terms)
+		{			
+			String term = t.getId().toString() + "*" + t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
+			termsReturn.add(term);
+		}
+		
+		return termsReturn;
+	}
+
+	@Override
+	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
+			String time) {
+		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+		
+		Showing showing = showingRepository.findByName(showingName);
+		
+		Auditorium auditorium = auditoriumRepository.findByName(auditoriumName);
+		
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditorium, showing);
+		
+		int duration = showing.getDuration();
+		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
+		LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
+		for(Term t : terms)
+		{			
+			LocalTime startTime = t.getTime();
+			LocalTime endTime = t.getTime().plusMinutes(duration);
+			if(insertedTimeStart.compareTo(startTime) <= 0)
+			{
+				if(insertedTimeEnd.compareTo(startTime) >= 0)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if(insertedTimeStart.compareTo(endTime) < 0)
+				{
+					return false;
+				}
+			}
+		}
+		
+		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing);
+		termRepository.save(term);
+		return true;
+	}
+
+	@Override
+	public boolean deleteTerm(String id) {
+		try
+		{
+			Term t = termRepository.findById(Long.parseLong(id));
+			termRepository.delete(t);
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
 	}
 	
 }

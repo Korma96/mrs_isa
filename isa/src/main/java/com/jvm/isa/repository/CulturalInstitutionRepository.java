@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.repository.Repository;
 
+import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
 

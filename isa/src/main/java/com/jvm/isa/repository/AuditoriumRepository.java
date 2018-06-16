@@ -9,5 +9,7 @@ public interface AuditoriumRepository extends Repository<Auditorium, Long> {
 	Auditorium save(Auditorium auditorium);
 	
 	Auditorium findByName(String name);
+	
+	void delete(Auditorium a);
 
 }
