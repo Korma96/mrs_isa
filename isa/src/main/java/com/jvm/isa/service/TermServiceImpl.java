@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
@@ -86,6 +88,7 @@ public class TermServiceImpl implements TermService {
 		return true;
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public Term getTerm(String dateStr, String timeStr, String culturalInstitutionName, String showingName) {
 		LocalDate date = null;
@@ -105,6 +108,7 @@ public class TermServiceImpl implements TermService {
 		return term;
 	}
 	
+	//TODO Mozda treba staviti @Transactional zbog ovog term.getAuditorium() jer je sve podeseno na LAZY
 	@Override
 	public ArrayList<Integer> getIndexOfBusySeatsAndRowsCols(Term term) {
 		
@@ -157,6 +161,7 @@ public class TermServiceImpl implements TermService {
 		return 0;
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean save(Term term) {
 		try {
@@ -169,6 +174,7 @@ public class TermServiceImpl implements TermService {
 		
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getCulturalInstitutions() {
 		List<Term> terms = termRepository.findAll();
@@ -184,6 +190,7 @@ public class TermServiceImpl implements TermService {
 		return culturalInstitutions;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getShowings(String culturalInstitutionName) {
 		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
@@ -200,6 +207,7 @@ public class TermServiceImpl implements TermService {
 		return showings;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getDates(String culturalInstitutionName, String showingName) {
 		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
@@ -217,6 +225,7 @@ public class TermServiceImpl implements TermService {
 		return dates;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getAuditoriumAndTime(String culturalInstitutionName, String showingName, String dateStr) {
 		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);

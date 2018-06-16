@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
 @Entity
 public class Term {
@@ -40,6 +41,18 @@ public class Term {
 	@OneToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private Showing showing;
 
+	/*
+	 * Za primer optimistickog zakljucavanja, Spring i EJB koriste posebnu anotaciju
+	 * @Version kojom se anotira obicno integer polje koje se pri svakoj promeni entiteta
+	 * povecava za 1. Svaki klijent ce dobiti i informaciju o verziji podatka.
+	 * Prilikom izmene podatka potrebno je proveriti da li je podatke neko drugi u medjuvremenu menjao:
+	 * - poredi se verzija podatka koju je klijent procitao sa onim sto se trenutno nalazi u bazi
+	 * - poredjenje se vrsi pri commit-u transakcije (normal validation)
+	 *   ili pri svakom pisanju u bazu u toku transakcije (early validation)
+	 * - ako su podaci menjani prijavlje se greska korisniku
+	 */
+	@Version
+	private Long version;
 	
 	public Term() {
 		
@@ -117,6 +130,14 @@ public class Term {
 
 	public void setShowing(Showing showing) {
 		this.showing = showing;
+	}
+	
+	public Long getVersion() {
+		return version;
+	}
+
+	public void setVersion(Long version) {
+		this.version = version;
 	}
 	
 	@Override

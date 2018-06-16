@@ -11,6 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jvm.isa.domain.Activation;
 import com.jvm.isa.domain.RegisteredUser;
@@ -57,6 +59,7 @@ public class EmailServiceImpl implements EmailService {
 	 * Anotacija za oznacavanje asinhronog zadatka
 	 * Vise informacija na: https://docs.spring.io/spring/docs/current/spring-framework-reference/integration.html#scheduling
 	 */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Async
 	@Override
 	public void sendActivationEmailAsync(RegisteredUser user) throws MessagingException {
@@ -149,6 +152,7 @@ public class EmailServiceImpl implements EmailService {
 		
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean activateAccount(String idForActivation) {
 		Activation activation = activationRepository.findByIdForActivation(idForActivation);

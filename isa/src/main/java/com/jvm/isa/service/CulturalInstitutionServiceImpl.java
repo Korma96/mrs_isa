@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
@@ -17,12 +19,14 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Autowired
 	private CulturalInstitutionRepository  culturalInstitutionRepository;
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean exists(String name)
 	{
 		return culturalInstitutionRepository.findByName(name) != null;
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean save(CulturalInstitution ci)
 	{
@@ -37,17 +41,19 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		return true;
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public List<CulturalInstitution> getCulturalInstitutionsByType(CulturalInstitutionType type) 
 	{
 		return this.culturalInstitutionRepository.findByType(type);
 	} 	
 	
-
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public CulturalInstitution getCulturalInstitution(String name) {
 		return culturalInstitutionRepository.findByName(name);
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = new ArrayList<String>();
@@ -80,6 +86,7 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		return culturalInstitutions;
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getShowings(String culturalInstitutionName) {
 		ArrayList<String> showings = new ArrayList<String>();
@@ -96,6 +103,7 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		return showings;
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean delete(CulturalInstitution ci)
 	{

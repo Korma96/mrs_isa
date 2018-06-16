@@ -483,26 +483,28 @@ public class UserController {
 	public ResponseEntity<Boolean> bookSelectedSeats(@RequestBody HashMap<String, String> hm) {
 		User loggedUser = getLoggedUserLocalMethod();
 		
-		if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
-			String dateStr = hm.get("date").trim();
-			String timeStr = hm.get("time").trim();
-			String culturalInstitutionName = hm.get("culturalInstitution").trim();
-			String showingName = hm.get("showing").trim();
-			String selectedSeats = hm.get("selectedSeats").trim();
-			
-			Boolean success;
-			
-			if(!selectedSeats.equals("")) {
-				success = termService.bookSelectedSeats(dateStr, timeStr, culturalInstitutionName, showingName, selectedSeats, (RegisteredUser) loggedUser);
-			
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
+				String dateStr = hm.get("date").trim();
+				String timeStr = hm.get("time").trim();
+				String culturalInstitutionName = hm.get("culturalInstitution").trim();
+				String showingName = hm.get("showing").trim();
+				String selectedSeats = hm.get("selectedSeats").trim();
+				
+				Boolean success;
+				
+				if(!selectedSeats.equals("")) {
+					success = termService.bookSelectedSeats(dateStr, timeStr, culturalInstitutionName, showingName, selectedSeats, (RegisteredUser) loggedUser);
+				
+				}
+				else {
+					success = false;
+				}
+				
+				return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 			}
-			else {
-				success = false;
-			}
-			
-			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 		}
-		
+			
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 		
 	}

@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
@@ -26,11 +28,13 @@ public class AdminServiceImpl implements AdminService {
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService; 
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean register(User admin) {
 			return userService.registrate(admin);
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean exists(String username) {
 
@@ -38,6 +42,7 @@ public class AdminServiceImpl implements AdminService {
 
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean existsRequisite(String name) {
 		return requisiteRepository.findByName(name) != null;
@@ -59,6 +64,7 @@ public class AdminServiceImpl implements AdminService {
 	 *  4 - You are not the first to enter the same new password the second time
 	 *  5 - Incorrect email
 	 * */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public int validAdmin(Administrator oldAdmin, String username, String oldPassword, String newPassword,
 			String repeatNewPassword, String firstName, String lastName, String email) {
@@ -77,6 +83,7 @@ public class AdminServiceImpl implements AdminService {
 	 *  4 - You are not the first to enter the same new password the second time
 	 *  5 - Incorrect email
 	 * */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public int validSystemAdmin(User oldAdmin, String username, String oldPassword, String newPassword, String repeatNewPassword, String email) {
 		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0;
@@ -99,6 +106,7 @@ public class AdminServiceImpl implements AdminService {
 	 *  3 - You did not enter the correct old password
 	 *  4 - You are not the first to enter the same new password the second time
 	 * */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public int validChangedUsernameAndPassword(User oldAdmin, String username, String oldPassword, String newPassword,
 			String repeatNewPassword) {
@@ -126,6 +134,7 @@ public class AdminServiceImpl implements AdminService {
 		return 0;
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public int correctRequisite(String name, String description, String priceStr, String culturalInstitutionName,
 			String showing) {
@@ -169,6 +178,7 @@ public class AdminServiceImpl implements AdminService {
 
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean addRequisite(Requisite requisite) {
 		try {
@@ -180,47 +190,54 @@ public class AdminServiceImpl implements AdminService {
 		return true;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public CulturalInstitution getCulturalInstitution(String culturalInstitutionName) {
 		return culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getCulturalInstitutions() {
 		return culturalInstitutionService.getCulturalInstitutions();
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getShowings(String culturalInstitutionName) {
 		return culturalInstitutionService.getShowings(culturalInstitutionName);
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public List<Requisite> getRequisites() {
 		return requisiteRepository.findAll();
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public void deleteRequisite(Requisite req) {
 		requisiteRepository.delete(req);
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public Requisite getRequisite(String name) {
 		return requisiteRepository.findByName(name);
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean saveRequisite(Requisite req) {
-			try {
-				requisiteRepository.save(req);
-			}
-			catch(Exception e) {
-				return false;
-			}
-			
-			return true;
+		try {
+			requisiteRepository.save(req);
 		}
+		catch(Exception e) {
+			return false;
+		}
+		
+		return true;
+	}
 
 	
 

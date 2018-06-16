@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
@@ -20,6 +22,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 	
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean registrate(User user) {
 		try {
@@ -32,18 +35,20 @@ public class UserServiceImpl implements UserService {
 		return true;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean exists(String username) {
 		return userRepository.findByUsername(username) != null;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public User getUser(String username) {
 		User user = userRepository.findByUsername(username);
 		return user;
 	}
 	
-	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public User getUser(String username, String password) {
 		User user = userRepository.findByUsernameAndPassword(username, password);
@@ -61,6 +66,7 @@ public class UserServiceImpl implements UserService {
 	 *  5 - Incorrect phone number
 	 *  6 - Everything is right
 	 * */
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public int correctUser(User oldUser, String username, String oldPassword, String newPassword, String repeatNewPassword, String firstName, String lastName, String email, String city, String phoneNumber) {
 		if(newPassword.equals("") ^ repeatNewPassword.equals("")) return 0; // xor, tj. jedno od polja je ostalo prazno
@@ -103,6 +109,7 @@ public class UserServiceImpl implements UserService {
 		return 3;
 	}
 	
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getPeople(RegisteredUser ru) {
 		ArrayList<String> people = new ArrayList<String>();
