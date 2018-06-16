@@ -37,4 +37,12 @@ public interface CulturalInstitutionService {
 	boolean save(Showing sh);
 	
 	boolean delete(CulturalInstitution ci);
+
+	boolean auditoriumExists(String name);
+
+	boolean saveAuditorium(Auditorium a);
+
+	Auditorium getAuditorium(String oldName);
+
+	boolean deleteAuditorium(String name);
 }

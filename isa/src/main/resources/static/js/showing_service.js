@@ -24,7 +24,6 @@ function show_all_showings(data)
 	var html_string = "";
 	html_string += '<table><tr><th>Name</th><th>Type</th><th>Genre</th><th>Duration</th><th>Rating</th><th>Actors</th><th>Director</th><th>Description</th><th><input type="button" id="id_btn_add_new_showing" class="buttons" value="Add"/><th/></tr>';
 	var counter = 0;
-	cultural_institutions = data;
 	for(x in data)
 	{
 		html_string += "<tr>";

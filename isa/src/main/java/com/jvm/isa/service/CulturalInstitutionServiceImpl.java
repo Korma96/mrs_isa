@@ -10,6 +10,7 @@ import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.domain.Showing;
+import com.jvm.isa.repository.AuditoriumRepository;
 import com.jvm.isa.repository.CulturalInstitutionRepository;
 import com.jvm.isa.repository.ShowingRepository;
 
@@ -20,7 +21,10 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	private CulturalInstitutionRepository  culturalInstitutionRepository;
 	
 	@Autowired
-	private ShowingRepository  showingRepository;
+	private ShowingRepository showingRepository;
+	
+	@Autowired
+	private AuditoriumRepository auditoriumRepository;
 	
 	@Override
 	public boolean exists(String name)
@@ -178,6 +182,43 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	public Showing getShowing(String name)
 	{
 		return showingRepository.findByName(name);
+	}
+
+	@Override
+	public boolean auditoriumExists(String name) 
+	{
+		return auditoriumRepository.findByName(name) != null;
+	}
+
+	@Override
+	public boolean saveAuditorium(Auditorium a) {
+		try 
+		{
+			auditoriumRepository.save(a);
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public Auditorium getAuditorium(String oldName) {
+		return auditoriumRepository.findByName(oldName);
+	}
+	@Override
+	public boolean deleteAuditorium(String name) {
+		Auditorium a = auditoriumRepository.findByName(name);
+		try
+		{
+			auditoriumRepository.delete(a);
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
 	}
 
 

@@ -187,9 +187,10 @@ function adminFunzoneMainPage() {
 
 function adminCulturalInstitutionsMainPage() {
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_auditoriums" href="/myapp/#/administrators/admin_cultural_institution/auditorium"> Auditoriums </a>');
 	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
-	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_repertoires" href="/myapp/#/administrators/admin_cultural_institution/repertoires"> Repertoires </a>');
+	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
 	$("#id_change_password").click(function(event) {
@@ -223,6 +224,17 @@ function adminCulturalInstitutionsMainPage() {
 		}
 		
 		culturalInstitutions();
+	});
+	
+	$("#id_auditoriums").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
+		}
+		
+		auditoriums();
 	});
 	
 	$("#id_showings").click(function(event) {
@@ -693,6 +705,37 @@ function showings()
 		deleteAllExceptFirst();
         $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
 		showingsMainPage();
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
+
+function auditoriums()
+{
+	var logged = isLogged();
+	if (logged) {  
+		deleteAllExceptFirst();
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append(
+				'<div> \
+				<form> \
+				<table> \
+					<tr> <td> \
+							<table class="ui-widget"> \
+								<tr>  <td><label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select></td>  </tr> \
+							</table> \
+						</td>  \
+					</tr> \
+				</table> \
+			</form></div> \
+			<div id="div_for_auditoriums"></div>');
+		
+		auditoriumsMainPage();
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);
