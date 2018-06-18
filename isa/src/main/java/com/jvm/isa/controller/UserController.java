@@ -573,7 +573,7 @@ public class UserController {
 			for (String seatStr : seatsAndFriends.keySet()) {
 				//ticket = ticketService.getTicket(term, Integer.parseInt(seat));
 				seat = Integer.parseInt(seatStr) - 1;
-				ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat, 1000);
+				ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat);
 				
 				savedTicket = ticketService.save(ticket);
 				savedTickets.add(savedTicket);
@@ -587,7 +587,7 @@ public class UserController {
 					if(user.getUserType() == UserType.REGISTERED_USER) {
 						friend = (RegisteredUser) user;
 						try {
-							emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, ticket.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+							emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, term.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
 							
 						} catch (Exception e) {
 							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());

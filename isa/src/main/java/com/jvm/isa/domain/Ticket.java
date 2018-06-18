@@ -32,19 +32,15 @@ public class Ticket {
 	@Column(name="seat", unique=false, nullable=false)
 	private int seat;
 	
-	@Column(name="price", unique=false, nullable=false)
-	private double price;
-	
 	public Ticket() {
 		
 	}
 	
-	public Ticket(Term term, RegisteredUser owner, RegisteredUser reservedBy, int seat, double price) {
+	public Ticket(Term term, RegisteredUser owner, RegisteredUser reservedBy, int seat) {
 		this.term = term;
 		this.owner = owner;
 		this.reservedBy = reservedBy;
 		this.seat = seat;
-		this.price = price;
 		this.reservedDateAndTime = LocalDateTime.now();
 	}
 
@@ -96,12 +92,5 @@ public class Ticket {
 		this.seat = seat;
 	}
 
-	public double getPrice() {
-		return price;
-	}
-
-	public void setPrice(double price) {
-		this.price = price;
-	}
 	
 }

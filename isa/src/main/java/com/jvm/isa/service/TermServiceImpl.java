@@ -261,12 +261,25 @@ public class TermServiceImpl implements TermService {
 		} catch (Exception e) {}
 		
 		List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditoriumDB);
+		// sort terms ascending by time
+		for(int i=0; i<terms.size(); i++)
+		{
+			for(int j=i+1; j<terms.size(); j++)
+			{
+				if(terms.get(i).getTime().compareTo(terms.get(j).getTime()) > 0)
+				{
+					Term temp = terms.get(i);
+					terms.set(i, terms.get(j));
+					terms.set(j, temp);
+				}
+			}
+		}
 		
 		List<String> termsReturn = new ArrayList<String>();
 		for(Term t : terms)
 		{		
 			int duration = t.getShowing().getDuration();
-			String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
+			String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString()  + "*" + (new Double(t.getPrice())).toString();
 			termsReturn.add(term);
 		}
 		
@@ -275,7 +288,7 @@ public class TermServiceImpl implements TermService {
 
 	@Override
 	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
-			String time) {
+			String time, double price) {
 		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
 		
 		Showing showing = showingRepository.findByName(showingName);
@@ -312,7 +325,7 @@ public class TermServiceImpl implements TermService {
 			}
 		}
 		
-		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing);
+		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing, price);
 		termRepository.save(term);
 		return true;
 	}

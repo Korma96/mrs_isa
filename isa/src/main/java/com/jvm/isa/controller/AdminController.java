@@ -227,8 +227,8 @@ public class AdminController {
 		String auditoriumName = hm.get("auditorium");
 		String date = hm.get("date");
 		String time = hm.get("time");
-		
-		boolean success = termService.addTerm(culturalInstitution, date, auditoriumName, showingName, time);
+		String price = hm.get("price");
+		boolean success = termService.addTerm(culturalInstitution, date, auditoriumName, showingName, time, new Double(price));
 		if(success)
 			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);

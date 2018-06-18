@@ -30,7 +30,7 @@ public interface TermService {
 	
 	List<String> getTermsByDateAndAuditorium(String date, String auditorium);
 	
-	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time);
+	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time, double price);
 	
 	boolean deleteTerm(String id);
 	

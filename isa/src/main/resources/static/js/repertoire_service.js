@@ -157,8 +157,8 @@ function searchTerms()
 
 function addTermsToUI(receivedTerms)
 {
-	var html_string = '<table><tr><th><label for="id_showing">Showing</label></th><th>Term</th><th></th></tr>';
-	html_string += '<tr><td><select id="id_showing"></select></td><td><input type="time" id="id_time"/></td><td><input type="button" id="id_btn_add_term" class="buttons" value="Add term"/></td></tr>';
+	var html_string = '<table><tr><th><label for="id_showing">Showing</label></th><th>Term</th><th>Price</th><th></th></tr>';
+	html_string += '<tr><td><select id="id_showing"></select></td><td><input type="time" id="id_time"/></td><td><input type="number" min="0" max="10000" id="id_price_input" /></td><td><input type="button" id="id_btn_add_term" class="buttons" value="Add term"/></td></tr>';
 	for(var t in receivedTerms)
 	{
 		var data = receivedTerms[t].split("*");
@@ -168,6 +168,9 @@ function addTermsToUI(receivedTerms)
 		html_string += "</td>";
 		html_string += "<td>";
 		html_string += data[2];
+		html_string += "</td>";
+		html_string += "<td>";
+		html_string += data[3];
 		html_string += "</td>";
 		html_string += "<td>";
 		html_string += '<button id="';
@@ -188,7 +191,6 @@ function addTermsToUI(receivedTerms)
 			{
 				$("#id_showing").append("<option " + showings[sh].name + "> " + showings[sh].name+" - "+showings[sh].duration+"min" + " </option>");
 			}
-			//$("#id_showing").change(searchTerms);
 		}
 		else {
 			toastr.error("Showings are not available!");
@@ -221,6 +223,8 @@ function addTerm()
 	var showing = $("#id_showing").find(":selected").text().trim();
 	if(showing == "-- select an option --")
 		return;
+	var showing = showing.split(" - ");
+	var showing = showing[0];
 	var auditorium = $("#id_auditorium").find(":selected").text().trim();
 	if(auditorium == "-- select an option --")
 		return;
@@ -229,8 +233,11 @@ function addTerm()
 		return;
 	var date = date.split("/");
 	var date = date[2] + "-" + date[0] + "-" + date[1];
-	var showing = showing.split(" - ");
-	var showing = showing[0];
+	var price = $("#id_price_input").val();
+	if(price == "")
+	{
+		return;
+	}
 	
 	var obj = {}
 	obj["ci"] = ci;
@@ -238,6 +245,7 @@ function addTerm()
 	obj["auditorium"] = auditorium;
 	obj["date"] = date;
 	obj["time"] = time;
+	obj["price"] = price;
 	
 	$.ajax({
 		type: "POST",
