@@ -1,5 +1,8 @@
 package com.jvm.isa.controller;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +36,7 @@ import com.jvm.isa.service.AdminService;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
 import com.jvm.isa.service.TermService;
+import com.jvm.isa.service.TicketService;
 
 @RestController
 @RequestMapping(value = "/administrators")
@@ -48,6 +52,9 @@ public class AdminController {
 	@Autowired
 	private AdminService adminService;
 
+	@Autowired
+	private TicketService ticketService;
+	
 	@Autowired
 	private EmailService emailService;
 
@@ -562,6 +569,77 @@ public class AdminController {
 		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
 	}
+
+	@RequestMapping(value = "/admin_cultural_institution/get_data_for_line_chart", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<int[][]> getDataForLineChart(@RequestBody HashMap<String, String> hm)
+	{
+		int[][] returnList = null;
+		String ci = hm.get("ci");
+		String date = hm.get("date");
+		String timePeriodType = hm.get("timePeriodType");
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		switch(timePeriodType)
+		{
+			case "DAY":
+			{
+				int numberOfTickets = ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci);
+				int dayOfMonth = dateLocal.getDayOfMonth();
+				int[] firstList = new int[] {numberOfTickets};
+				int[] secondList = new int[] {dayOfMonth};
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+			case "WEEK":
+			{
+				DayOfWeek dayOfWeek = dateLocal.getDayOfWeek();
+				// set date on the beggining of the week
+				while(dayOfWeek.compareTo(DayOfWeek.MONDAY) != 0)
+				{
+					dateLocal = dateLocal.minusDays(1);
+					dayOfWeek = dateLocal.getDayOfWeek();
+				}
+				// now current date is monday
+				int[] firstList = new int[7];
+				int[] secondList = new int[7];
+				for(int i=0; i<7; i++)
+				{
+					firstList[i] = ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci);
+					secondList[i] = dateLocal.getDayOfMonth();
+					dateLocal = dateLocal.plusDays(1);
+				}
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+			case "MONTH":
+			{
+				int dayOfMonth = dateLocal.getDayOfMonth();
+				dateLocal = dateLocal.minusDays(dayOfMonth - 1);
+				ArrayList<Integer> helpList = new ArrayList<Integer>();
+				do
+				{
+					helpList.add(ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci));
+					dateLocal = dateLocal.plusDays(1);
+				}
+				while(dateLocal.getDayOfMonth() != 1);
+				int[] firstList = new int[helpList.size()];
+				int[] secondList = new int[helpList.size()];
+				for(int i=0; i<helpList.size(); i++)
+				{
+					firstList[i] = helpList.get(i);
+					secondList[i] = i+1;
+				}
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+		}
+		
+		return new ResponseEntity<int[][]>(returnList, HttpStatus.OK);
+	}
+	
 	
 	@RequestMapping(value = "/admin_funzone/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getShowingsOfCulturalInstitution(

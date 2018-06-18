@@ -1,5 +1,9 @@
 package com.jvm.isa.service;
 
+import java.awt.List;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +42,21 @@ public class TicketServiceImpl implements TicketService {
 		}
 		
 		return savedTicket;
+	}
+
+	@Override
+	public int getNumberOfTicketsByDateAndCulturalInstitution(LocalDate date, String ci) {
+		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+		int counter = 0;
+		for(Ticket t : tickets)
+		{
+			Term term = t.getTerm();
+			if((term.getDate().compareTo(date) == 0) && term.getCulturalInstitution().getName().equals(ci))
+			{
+				counter++;
+			}
+		}
+		return counter;
 	}
 	
 }

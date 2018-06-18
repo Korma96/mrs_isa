@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -252,10 +253,11 @@ public class TermServiceImpl implements TermService {
 
 	@Override
 	public List<String> getTermsByDateAndAuditorium(String date, String auditorium) {
-		
+
 		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
 		
 		LocalDate dateLocal = null;
+		
 		try {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {}

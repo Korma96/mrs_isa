@@ -27,7 +27,7 @@ public class Ticket {
 	private RegisteredUser reservedBy;
 	
 	@Column(name="reserved_date_and_time", unique=false, nullable=false)
-	private LocalDateTime reservedDateAndTime;
+	private LocalDateTime reservedDateTime;
 	
 	@Column(name="seat", unique=false, nullable=false)
 	private int seat;
@@ -41,7 +41,7 @@ public class Ticket {
 		this.owner = owner;
 		this.reservedBy = reservedBy;
 		this.seat = seat;
-		this.reservedDateAndTime = LocalDateTime.now();
+		this.reservedDateTime = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -77,11 +77,11 @@ public class Ticket {
 	}
 
 	public LocalDateTime getReservedDateAndTime() {
-		return reservedDateAndTime;
+		return reservedDateTime;
 	}
 
 	public void setReservedDateAndTime(LocalDateTime reservedDateAndTime) {
-		this.reservedDateAndTime = reservedDateAndTime;
+		this.reservedDateTime = reservedDateAndTime;
 	}
 
 	public int getSeat() {
