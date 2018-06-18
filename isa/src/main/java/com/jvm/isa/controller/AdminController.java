@@ -211,11 +211,10 @@ public class AdminController {
 	@RequestMapping(value = "/admin_cultural_institution/get_terms", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getTerms(@RequestBody HashMap<String, String> hm) 
 	{
-		String showingName = hm.get("showing");
 		String auditoriumName = hm.get("auditorium");
 		String date = hm.get("date");
 		
-		List<String> returnList = termService.getTermsByDateAndAuditoriumAndShowing(date, auditoriumName, showingName);
+		List<String> returnList = termService.getTermsByDateAndAuditorium(date, auditoriumName);
 
 		return new ResponseEntity<List<String>>(returnList, HttpStatus.OK);
 	}

@@ -26,7 +26,7 @@ public interface TermRepository extends Repository<Term, Long> {
 	List<Term> findByDateAndCulturalInstitutionAndShowing(LocalDate date, CulturalInstitution culturalInstitution,
 			Showing showing);
 	
-	List<Term> findByDateAndAuditoriumAndShowing(LocalDate date, Auditorium auditorium, Showing showing);
+	List<Term> findByDateAndAuditorium(LocalDate date, Auditorium auditorium);
 	
 	Term findById(Long id);
 	

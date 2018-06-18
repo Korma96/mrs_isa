@@ -28,7 +28,7 @@ public interface TermService {
 	
 	int thereAreRepetitionsOrNotPutYourself(Collection<String> values, String loggedUsername);
 	
-	List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium, String showing);
+	List<String> getTermsByDateAndAuditorium(String date, String auditorium);
 	
 	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time);
 	

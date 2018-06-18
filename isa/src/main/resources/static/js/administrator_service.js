@@ -674,7 +674,6 @@ function repertoires()
 					<tr> <td> \
 							<table class="ui-widget"> \
 								<tr>  <td><label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select></td>  </tr> \
-								<tr>  <td><label for="id_showing">Showing:</label></td>  <td><select id="id_showing"></select></td>  </tr> \
 								<tr> <td><label for="id_date"> Date: </label></td>  <td><input type="text" id="id_date"/></td> </tr> \
 								<tr> <td><label for="id_auditorium"> Auditorium: </label></td>  <td><select id="id_auditorium"></select></td> </tr> \
 							</table> \

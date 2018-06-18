@@ -251,10 +251,7 @@ public class TermServiceImpl implements TermService {
 	}
 
 	@Override
-	public List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium,
-			String showing) {
-		
-		Showing showingDB = showingRepository.findByName(showing);
+	public List<String> getTermsByDateAndAuditorium(String date, String auditorium) {
 		
 		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
 		
@@ -263,13 +260,13 @@ public class TermServiceImpl implements TermService {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {}
 		
-		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditoriumDB, showingDB);
+		List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditoriumDB);
 		
-		int duration = showingDB.getDuration();
 		List<String> termsReturn = new ArrayList<String>();
 		for(Term t : terms)
-		{			
-			String term = t.getId().toString() + "*" + t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
+		{		
+			int duration = t.getShowing().getDuration();
+			String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
 			termsReturn.add(term);
 		}
 		
@@ -290,7 +287,7 @@ public class TermServiceImpl implements TermService {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {}
 		
-		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditorium, showing);
+		List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditorium);
 		
 		int duration = showing.getDuration();
 		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);

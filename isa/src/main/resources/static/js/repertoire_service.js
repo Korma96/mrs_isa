@@ -100,27 +100,8 @@ function repertoireMainPageComplete()
 				$("#id_cultural_institution").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
 			}
 			
-			$("#id_cultural_institution").change(changeАuditoriums);
-			
-			var showings = getShowings();
-			if(showings) {
-				if (showings.length > 0) {
-					$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');
-					for(sh in showings)
-					{
-						$("#id_showing").append("<option " + showings[sh].name + "> " + showings[sh].name+" - "+showings[sh].duration+"min" + " </option>");
-					}
-					$("#id_showing").change(searchTerms);
-					$("#id_date").change(searchTerms);
-				}
-				else {
-					toastr.error("Showings are not available!");
-				}
-			}
-			else {
-				toastr.error("Showings are not available!");
-			}
-			
+			$("#id_cultural_institution").change(changeАuditoriums);	
+			$("#id_date").change(searchTerms);		
 		}
 		else {
 			toastr.error("Cultural institutions are not available!");
@@ -138,9 +119,9 @@ function searchTerms()
 	{
 		return;
 	}
-	var showing = $("#id_showing").find(":selected").text().trim();
-	if(showing == "-- select an option --")
-		return;
+	//var showing = $("#id_showing").find(":selected").text().trim();
+	//if(showing == "-- select an option --")
+	//	return;
 	var auditorium = $("#id_auditorium").find(":selected").text().trim();
 	if(auditorium == "-- select an option --")
 		return;
@@ -149,11 +130,11 @@ function searchTerms()
 		return;
 	var date = date.split("/");
 	var date = date[2] + "-" + date[0] + "-" + date[1];
-	var showing = showing.split(" - ");
-	var showing = showing[0];
+	//var showing = showing.split(" - ");
+	//var showing = showing[0];
 	
 	var obj = {}
-	obj["showing"] = showing;
+	//obj["showing"] = showing;
 	obj["auditorium"] = auditorium;
 	obj["date"] = date;
 	
@@ -176,13 +157,17 @@ function searchTerms()
 
 function addTermsToUI(receivedTerms)
 {
-	var html_string = '<table><tr><th><input type="time" id="id_time"/></th><th><input type="button" id="id_btn_add_term" class="buttons" value="Add term"/></th></tr>';
+	var html_string = '<table><tr><th><label for="id_showing">Showing</label></th><th>Term</th><th></th></tr>';
+	html_string += '<tr><td><select id="id_showing"></select></td><td><input type="time" id="id_time"/></td><td><input type="button" id="id_btn_add_term" class="buttons" value="Add term"/></td></tr>';
 	for(var t in receivedTerms)
 	{
 		var data = receivedTerms[t].split("*");
 		html_string += "<tr>";
 		html_string += "<td>";
 		html_string += data[1];
+		html_string += "</td>";
+		html_string += "<td>";
+		html_string += data[2];
 		html_string += "</td>";
 		html_string += "<td>";
 		html_string += '<button id="';
@@ -194,7 +179,25 @@ function addTermsToUI(receivedTerms)
 	}	
 	html_string += "</table>";
 	$("#div_for_terms").html(html_string);
-	
+
+	var showings = getShowings();
+	if(showings) {
+		if (showings.length > 0) {
+			$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');
+			for(sh in showings)
+			{
+				$("#id_showing").append("<option " + showings[sh].name + "> " + showings[sh].name+" - "+showings[sh].duration+"min" + " </option>");
+			}
+			//$("#id_showing").change(searchTerms);
+		}
+		else {
+			toastr.error("Showings are not available!");
+		}
+	}
+	else {
+		toastr.error("Showings are not available!");
+	}
+
 	$("#id_btn_add_term").click(function(event) {
 		event.preventDefault();
 		addTerm();
