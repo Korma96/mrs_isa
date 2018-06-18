@@ -58,5 +58,20 @@ public class TicketServiceImpl implements TicketService {
 		}
 		return counter;
 	}
+
+	@Override
+	public int getIncome(String ci, LocalDate dateLocal1, LocalDate dateLocal2) {
+		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+		int income = 0;
+		for(Ticket t : tickets)
+		{
+			Term term = t.getTerm();
+			if((term.getDate().compareTo(dateLocal1) >= 0) && (term.getDate().compareTo(dateLocal2) <= 0) && term.getCulturalInstitution().getName().equals(ci))
+			{
+				income += term.getPrice();
+			}
+		}
+		return income;
+	}
 	
 }

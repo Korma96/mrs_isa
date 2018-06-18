@@ -640,6 +640,26 @@ public class AdminController {
 		return new ResponseEntity<int[][]>(returnList, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/admin_cultural_institution/get_income", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> getIncome(@RequestBody HashMap<String, String> hm)
+	{
+		String ci = hm.get("ci");
+		String date1 = hm.get("date1");
+		String date2 = hm.get("date2");
+		LocalDate dateLocal1 = null;
+		try {
+			dateLocal1 = LocalDate.parse(date1, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		LocalDate dateLocal2 = null;
+		try {
+			dateLocal2 = LocalDate.parse(date2, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		int income = ticketService.getIncome(ci, dateLocal1, dateLocal2);
+		String Income = (new Integer(income)).toString();
+		return new ResponseEntity<String>(Income, HttpStatus.OK);
+	}
 	
 	@RequestMapping(value = "/admin_funzone/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ArrayList<String>> getShowingsOfCulturalInstitution(

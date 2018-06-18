@@ -190,6 +190,7 @@ function adminCulturalInstitutionsMainPage() {
 	$("#myDropdown").append('<a id="id_auditoriums" href="/myapp/#/administrators/admin_cultural_institution/auditorium"> Auditoriums </a>');
 	$("#myDropdown").append('<a id="id_attendance" href="/myapp/#/administrators/admin_cultural_institution/attendance"> Attendance </a>');
 	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
+	$("#myDropdown").append('<a id="id_income" href="/myapp/#/administrators/admin_cultural_institution/income"> Income </a>');
 	$("#myDropdown").append('<a id="id_repertoires" href="/myapp/#/administrators/admin_cultural_institution/repertoires"> Repertoires </a>');
 	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
@@ -280,6 +281,17 @@ function adminCulturalInstitutionsMainPage() {
 		}
 		
 		attendance();
+	});
+	
+	$("#id_income").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
+		}
+		
+		income();
 	});
 }
 
@@ -725,9 +737,29 @@ function attendance()
         				</select></td> \
 						<td><label for="id_date">  Date:</label></td><td><input type="text" id="id_date"/></td> \
 						<td><input type="button" id="id_btn_show_chart" class="buttons" value="Show chart"/></td></tr></table></div> \
-						<canvas id="line-chart" width="800" height="450"></canvas>')
+						<canvas id="line-chart" width="800" height="450"></canvas>');
 		
 		line_chart_main_page();
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function income()
+{
+	var logged = isLogged();
+	if (logged) { // ako je ulogovan
+		var center = $("#center");
+		
+		deleteAllExceptFirst();
+		
+		center.append('<div><table><tr><td><label for="id_cultural_institution">  Cultural institution:</label></td><td><select id="id_cultural_institution"></select></td>  \
+						<td><label for="id_date1">  Start date:</label></td><td><input type="text" id="id_date1"/></td> \
+						<td><label for="id_date2">  End date:</label></td><td><input type="text" id="id_date2"/></td> \
+						<td><input type="button" id="id_btn_show_income" class="buttons" value="Calculate income"/></td></tr></table></div>');
+		
+		income_main_page();
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);

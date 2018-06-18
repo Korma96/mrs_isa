@@ -14,4 +14,7 @@ public interface TicketService {
 	Ticket save(Ticket ticket);
 
 	int getNumberOfTicketsByDateAndCulturalInstitution(LocalDate date, String ci);
+
+	int getIncome(String ci, LocalDate dateLocal1, LocalDate dateLocal2);
 }
+
