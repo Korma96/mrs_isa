@@ -1,13 +1,72 @@
 var addNewShowingURL = "/myapp/administrators/admin_cultural_institution/add_new_showing";
 var updateShowingURL = "/myapp/administrators/admin_cultural_institution/update_showing";
 var deleteShowingURL = "/myapp/administrators/admin_cultural_institution/delete_showing";
+var getShowingsForChosenCIURL = "/myapp/administrators/admin_cultural_institution/get_showings_for_ci"
+var getAllCIsURL = "/myapp/administrators/admin_cultural_institution/get_cultural_institutions"
 
 var currentShowings = null;
+var lastCi = null;
 
-
-function showingsMainPage()
+function get_showings_for_ci(ci)
 {
-    var showings = getShowings();
+	var showings = null;
+
+	var obj = {};
+	obj["ci"] = ci;
+	
+	$.ajax({ 
+	    type: "POST",
+	    async: false,
+		url:  getShowingsForChosenCIURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(data) {
+	    	if(data) {    	        
+				showings = data;
+	    	}
+	    	else {
+				toastr.error("There are no showings for chosen cultural institution!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return showings;
+}
+
+function get_all_cis()
+{
+	var cis = null;
+
+	$.ajax({ 
+	    type: "POST",
+	    async: false,
+		url:  getAllCIsURL,
+	    dataType: "json", 
+	    contentType: "application/json",
+	    success: function(data) {
+	    	if(data) {    	        
+				cis = data;
+	    	}
+	    	else {
+				toastr.error("There are no cultural institutions!"); 
+	    	}
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+
+	return cis;
+}
+
+function ci_changed()
+{
+	var ci = $("#id_cultural_institution").find(":selected").text().trim();
+    var showings = get_showings_for_ci(ci);
     if(showings)
     {
         show_all_showings(showings);
@@ -17,6 +76,41 @@ function showingsMainPage()
         toastr.error("No data found!");
     }
 }
+
+function showingsMainPage()
+{
+	var culturalInstitutions = getAllCulturalInstitutions();
+	var html_string = '<label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select>';
+	$("#search_bar").append(html_string);
+	if(culturalInstitutions) {
+		if(culturalInstitutions.length > 0) {
+			var html_string = "";
+			for(ci in culturalInstitutions)
+			{
+				html_string += "<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>";
+			}
+			if(lastCi != null)
+			{
+				$("#id_cultural_institution").append(html_string);
+				$("#id_cultural_institution").val(lastCi);
+			}
+			else
+			{
+				html_string = '<option disabled selected value> -- select an option -- </option>' + html_string;
+				$("#id_cultural_institution").append(html_string);
+			}
+
+			$("#id_cultural_institution").change(ci_changed);
+		}
+		else {
+			toastr.error("Cultural institutions are not available!");
+		}
+	}
+	else {
+		toastr.error("Cultural institutions are not available!");
+	}
+}
+
 
 function show_all_showings(data)
 {
@@ -88,7 +182,8 @@ function add_showing()
 {
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
-
+		var ci = $("#id_cultural_institution").find(":selected").text().trim();
+		lastCi = ci;
 		deleteAllExceptFirst();
 		
 		$("#center").append(
@@ -117,7 +212,7 @@ function add_showing()
 		$("#id_btn_save_new_showing").click(function(event) {
 			event.preventDefault();
 			
-			addShowingAjax();
+			addShowingAjax(ci);
 		});
 		
 	}
@@ -126,7 +221,7 @@ function add_showing()
 	}
 }
 
-function addShowingAjax()
+function addShowingAjax(ci)
 {
 	var obj = {};
 	var name = $("#id_name").val();
@@ -151,7 +246,8 @@ function addShowingAjax()
     obj["rating"] = rating;
     obj["actors"] = actors;
     obj["director"] = director;
-    obj["description"] = description;
+	obj["description"] = description;
+	obj["ci"] = ci;
 	
 	$.ajax({ 
 	    type: "POST",
@@ -176,6 +272,7 @@ function addShowingAjax()
     	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
     	        
 				showingsMainPage();
+				ci_changed();
 	    	}
 	    	else {
 	    		toastr.error("Name already exists!"); 
@@ -197,6 +294,8 @@ function update_showing()
 		numb = numb.join("");
 		var s = currentShowings[parseInt(numb)];
 		
+		var ci = $("#id_cultural_institution").find(":selected").text().trim();
+		lastCi = ci;
 		deleteAllExceptFirst();
 		
 		var update_html = 
@@ -237,7 +336,7 @@ function update_showing()
 		$("#id_btn_update_showing").click(function(event) {
 			event.preventDefault();
 			
-			updateShowingAjax(s.name);
+			updateShowingAjax(s.name, ci);
 		});
 	}
 	else
@@ -246,7 +345,7 @@ function update_showing()
 	}
 }
 
-function updateShowingAjax(old_name)
+function updateShowingAjax(old_name, ci)
 {
 	var obj = {};
 	var name = $("#id_name").val();
@@ -272,7 +371,8 @@ function updateShowingAjax(old_name)
     obj["rating"] = rating;
     obj["actors"] = actors;
     obj["director"] = director;
-    obj["description"] = description;
+	obj["description"] = description;
+	obj["ci"] = ci;
 
 	$.ajax({ 
 	    type: "POST",
@@ -289,6 +389,7 @@ function updateShowingAjax(old_name)
     	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
     	        
 				showingsMainPage();
+				ci_changed();
 	    	}
 	    	else {
 	    		toastr.error("Wrong data!"); 
@@ -306,9 +407,12 @@ function delete_showing()
 	var numb = button_id.match(/\d/g);
 	numb = numb.join("");
 	var s = currentShowings[parseInt(numb)];
+	var ci = $("#id_cultural_institution").find(":selected").text().trim();
+	lastCi = ci;
 
 	var obj = {};
 	obj["name"] = s.name;
+	obj["ci"] = ci;
 	
 	$.ajax({ 
 	    type: "POST",
@@ -325,6 +429,7 @@ function delete_showing()
     	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
     	        
 				showingsMainPage();
+				ci_changed();
 	    	}
 	    	else {
 	    		toastr.error("Wrong data!"); 

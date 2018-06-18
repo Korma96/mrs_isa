@@ -183,7 +183,8 @@ function addTermsToUI(receivedTerms)
 	html_string += "</table>";
 	$("#div_for_terms").html(html_string);
 
-	var showings = getShowings();
+	var ci = $("#id_cultural_institution").find(":selected").text().trim();
+	var showings = get_showings_for_ci(ci);
 	if(showings) {
 		if (showings.length > 0) {
 			$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');

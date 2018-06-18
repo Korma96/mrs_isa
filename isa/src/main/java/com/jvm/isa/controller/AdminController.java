@@ -187,6 +187,19 @@ public class AdminController {
 		return new ResponseEntity<ArrayList<Showing>>(returnList, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/admin_cultural_institution/get_showings_for_ci", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<Showing>> getShowingsForCI(@RequestBody HashMap<String, String> hm) 
+	{
+		String ciName = hm.get("ci");
+		ArrayList<String> returnList = culturalInstitutionService.getShowings(ciName);
+		ArrayList<Showing> showingList = new ArrayList<Showing>();
+		for(String name : returnList)
+		{
+			showingList.add(culturalInstitutionService.getShowing(name));
+		}
+		return new ResponseEntity<ArrayList<Showing>>(showingList, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/admin_cultural_institution/get_auditoriums_for_ci", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getAuditoriumsForCI(@RequestBody HashMap<String, String> hm) 
 	{
@@ -377,12 +390,17 @@ public class AdminController {
 			String actors = hm.get("actors");
 			String director = hm.get("director");
 			String description = hm.get("description");
+			String ci = hm.get("ci");
 			ShowingType shType = ShowingType.valueOf(type);
 			try
 			{
-			Showing sh = new Showing(name, genre, actors, director, new Integer(duration), "", new Double(rating), description, shType);
-			boolean success = culturalInstitutionService.save(sh);
-			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+				Showing sh = new Showing(name, genre, actors, director, new Integer(duration), "", new Double(rating), description, shType);
+				CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+				List<Showing> showings = c.getShowings();
+				showings.add(sh);
+				c.setShowings(showings);
+				boolean success = culturalInstitutionService.save(c);
+				return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 			}
 			catch(Exception e)
 			{
@@ -404,6 +422,7 @@ public class AdminController {
 		String actors = hm.get("actors");
 		String director = hm.get("director");
 		String description = hm.get("description");
+		String ci = hm.get("ci");
 		ShowingType shType = ShowingType.valueOf(type);
 		Showing s = culturalInstitutionService.getShowing(oldName);
 		if (s != null) 
@@ -428,7 +447,11 @@ public class AdminController {
 			s.setPoster("");
 			s.setShortDescription(description);
 			s.setType(shType);
-			boolean success = culturalInstitutionService.save(s);
+			CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+			List<Showing> showings = c.getShowings();
+			showings.add(s);
+			c.setShowings(showings);
+			boolean success = culturalInstitutionService.save(c);
 			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 		}
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
@@ -438,8 +461,19 @@ public class AdminController {
 	public ResponseEntity<Boolean> deleteShowing(@RequestBody HashMap<String, String> hm)
 	{
 		String name = hm.get("name");
-		boolean success = culturalInstitutionService.deleteShowing(name);
-		return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+		String ci = hm.get("ci");
+		Showing s = culturalInstitutionService.getShowing(name);
+		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+		List<Showing> showings = c.getShowings();
+		showings.remove(s);
+		c.setShowings(showings);
+		boolean success = culturalInstitutionService.save(c);
+		if(!success)
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		boolean success2 = culturalInstitutionService.deleteShowing(name);
+		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
 	}
 	
