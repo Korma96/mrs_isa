@@ -1,5 +1,8 @@
 package com.jvm.isa.service;
 
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 import com.jvm.isa.domain.RegisteredUser;
@@ -21,4 +24,7 @@ public interface UserService {
 
 	int correctChangepassword(User user, String oldPassword, String newPassword, String repeatNewPassword);
 
+	void saveImageinDatabase(String fileName, InputStream uploadedInputStream);
+	
+	long computeSubtractTwoDateTime(LocalDate ld1, LocalDate ld2, LocalTime lt1, LocalTime lt2);
 }

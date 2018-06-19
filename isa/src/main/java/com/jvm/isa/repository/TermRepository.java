@@ -17,8 +17,10 @@ public interface TermRepository extends Repository<Term, Long> {
 	
 	List<Term> findByCulturalInstitutionAndShowing(CulturalInstitution culturalInstitution, Showing showing);
 	
-	Term findByDateAndTimeAndCulturalInstitutionAndShowing(LocalDate date, LocalTime time, CulturalInstitution culturalInstitution, Showing showing);
+	Term findByCulturalInstitutionAndShowingAndDateAndTimeAndAuditorium(CulturalInstitution culturalInstitution, Showing showing, LocalDate date, LocalTime time, Auditorium auditorium);
 
+	List<Term> findByCulturalInstitutionAndAuditorium(CulturalInstitution culturalInstitution, Auditorium auditorium);
+	
 	Term save(Term term);
 
 	List<Term> findAll();
@@ -31,4 +33,7 @@ public interface TermRepository extends Repository<Term, Long> {
 	Term findById(Long id);
 	
 	void delete(Term term);
+
+	List<Term> findByCulturalInstitutionAndShowingAndDateAndAuditorium(CulturalInstitution culturalInstitution,
+			Showing showing, LocalDate date, Auditorium auditorium);
 }

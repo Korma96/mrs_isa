@@ -1,10 +1,7 @@
 package com.jvm.isa.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,11 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.AdministratorDTO;
-import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
+import com.jvm.isa.domain.ImageModel;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.RegisteredUserDTO;
 import com.jvm.isa.domain.Showing;
+import com.jvm.isa.domain.ShowingDTO;
 import com.jvm.isa.domain.SysAdministrator;
 import com.jvm.isa.domain.SysAdministratorDTO;
 import com.jvm.isa.domain.Term;
@@ -41,6 +39,7 @@ import com.jvm.isa.repository.AuditoriumRepository;
 import com.jvm.isa.repository.TermRepository;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
+import com.jvm.isa.service.ImageModelService;
 import com.jvm.isa.service.TermService;
 import com.jvm.isa.service.TicketService;
 import com.jvm.isa.service.UserService;
@@ -70,6 +69,9 @@ public class UserController {
 	
 	@Autowired
 	private TermRepository termRepository;
+	
+	@Autowired
+	private ImageModelService imageModelService;
 	
 	@Autowired
 	private HttpSession httpSession;
@@ -492,12 +494,13 @@ public class UserController {
 				String timeStr = hm.get("time").trim();
 				String culturalInstitutionName = hm.get("culturalInstitution").trim();
 				String showingName = hm.get("showing").trim();
+				String auditoriumName = hm.get("auditorium");
 				String selectedSeats = hm.get("selectedSeats").trim();
 				
 				Boolean success;
 				
 				if(!selectedSeats.equals("")) {
-					success = termService.bookSelectedSeats(dateStr, timeStr, culturalInstitutionName, showingName, selectedSeats, (RegisteredUser) loggedUser);
+					success = termService.bookSelectedSeats(dateStr, timeStr, culturalInstitutionName, showingName, auditoriumName, selectedSeats, (RegisteredUser) loggedUser);
 				
 				}
 				else {
@@ -519,11 +522,12 @@ public class UserController {
 		String timeStr = hm.get("time").trim();
 		String culturalInstitutionName = hm.get("culturalInstitution").trim();
 		String showingName = hm.get("showing").trim();
+		String auditoriumName = hm.get("auditorium").trim();
 		
 		HashMap<String, Object> hmReturn = new HashMap<String, Object>();
 		
 		
-		Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName);
+		Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName, auditoriumName);
 		if(term != null) {
 			ArrayList<Integer> indexOfBusySeatsAndRowsCols = termService.getIndexOfBusySeatsAndRowsCols(term);
 			hmReturn.put("existsTerm", true);
@@ -548,68 +552,73 @@ public class UserController {
 	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
 	public ResponseEntity<Integer> sendSeatsAndFriends(@RequestBody HashMap<String, Object> hm) { 
 		User loggedUser = getLoggedUserLocalMethod();
-		if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
-			RegisteredUser loggedRegisteredUser = (RegisteredUser) loggedUser;
-			
-			String dateStr = ((String) hm.get("date")).trim();
-			String timeStr = ((String) hm.get("time")).trim();
-			String culturalInstitutionName = ((String) hm.get("culturalInstitution")).trim();
-			String showingName = ((String) hm.get("showing")).trim();
-			HashMap<String, String> seatsAndFriends = (HashMap<String, String>) hm.get("seatsAndFriends");
-			
-			int retValue = termService.thereAreRepetitionsOrNotPutYourself(seatsAndFriends.values(), loggedUser.getUsername());
-			if(retValue != 0) {
-				return new ResponseEntity<Integer>(retValue, HttpStatus.OK);
-			}
-			
-			RegisteredUser friend;
-			User user;
-			Ticket ticket;
-			Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName);
-			ArrayList<Ticket> loggedRegisteredUserTickets = new ArrayList<Ticket>();
-			ArrayList<Ticket> savedTickets = new ArrayList<Ticket>();
-			
-			int seat;
-			Ticket savedTicket;
-			
-			for (String seatStr : seatsAndFriends.keySet()) {
-				//ticket = ticketService.getTicket(term, Integer.parseInt(seat));
-				seat = Integer.parseInt(seatStr) - 1;
-				ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat, 1000);
+		
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
+				RegisteredUser loggedRegisteredUser = (RegisteredUser) loggedUser;
 				
-				savedTicket = ticketService.save(ticket);
-				savedTickets.add(savedTicket);
-				//ticket.setOwner(loggedRegisteredUser);
+				String dateStr = ((String) hm.get("date")).trim();
+				String timeStr = ((String) hm.get("time")).trim();
+				String culturalInstitutionName = ((String) hm.get("culturalInstitution")).trim();
+				String showingName = ((String) hm.get("showing")).trim();
+				String auditoriumName = ((String) hm.get("auditorium")).trim();
+				HashMap<String, String> seatsAndFriends = (HashMap<String, String>) hm.get("seatsAndFriends");
 				
-				if(seatsAndFriends.get(seatStr).equals(loggedRegisteredUser.getUsername())) {
-					loggedRegisteredUserTickets.add(savedTicket);
+				int retValue = termService.thereAreRepetitionsOrNotPutYourself(seatsAndFriends.values(), loggedUser.getUsername());
+				if(retValue != 0) {
+					return new ResponseEntity<Integer>(retValue, HttpStatus.OK);
 				}
-				else {
-					user = userService.getUser(seatsAndFriends.get(seatStr));
-					if(user.getUserType() == UserType.REGISTERED_USER) {
-						friend = (RegisteredUser) user;
-						try {
-							emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, ticket.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+				
+				RegisteredUser friend;
+				User user;
+				Ticket ticket;
+				Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName, auditoriumName);
+				if(term == null) return new ResponseEntity<Integer>(-1, HttpStatus.OK);
+				
+				ArrayList<Ticket> loggedRegisteredUserTickets = new ArrayList<Ticket>();
+				ArrayList<Ticket> savedTickets = new ArrayList<Ticket>();
+				
+				int seat;
+				Ticket savedTicket;
+				
+				for (String seatStr : seatsAndFriends.keySet()) {
+					//ticket = ticketService.getTicket(term, Integer.parseInt(seat));
+					seat = Integer.parseInt(seatStr) - 1;
+					ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat, 1000);
+					
+					savedTicket = ticketService.save(ticket);
+					savedTickets.add(savedTicket);
+					//ticket.setOwner(loggedRegisteredUser);
+					
+					if(seatsAndFriends.get(seatStr).equals(loggedRegisteredUser.getUsername())) {
+						loggedRegisteredUserTickets.add(savedTicket);
+					}
+					else {
+						user = userService.getUser(seatsAndFriends.get(seatStr));
+						if(user.getUserType() == UserType.REGISTERED_USER) {
+							friend = (RegisteredUser) user;
+							try {
+								emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, ticket.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+								
+							} catch (Exception e) {
+								System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+							}
 							
-						} catch (Exception e) {
-							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+							friend.getInvitations().add(savedTicket);
+							userService.registrate(friend);
 						}
 						
-						friend.getInvitations().add(savedTicket);
-						userService.registrate(friend);
 					}
 					
 				}
 				
+				if(loggedRegisteredUserTickets.size() > 0) saveTicketsForLoggedUser(loggedRegisteredUser, loggedRegisteredUserTickets);
+				
+				saveTicketsForCulturalInstitution(term.getCulturalInstitution(), savedTickets);
+				
+				return new ResponseEntity<Integer>(0, HttpStatus.OK);
 			}
-			
-			if(loggedRegisteredUserTickets.size() > 0) saveTicketsForLoggedUser(loggedRegisteredUser, loggedRegisteredUserTickets);
-			
-			saveTicketsForCulturalInstitution(term.getCulturalInstitution(), savedTickets);
-			
-			return new ResponseEntity<Integer>(0, HttpStatus.OK);
 		}
-		
 		
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
@@ -622,6 +631,19 @@ public class UserController {
 	private void saveTicketsForCulturalInstitution(CulturalInstitution culturalInstitution, ArrayList<Ticket> savedTickets) {
 		culturalInstitution.getTickets().addAll(savedTickets);
 		culturalInstitutionService.save(culturalInstitution);
+	}
+	
+	@RequestMapping(value = "/get_visited_and_unvisited_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getVisitedAndUnvisitedCulturalInstitutions() {
+		User loggedUser = getLoggedUserLocalMethod();
+		
+		if(loggedUser != null) {
+			HashMap<String, Object> visitedAndUnvisitedCulturalInstitutions = ticketService.getVisitedAndUnvisitedCulturalInstitutions((RegisteredUser) loggedUser);
+			return new ResponseEntity<HashMap<String, Object>>(visitedAndUnvisitedCulturalInstitutions, HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<HashMap<String, Object>>(new HashMap<String, Object>(), HttpStatus.OK);
+	
 	}
 	
 	@RequestMapping(value = "/get_cultural_institutions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -666,17 +688,53 @@ public class UserController {
 		return new ResponseEntity<ArrayList<String>>(dates, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/get_auditoriums_and_times", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+	@RequestMapping(value = "/get_auditoriums", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
 																					produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ArrayList<String>> getAuditoriumsAndTimes(@RequestBody HashMap<String, String> hm) {
+	public ResponseEntity<ArrayList<String>> getAuditoriums(@RequestBody HashMap<String, String> hm) {
 		String dateStr = hm.get("date").trim();
 		String culturalInstitutionName = hm.get("culturalInstitution").trim();
 		String showingName = hm.get("showing").trim();
 		
 
-		ArrayList<String> auditoriumsAndTimes = termService.getAuditoriumAndTime(culturalInstitutionName, showingName, dateStr);
+		ArrayList<String> auditoriumsAndTimes = termService.getAuditoriums(culturalInstitutionName, showingName, dateStr);
 		
 		return new ResponseEntity<ArrayList<String>>(auditoriumsAndTimes, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/get_times", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getTimes(@RequestBody HashMap<String, String> hm) {
+		String dateStr = hm.get("date").trim();
+		String culturalInstitutionName = hm.get("culturalInstitution").trim();
+		String showingName = hm.get("showing").trim();
+		String auditoriumStr = hm.get("auditorium").trim();
+		
+
+		ArrayList<String> times = termService.getTimes(culturalInstitutionName, showingName, dateStr, auditoriumStr);
+		
+		return new ResponseEntity<ArrayList<String>>(times, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/get_price", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getPrice(@RequestBody HashMap<String, String> hm) {
+		String dateStr = hm.get("date").trim();
+		String culturalInstitutionName = hm.get("culturalInstitution").trim();
+		String showingName = hm.get("showing").trim();
+		String auditoriumStr = hm.get("auditorium").trim();
+		String timeStr = hm.get("time").trim();
+		
+		HashMap<String, Object> retHm = new HashMap<String, Object>();
+		
+		Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName, auditoriumStr);
+		boolean hasPrice = (term != null);
+		retHm.put("hasPrice", hasPrice);
+		if(hasPrice) {
+			retHm.put("price", term.getPrice());
+		}
+		
+		return new ResponseEntity<HashMap<String, Object>>(retHm, HttpStatus.OK);
 	}
 	
 	
@@ -727,7 +785,7 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
 				
 				if(ru.getInvitations().contains(ticket) && !ru.getTickets().contains(ticket)) {
 					ticket.setOwner(ru);
@@ -755,7 +813,8 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
+				if(ticket == null) return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 				
 				if(ru.getInvitations().contains(ticket)) {
 					ru.getInvitations().remove(ticket);
@@ -772,7 +831,7 @@ public class UserController {
 						culturalInstitutionService.save(culturalInstitution);
 					}
 					
-					return new ResponseEntity<>(true, HttpStatus.OK);
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 				}
 			
 				
@@ -781,7 +840,7 @@ public class UserController {
 			
 		}
 		
-		return new ResponseEntity<>(false, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/remove_ticket", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -792,11 +851,11 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
+				if(ticket == null) return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 				
-				
-				if(computeSubtractTwoDateTime(LocalDate.now(), ticket.getTerm().getDate(), LocalTime.now(), ticket.getTerm().getTime()) < 30) {
-					return new ResponseEntity<>(false, HttpStatus.OK); // za 30 min pocinje predstava/projekcija (nije moguce otkazati)
+				if(userService.computeSubtractTwoDateTime(LocalDate.now(), ticket.getTerm().getDate(), LocalTime.now(), ticket.getTerm().getTime()) < 30) {
+					return new ResponseEntity<Boolean>(false, HttpStatus.OK); // za 30 min pocinje predstava/projekcija (nije moguce otkazati)
 				}
 				
 				if(ru.getTickets().contains(ticket)) {
@@ -814,7 +873,7 @@ public class UserController {
 					}
 					
 					
-					return new ResponseEntity<>(true, HttpStatus.OK);
+					return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 				}
 			
 				
@@ -825,12 +884,63 @@ public class UserController {
 		
 		return new ResponseEntity<>(false, HttpStatus.OK);
 	}
-
 	
-	private long computeSubtractTwoDateTime(LocalDate ld1, LocalDate ld2, LocalTime lt1, LocalTime lt2) {
-		long sub = ChronoUnit.MINUTES.between(LocalDateTime.of(ld1, lt1), LocalDateTime.of(ld2, lt2));
-		return sub;
-		//Duration.between(ticket.getTerm().getTime(), LocalTime.now()).toMinutes()
+	public void saveNewCulturalInstitutionOnSession(CulturalInstitution newCulturalInstitution) {
+		httpSession.setAttribute("newCulturalInstitution", newCulturalInstitution);
 	}
 	
+	public CulturalInstitution getNewCulturalInstitutionOnSession() {
+		return (CulturalInstitution) httpSession.getAttribute("newCulturalInstitution");
+	}
+	
+	public void removeNewCulturalInstitutionOnSession() {
+		httpSession.removeAttribute("newCulturalInstitution");
+	}
+	
+	public void saveNewShowingOnSession(Showing newShowing) {
+		httpSession.setAttribute("newShowing", newShowing);
+	}
+	
+	public Showing getNewShowingOnSession() {
+		return (Showing) httpSession.getAttribute("newShowing");
+	}
+	
+	public void removeNewShowingOnSession() {
+		httpSession.removeAttribute("newShowing");
+	}
+	
+	@RequestMapping(value = "/get_image/{name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getImage(@PathVariable("name") String name) {
+		ImageModel imageModel = imageModelService.getImageModel(name);
+		HashMap<String, Object> hm = new HashMap<String, Object>();
+		
+		boolean hasImage = (imageModel != null);
+		hm.put("hasImage", hasImage);
+		if(hasImage) hm.put("imageModel", imageModel);
+		
+		return new ResponseEntity<HashMap<String, Object>>(hm, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/get_showing_for_show/{name}/{culturalInstitutionName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getShowingForShow(@PathVariable("name") String name, @PathVariable("culturalInstitutionName") String culturalInstitutionName) {
+		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+		HashMap<String, Object> hm = new HashMap<String, Object>();
+		
+		boolean hasShowing = (culturalInstitution != null);
+		if(!hasShowing) {
+			hm.put("hasShowing", hasShowing);
+		}
+		else {
+			Showing showing = culturalInstitution.getShowing(name);
+			hasShowing = (showing != null);
+			hm.put("hasShowing", hasShowing);
+			
+			if(hasShowing) {
+				hm.put("showing", new ShowingDTO(showing));
+			}
+			
+		}
+		
+		return new ResponseEntity<HashMap<String, Object>>(hm, HttpStatus.OK);
+	}
 }

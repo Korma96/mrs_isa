@@ -1,14 +1,23 @@
 package com.jvm.isa.service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.jvm.isa.domain.ImageModel;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
@@ -21,6 +30,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
     private UserRepository userRepository;
 	
+	@Autowired
+	private ImageModelService imageModelService;
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
@@ -125,4 +136,34 @@ public class UserServiceImpl implements UserService {
 		return people;
 	}
 	
+	@Async
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Override
+	public void saveImageinDatabase(String fileName, InputStream uploadedInputStream) {
+		/*Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {*/
+		ImageModel newImageModel = null;
+		try {
+			newImageModel = new ImageModel(fileName, IOUtils.toByteArray(uploadedInputStream));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		imageModelService.save(newImageModel);
+		System.out.println("File successfully uploaded to : " + fileName); 
+				
+		//	}
+		//});
+		//thread.start();
+		
+	}
+	
+	public long computeSubtractTwoDateTime(LocalDate ld1, LocalDate ld2, LocalTime lt1, LocalTime lt2) {
+		long sub = ChronoUnit.MINUTES.between(LocalDateTime.of(ld1, lt1), LocalDateTime.of(ld2, lt2));
+		return sub;
+		//Duration.between(ticket.getTerm().getTime(), LocalTime.now()).toMinutes()
+	}
 }
+

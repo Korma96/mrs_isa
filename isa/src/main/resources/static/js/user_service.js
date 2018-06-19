@@ -18,14 +18,18 @@ var getIndexesOfBusySeatsAndRowsColsURL = "/myapp/users/get_indexes_of_busy_seat
 var sendSeatsAndFriendsURL = "/myapp/users/send_seats_and_friends";
 var getCulturalInstitutionsForReservationURL = "/myapp/users/get_cultural_institutions";
 var getShowingsOfCulturalInstitutionForReservationURL = "/myapp/users/get_showings_of_cultural_institution";
-var getAuditoriumsAndTimesURL = "/myapp/users/get_auditoriums_and_times";
+var getAuditoriumsURL = "/myapp/users/get_auditoriums";
+var getTimesURL = "/myapp/users/get_times";
 var getDatesURL = "/myapp/users/get_dates";
 var invitationsURL = "/myapp/users/get_invitations";
 var ticketsURL = "/myapp/users/get_tickets";
 var acceptInvitationURL = "/myapp/users/accept_invitation";
 var declineInvitationURL = "/myapp/users/decline_invitation";
 var removeTicketURL = "/myapp/users/remove_ticket";
-
+var getVisitedAndUnvisitedCulturalInstitutionsURL = "/myapp/users/get_visited_and_unvisited_cultural_institutions"; 
+var getImageURL = "/myapp/users/get_image";
+var getShowingForShowURL = "/myapp/users/get_showing_for_show";
+var getPriceURL = "/myapp/users/get_price";
 
 	
 var indexOfFriends = 0;
@@ -111,6 +115,13 @@ var pathname = getPathname();
 	case "/users/friends/":
 	case "/users/friends":
 		friendsPage();
+		break;
+	case "users/visited_and_unvisited_cultural_institutions":
+	case "users/visited_and_unvisited_cultural_institutions/":
+	case "/users/visited_and_unvisited_cultural_institutions/":
+	case "/users/visited_and_unvisited_cultural_institutions":
+		showVisitedAndUnvisitedCulturalInstitutions();
+		loadVisitedAndUnvisitedCulturalInstitutionsPageComplete();
 		break;
 	case "users/seats_reservation":
 	case "users/seats_reservation/":
@@ -281,6 +292,18 @@ function loadInvitationsAndTicketsPageComplete() {
 	$("#title").html('INVITATIONS AND TICKETS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
 }
 
+function loadCulturalInstitutionPageComplete() {
+	$("#title").html('CULTURAL INSTITUTION PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
+}
+
+function loadShowingPageComplete() {
+	$("#title").html('SHOWING PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
+}
+
+function loadVisitedAndUnvisitedCulturalInstitutionsPageComplete() {
+	$("#title").html('VISITED AND UNVISITED CULTURAL INSTITUTIONS PAGE &nbsp;&nbsp;  <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a>  ');
+}
+
 $(document).on("click", ".a_register", function(event) {
 	event.preventDefault();
 	
@@ -425,7 +448,7 @@ function successfullyLogged() {
 	  .attr({
 	      type: 'text/css', 
 	      rel: 'stylesheet',
-	      href: 'css/invitations_and_tickets.css'
+	      href: 'css/showing.css'
 	});
 	
 	$('<link>')
@@ -482,6 +505,22 @@ function registeredUserPage() {
 	      href: 'css/friends_page.css'
 	});
 	
+	$('<link>')
+	  .appendTo('head')
+	  .attr({
+	      type: 'text/css', 
+	      rel: 'stylesheet',
+	      href: 'css/invitations_and_tickets.css'
+	});
+	
+	$('<link>')
+	  .appendTo('head')
+	  .attr({
+	      type: 'text/css', 
+	      rel: 'stylesheet',
+	      href: 'css/visited_and_unvisited_cultural_institutions.css'
+	});
+	
 	$("#title").html('REGISTERED USER PAGE &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 	
 	$("#myDropdown").append('<a id="id_seats_reservation" href="/myapp/#/users/seats_reservation"> Seats reservation </a>');
@@ -489,7 +528,10 @@ function registeredUserPage() {
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/users/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/users/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_friends" href="/myapp/#/users/friends"> Friends </a>');
+	$("#myDropdown").append('<a id="id_visited_unvisited" href="/myapp/#/users/visited_and_unvisited_cultural_institutions"> Visited and unvisited cultural institutions </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	showVisitedAndUnvisitedCulturalInstitutions();
 	
 	$("#id_seats_reservation").click(function(event) {
 		event.preventDefault();
@@ -540,6 +582,18 @@ function registeredUserPage() {
 		
 		friendsPage();
 	});
+	
+	$("#id_visited_unvisited").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set URL
+		}
+		
+		showVisitedAndUnvisitedCulturalInstitutions();
+		loadVisitedAndUnvisitedCulturalInstitutionsPageComplete();
+	});
+	
 	
 	$("#id_logout").click(function(event) {
 		event.preventDefault();
@@ -1038,8 +1092,8 @@ function getPeople() {
 	return people;
 }
 
-function getAuditoriumsAndTimes() {
-	var auditoriumsAndTimes = null;
+function getAuditoriums() {
+	var auditoriums = null;
 	
 	var culturalInstitution = $("#id_cultural_institution").val();
 	var showing = $("#id_showing").val();
@@ -1048,16 +1102,16 @@ function getAuditoriumsAndTimes() {
 	$.ajax({
 		async: false,
 		type : "PUT",
-		url : getAuditoriumsAndTimesURL,
+		url : getAuditoriumsURL,
 		dataType : "json",
 		data: JSON.stringify({"culturalInstitution": culturalInstitution.trim(), 
 			                  "showing": showing.trim(),
-			                  "date": date
+			                  "date": date.trim()
          }),
 		contentType: "application/json",
 		cache: false,
-		success : function(receiveAuditoriumsAndTimes) {
-			auditoriumsAndTimes = receiveAuditoriumsAndTimes;
+		success : function(receiveAuditoriums) {
+			auditoriums = receiveAuditoriums;
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
@@ -1065,7 +1119,39 @@ function getAuditoriumsAndTimes() {
 		}
 	});
 	
-	return auditoriumsAndTimes;
+	return auditoriums;
+}
+
+function getTimes() {
+	var times = null;
+	
+	var culturalInstitution = $("#id_cultural_institution").val();
+	var showing = $("#id_showing").val();
+	var date = $("#id_date").val();
+	var auditorium = $("#id_auditorium").val();
+	
+	$.ajax({
+		async: false,
+		type : "PUT",
+		url : getTimesURL,
+		dataType : "json",
+		data: JSON.stringify({"culturalInstitution": culturalInstitution.trim(), 
+			                  "showing": showing.trim(),
+			                  "date": date.trim(),
+			                  "auditorium": auditorium.trim()
+         }),
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveTimes) {
+			times = receiveTimes;
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return times;
 }
 
 function getDates() {
@@ -1403,8 +1489,6 @@ function loadAllForReservation() {
 				$("#id_cultural_institution").append("<option " + selected + "> " + culturalInstitution + " </option>");
 			});
 			
-			$("#id_cultural_institution").change(changedCulturalInstitutionForReservation);
-			
 			var showingsOfCulturalInstitution = getShowingsOfCulturalInstitutionForReservation(culturalInstitutions[0]);
 			if(showingsOfCulturalInstitution) {
 				if (showingsOfCulturalInstitution.length > 0) {
@@ -1433,25 +1517,56 @@ function loadAllForReservation() {
 							});
 							
 							
-							var auditoriumsAndTimes = getAuditoriumsAndTimes(culturalInstitutions[0], showingsOfCulturalInstitution[0], dates[0]);
-							if(auditoriumsAndTimes) {
-								if (auditoriumsAndTimes.length > 0) {
-									$.each(auditoriumsAndTimes, function(index4, auditoriumAndTime) {
+							var auditoriums = getAuditoriums(culturalInstitutions[0], showingsOfCulturalInstitution[0], dates[0]);
+							if(auditoriums) {
+								if (auditoriums.length > 0) {
+									$.each(auditoriums, function(index4, auditorium) {
 										if(index4 == 0) {
 											selected = "selected";
 										}
 										else{
 											selected = "";
 										}
-										$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+										$("#id_auditorium").append("<option " + selected + "> " + auditorium + " </option>");
 									});
+									
+									var times = getTimes(culturalInstitutions[0], showingsOfCulturalInstitution[0], dates[0], auditoriums[0]);
+									if(times) {
+										if (times.length > 0) {
+											$.each(times, function(index5, time) {
+												if(index5 == 0) {
+													selected = "selected";
+												}
+												else{
+													selected = "";
+												}
+												$("#id_time").append("<option " + selected + "> " + time + " </option>");
+											});
+											
+											var price = getPrice(culturalInstitutions[0], showingsOfCulturalInstitution[0], dates[0], auditoriums[0], times[0]);
+											if(price) {
+												$("#id_price").text(price);
+											}
+											else {
+												$("#id_price").text(0);
+												toastr.error("Not found term for selected options!");
+											}
+											
+										}
+										else {
+											toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+										}
+									}
+									else {
+										toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+									}
 								}
 								else {
-									toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+									toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 								}
 							}
 							else {
-								toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+								toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 							}
 							
 						}
@@ -1489,7 +1604,8 @@ function changedCulturalInstitutionForReservation() {
 	var currentCulturalInstitution = $("#id_cultural_institution").val();
 	$("#id_showing").empty();
 	$("#id_date").empty();
-	$("#id_auditorium_and_time").empty();
+	$("#id_auditorium").empty();
+	$("#id_time").empty();
 	
 	var showingsOfCulturalInstitution = getShowingsOfCulturalInstitutionForReservation(currentCulturalInstitution);
 	if(showingsOfCulturalInstitution) {
@@ -1518,29 +1634,59 @@ function changedCulturalInstitutionForReservation() {
 					});
 					
 					
-					var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, showingsOfCulturalInstitution[0], dates[0]);
-					if(auditoriumsAndTimes) {
-						if (auditoriumsAndTimes.length > 0) {
-							$.each(auditoriumsAndTimes, function(index3, auditoriumAndTime) {
+					var auditoriums = getAuditoriums(currentCulturalInstitution, showingsOfCulturalInstitution[0], dates[0]);
+					if(auditoriums) {
+						if (auditoriums.length > 0) {
+							$.each(auditoriums, function(index3, auditorium) {
 								if(index3 == 0) {
 									selected = "selected";
 								}
 								else{
 									selected = "";
 								}
-								$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+								$("#id_auditorium").append("<option " + selected + "> " + auditorium + " </option>");
 							});
 							
 							
+							var times = getTimes(currentCulturalInstitution, showingsOfCulturalInstitution[0], dates[0], auditoriums[0]);
+							if(times) {
+								if (times.length > 0) {
+									$.each(times, function(index, time) {
+										if(index4 == 0) {
+											selected = "selected";
+										}
+										else{
+											selected = "";
+										}
+										$("#id_time").append("<option " + selected + "> " + time + " </option>");
+									});
+									
+									var price = getPrice(currentCulturalInstitution, showingsOfCulturalInstitution[0], dates[0], auditoriums[0], times[0]);
+									if(price) {
+										$("#id_price").text(price);
+									}
+									else {
+										$("#id_price").text(0);
+										toastr.error("Not found term for selected options!");
+									}
+									
+								}
+								else {
+									toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+								}
+							}
+							else {
+								toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+							}
+							
 						}
 						else {
-							toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+							toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 						}
 					}
 					else {
-						toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+						toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 					}
-					
 					
 				}
 				else {
@@ -1569,7 +1715,8 @@ function changedShowingForReservation() {
 	var currentCulturalInstitution = $("#id_cultural_institution").val();
 	var currentShowing = $("#id_showing").val();
 	$("#id_date").empty();
-	$("#id_auditorium_and_time").empty();
+	$("#id_auditorium").empty();
+	$("#id_time").empty();
 	
 	var dates = getDates(currentCulturalInstitution, currentShowing);
 	if(dates) {
@@ -1585,29 +1732,58 @@ function changedShowingForReservation() {
 			});
 			
 			
-			var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, currentShowing, dates[0]);
-			if(auditoriumsAndTimes) {
-				if (auditoriumsAndTimes.length > 0) {
-					$.each(auditoriumsAndTimes, function(index2, auditoriumAndTime) {
+			var auditoriums = getAuditoriums(currentCulturalInstitution, currentShowing, dates[0]);
+			if(auditoriums) {
+				if (auditoriums.length > 0) {
+					$.each(auditoriums, function(index2, auditorium) {
 						if(index2 == 0) {
 							selected = "selected";
 						}
 						else{
 							selected = "";
 						}
-						$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+						$("#id_auditorium").append("<option " + selected + "> " + auditorium + " </option>");
 					});
 					
+					var times = getTimes(currentCulturalInstitution, currentShowing, dates[0], auditoriums[0]);
+					if(times) {
+						if (times.length > 0) {
+							$.each(times, function(index3, time) {
+								if(index3 == 0) {
+									selected = "selected";
+								}
+								else{
+									selected = "";
+								}
+								$("#id_time").append("<option " + selected + "> " + time + " </option>");
+							});
+							
+							var price = getPrice(currentCulturalInstitution, currentShowing, dates[0], auditoriums[0], times[0]);
+							if(price) {
+								$("#id_price").text(price);
+							}
+							else {
+								$("#id_price").text(0);
+								toastr.error("Not found term for selected options!");
+							}
+							
+						}
+						else {
+							toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+						}
+					}
+					else {
+						toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+					}
 					
 				}
 				else {
-					toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+					toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 				}
 			}
 			else {
-				toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+				toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 			}
-			
 			
 		}
 		else {
@@ -1626,31 +1802,135 @@ function changedDatesForReservation() {
 	var currentCulturalInstitution = $("#id_cultural_institution").val();
 	var currentShowing = $("#id_showing").val();
 	var currentDate = $("#id_date").val();
-	$("#id_auditorium_and_time").empty();
+	$("#id_auditorium").empty();
+	$("#id_time").empty();
 	
-	var auditoriumsAndTimes = getAuditoriumsAndTimes(currentCulturalInstitution, currentShowing, currentDate);
-	if(auditoriumsAndTimes) {
-		if (auditoriumsAndTimes.length > 0) {
-			$.each(auditoriumsAndTimes, function(index, auditoriumAndTime) {
+	var auditoriums = getAuditoriums(currentCulturalInstitution, currentShowing, currentDate);
+	if(auditoriums) {
+		if (auditoriums.length > 0) {
+			$.each(auditoriums, function(index, auditorium) {
 				if(index == 0) {
 					selected = "selected";
 				}
 				else{
 					selected = "";
 				}
-				$("#id_auditorium_and_time").append("<option " + selected + "> " + auditoriumAndTime + " </option>");
+				$("#id_auditorium").append("<option " + selected + "> " + auditorium + " </option>");
 			});
 			
+			var times = getTimes(currentCulturalInstitution, currentShowing, currentDate, auditoriums[0]);
+			if(times) {
+				if (times.length > 0) {
+					$.each(times, function(index2, time) {
+						if(index2 == 0) {
+							selected = "selected";
+						}
+						else{
+							selected = "";
+						}
+						$("#id_time").append("<option " + selected + "> " + time + " </option>");
+					});
+					
+					var price = getPrice(currentCulturalInstitution, currentShowing, currentDate, auditoriums[0], times[0]);
+					if(price) {
+						$("#id_price").text(price);
+					}
+					else {
+						$("#id_price").text(0);
+						toastr.error("Not found term for selected options!");
+					}
+				}
+				else {
+					toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+				}
+			}
+			else {
+				toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+			}
 			
 		}
 		else {
-			toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+			toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 		}
 	}
 	else {
-		toastr.error("Auditoriums and times, for selected cultural institution and showing and date, are not available!");
+		toastr.error("Auditoriums, for selected cultural institution and showing and date, are not available!");
 	}
 	
+}
+
+function changedAuditoriumsForReservation() {
+	$("#id_seats").remove();
+	
+	var currentCulturalInstitution = $("#id_cultural_institution").val();
+	var currentShowing = $("#id_showing").val();
+	var currentDate = $("#id_date").val();
+	var currentAuditorium = $("#id_auditorium").val();
+	$("#id_time").empty();
+	
+	var times = getTimes(currentCulturalInstitution, currentShowing, currentDate, currentAuditorium);
+	if(times) {
+		if (times.length > 0) {
+			$.each(times, function(index2, time) {
+				if(index2 == 0) {
+					selected = "selected";
+				}
+				else{
+					selected = "";
+				}
+				$("#id_time").append("<option " + selected + "> " + time + " </option>");
+			});
+			
+			var price = getPrice(currentCulturalInstitution, currentShowing, currentDate, currentAuditorium, times[0]);
+			if(price) {
+				$("#id_price").text(price);
+			}
+			else {
+				$("#id_price").text(0);
+				toastr.error("Not found term for selected options!");
+			}
+		}
+		else {
+			toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+		}
+	}
+	else {
+		toastr.error("Times, for selected cultural institution and showing and date and auditorium, are not available!");
+	}
+			
+}
+
+function getPrice(currentCulturalInstitution, currentShowing, currentDate, currentAuditorium, currentTime) {
+	var price = null;
+	
+	$.ajax({ 
+		async: false,
+	    type: "PUT",
+		url: getPriceURL,
+		dataType : "json",
+		data: JSON.stringify({"date": currentDate.trim(), 
+								"time": currentTime.trim(), 
+								"culturalInstitution": currentCulturalInstitution.trim(), 
+								"showing": currentShowing.trim(),
+								"auditorium": currentAuditorium.trim()
+		}),
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(retValue) {
+	    	if(retValue["hasPrice"]) {
+	    		var retPrice = retValue["price"]; 
+	    		if(retPrice) {
+	    			price = retPrice;
+	    		}
+	    	}
+	    				
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return price;
 }
 
 function loadReservationPageComplete() {
@@ -1662,7 +1942,18 @@ function loadReservationPageComplete() {
 	$("#id_cultural_institution").change(changedCulturalInstitutionForReservation);
 	$("#id_showing").change(changedShowingForReservation);
 	$("#id_date").change(changedDatesForReservation);
-	$("#id_auditorium_and_time").change(function() { $("#id_seats").remove(); });
+	$("#id_auditorium").change(changedAuditoriumsForReservation);
+	$("#id_time").change(function() { 
+		var price = getPrice($("#id_cultural_institution").val(), $("#id_showing").val(), $("#id_date").val(), $("#id_auditorium").val(), $("#id_time").val());
+		if(price) {
+			$("#id_price").text(price);
+		}
+		else {
+			$("#id_price").text(0);
+			toastr.error("Not found term for selected options!");
+		}
+		$("#id_seats").remove();
+	});
 	
 	$('#id_btn_show_seats').click(function (event) {
 		event.preventDefault();
@@ -1731,7 +2022,8 @@ function getIndexesOfBusySeatsAndRowsCols() {
 	var indexesOfBusySeatsAndRowsCols = null;
 	
 	var date = $("#id_date").val();
-	var time = $("#id_auditorium_and_time").val().split(",")[1].trim();
+	var auditorium = $("#id_auditorium").val();
+	var time = $("#id_time").val();
 	var culturalInstitution = $("#id_cultural_institution").val();
 	var showing = $("#id_showing").val();
 	
@@ -1743,7 +2035,9 @@ function getIndexesOfBusySeatsAndRowsCols() {
 		data: JSON.stringify({"date": date.trim(), 
 								"time": time.trim(), 
 								"culturalInstitution": culturalInstitution.trim(), 
-								"showing": showing.trim()}),
+								"showing": showing.trim(),
+								"auditorium": auditorium.trim()
+		}),
 	    contentType: "application/json",
 	    cache: false,
 	    success: function(retValue) {
@@ -1764,7 +2058,8 @@ function getIndexesOfBusySeatsAndRowsCols() {
 function bookSelectedSeats(selectedSeats) {
 	if(selectedSeats!== "") {
 		var date = $("#id_date").val();
-		var time = $("#id_auditorium_and_time").val().split(",")[1].trim();
+		var auditorium = $("#id_auditorium").val();
+		var time = $("#id_time").val();
 		var culturalInstitution = $("#id_cultural_institution").val();
 		var showing = $("#id_showing").val();
 		
@@ -1776,6 +2071,7 @@ function bookSelectedSeats(selectedSeats) {
 									"time": time.trim(), 
 									"culturalInstitution": culturalInstitution.trim(), 
 									"showing": showing.trim(),
+									"auditorium": auditorium.trim(),
 									"selectedSeats": selectedSeats.trim()}),
 		    contentType: "application/json",
 		    cache: false,
@@ -1890,7 +2186,8 @@ function sendSeatsAndFriendsAndMe(loggedUser) {
 	obj["culturalInstitution"] = $("#id_cultural_institution").val();
 	obj["showing"] = $("#id_showing").val();
 	obj["date"] = $("#id_date").val();
-	obj["time"] = $("#id_auditorium_and_time").val().split(",")[1].trim();
+	obj["auditorium"] = $("#id_auditorium").val();
+	obj["time"] = $("#id_time").val();
 	obj["seatsAndFriends"] = seatsAndFriends;
 	
 	
@@ -1969,6 +2266,8 @@ function invitationsAndTickets() {
 }
 
 function workWithInvitationsAndTickets() {
+	$("#id_invitations_and_tickets_page").prepend("<br/><br/>");
+	
 	var invitations = getInvitations();
 	var tickets = getTickets();
 	
@@ -2272,4 +2571,305 @@ function getTickets() {
 	});
 	
 	return tickets;
+}
+
+function getVisitedAndUnvisitedCulturalInstitutions() {
+	var visitedAndUnvisitedCulturalInstitutions = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : getVisitedAndUnvisitedCulturalInstitutionsURL,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(receiveVisitedAndUnvisitedCulturalInstitutions) {
+			if(receiveVisitedAndUnvisitedCulturalInstitutions["visited"]) {
+				visitedAndUnvisitedCulturalInstitutions = receiveVisitedAndUnvisitedCulturalInstitutions;
+			}
+			else {
+				visitedAndUnvisitedCulturalInstitutions = null;
+			}
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+	
+	return visitedAndUnvisitedCulturalInstitutions;
+}
+
+function showVisitedAndUnvisitedCulturalInstitutions() {
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		
+		deleteAllExceptFirst();
+		$("#center").append('<div id="id_visited_and_unvisited_cultural_institutions"></div>');
+		
+		$("#id_visited_and_unvisited_cultural_institutions").load("html/partials/visited_and_unvisited_cultural_institutions.html", workWithVisitedAndUnvisitedCulturalInstitutions);
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+}
+
+function workWithVisitedAndUnvisitedCulturalInstitutions() {
+	$("#id_visited_and_unvisited_cultural_institutions").prepend("<br/><br/>");
+	
+	var visitedAndUnvisitedCulturalInstitutions = getVisitedAndUnvisitedCulturalInstitutions();
+	var visitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["visited"];
+	var unvisitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["unvisited"];
+	
+	//popunjavanje tabele visited
+	if(visitedCulturalInstitutions) {
+		for (var i in visitedCulturalInstitutions) {
+			  $( "#id_table_visited" ).append('<tr> <td></td> <td>  <a href="/myapp/#/users/culturual_institution" id="id_visited_culturual_institution"> ' + visitedCulturalInstitutions[i].name + '</a> </td> <td>' + visitedCulturalInstitutions[i].address + ' </td> <td> ' + visitedCulturalInstitutions[i].description + '</td> <td>'+ visitedCulturalInstitutions[i].type +'</td> </tr>');
+			  $("#id_visited_culturual_institution").on("click", {name: visitedCulturalInstitutions[i].name, address: visitedCulturalInstitutions[i].address, description: visitedCulturalInstitutions[i].description, type: visitedCulturalInstitutions[i].type}, showCulturalInstitution);
+		}
+		
+		$("#id_header_visited_name").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(1, "id_table_visited");
+		});
+		
+		$("#id_header_visited_address").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(2, "id_table_visited");
+		});
+		
+		$("#id_header_visited_description").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(3, "id_table_visited");
+		});
+		
+		$("#id_header_visited_type").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(4, "id_table_visited");
+		});
+		
+	}
+	
+	//popunjavanje tabele unvisited
+	if(unvisitedCulturalInstitutions) {
+		for (var i in unvisitedCulturalInstitutions) {
+			  $( "#id_table_unvisited" ).append('<tr> <td></td> <td> <a href="/myapp/#/users/culturual_institution" id="id_unvisited_culturual_institution_'+i+'"> ' + unvisitedCulturalInstitutions[i].name + '</a>  </td> <td>' + unvisitedCulturalInstitutions[i].address + ' </td> <td> ' + unvisitedCulturalInstitutions[i].description + '</td> <td>'+ unvisitedCulturalInstitutions[i].type +'</td> </tr>');
+			  $("#id_unvisited_culturual_institution_"+i).on("click", {name: unvisitedCulturalInstitutions[i].name, address: unvisitedCulturalInstitutions[i].address, description: unvisitedCulturalInstitutions[i].description, type: unvisitedCulturalInstitutions[i].type}, showCulturalInstitution);
+		}
+		
+		$("#id_header_unvisited_name").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(1, "id_table_unvisited");
+		});
+		
+		$("#id_header_unvisited_address").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(2, "id_table_unvisited");
+		});
+		
+		$("#id_header_unvisited_description").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(3, "id_table_unvisited");
+		});
+		
+		$("#id_header_unvisited_type").click(function(event) {
+			event.preventDefault();
+			
+			sortTable(4, "id_table_unvisited");
+		});
+		
+	}
+	
+}
+
+function loadAndSetImage(imageName, id) {
+	$.ajax({
+		type : "GET",
+		url : getImageURL + "/" + imageName,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(retValue) {
+			if(retValue["hasImage"]) {
+				var imageModel = retValue["imageModel"];
+				if(imageModel) {
+					$("#"+id).attr('src', `data:image/png;base64,${imageModel.pic}`); // pic je niz byte-ova koji pretstavlja sliku
+				}
+				else {
+					$("#"+id).attr('src', 'images/no_image_available.jpg');					
+				}
+			}
+			else {
+				$("#"+id).attr('src', 'images/no_image_available.jpg');					
+			}
+			
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus);
+		}
+	});
+	
+}
+
+function getShowingForShow(name, culturalInstitutionName) {
+	var retShowing = null;
+	
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : getShowingForShowURL + "/" + name + "/" + culturalInstitutionName,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(retValue) {
+			if(retValue["hasShowing"]) {
+				retShowing = retValue["showing"];
+			}
+			
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus);
+		}
+	});
+	
+	return retShowing;
+}
+
+function showCulturalInstitution(event) {
+	event.preventDefault();
+	
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		if(event.data.name) {
+			deleteAllExceptFirst();
+			$("#center").append('<div> <table id="id_main_table"> </table></div>');
+			
+			var showings = getShowingsOfCulturalInstitution(event.data.name);
+			
+			$("#id_main_table").append('<tr> <td> <div class="div_image_or_google_map cultural_institution_div"><img id="id_img"alt="No image" src="#" class="medium_img"/></div> </td> <td> <div class="div_image_or_google_map cultural_institution_div" id="google_map"></div>  </td>  </tr>');
+			$("#id_main_table").append('<tr><td colspan="2"><div class="cultural_institution_div"> <table id="id_cultural_institution_table"></table></div>');
+			$("#id_main_table").append('<tr><td colspan="2"><div class="cultural_institution_div"> <table id="id_showings_table"></table></div>');
+			
+			$("#id_cultural_institution_table").append('<tr> <td><b>Name:</b></td> <td class="blue"> <b>'+event.data.name+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Address:</b></td> <td class="blue"> <b>'+event.data.address+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Description:</b></td> <td class="blue"> <b>'+event.data.description+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Type:</b></td> <td class="blue"> <b>'+event.data.type+'</b> </td>  </tr>');
+			
+			loadAndSetImage("cultural_institution_" + event.data.name, "id_img");
+			
+			showGoogleMap(event.data.address);
+				
+			$("#id_showings_table").append('<tr> <th colspan="2"> Showings </th> </tr>');
+			
+			if(showings) {
+				if(showings.length > 0) {
+					$.each(showings, function(index, item) {
+						$("#id_showings_table").append('<tr> <td><img class="small_img" id="id_showing_img_'+index+'" alt="No image" src="#"/></td> <td> <a id="id_showing_'+index+'" href="/myapp/#/users/showing" > <h3>' + item + ' </h3> </a> </td> </tr>');
+						$("#id_showing_img_" + index).on("click", {name: item}, showShowing);
+						$("#id_showing_" + index).on("click", {name: item, culturalInstitutionName: event.data.name}, showShowing);
+						
+						loadAndSetImage(event.data.name + "_" + item, "id_showing_img_" + index);
+					});
+				}
+				else {
+					toastr.error("Not found showings for this cultural institution!");
+				}
+			}
+			else {
+				toastr.error("Not found showings for this cultural institution!");
+			}
+			
+			
+			loadCulturalInstitutionPageComplete();
+		}
+		else {
+			toastr.error("Not found this cultural institution!");
+		}
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
+
+function showShowing(event) {
+	event.preventDefault();
+	
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		var showing = getShowingForShow(event.data.name, event.data.culturalInstitutionName);
+		if(showing) {
+			deleteAllExceptFirst();
+			$("#center").append('<div> <table id="id_main_table"> </table></div>');
+			
+			$("#id_main_table").append('<tr> <td> <div align="center"><input type="button" id="id_btn_quick_booking" class="buttons" value="Quick booking..."/> </td> </tr>');
+			$("#id_btn_quick_booking").on("click", { showingName: event.data.name, culturalInstitutionName: event.data.culturalInstitutionName}, quickBooking);
+			
+			$("#id_main_table").append('<tr> <td> <div class="div_image_or_google_map cultural_institution_div"><img id="id_showing_img"alt="No image" src="#" class="medium_img"/></div> </td> </tr>');
+			$("#id_main_table").append('<tr><td><div class="showing_div"> <table id="id_showing_table"></table></div>');
+			
+			$("#id_showing_table").append('<tr> <td><b>Name:</b></td> <td class="blue"> <b>'+showing.name+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Genre:</b></td> <td class="blue"> <b>'+showing.genre+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Actors:</b></td> <td class="blue"> <b>'+showing.listOfActors+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Name of director:</b></td> <td class="blue"> <b>'+showing.nameOfDirector+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Duration:</b></td> <td class="blue"> <b>'+showing.duration+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Average rating:</b></td> <td class="blue"> <b>'+showing.averageRating+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Short description:</b></td> <td class="blue"> <b>'+showing.shortDescription+'</b> </td>  </tr>');
+			$("#id_showing_table").append('<tr> <td><b>Type:</b></td> <td class="blue"> <b>'+showing.type+'</b> </td>  </tr>');
+			
+			loadAndSetImage(event.data.culturalInstitutionName + "_" + event.data.name, "id_showing_img");
+			
+			loadShowingPageComplete();
+		}
+		else {
+			toastr.error("Not found this showing!");
+		}
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
+}
+
+
+function showGoogleMap(addr) {
+    $("#google_map").googleMap();
+    $("#google_map").addMarker({
+    	address: addr, 
+    	zoom: 50
+    });
+}
+
+
+function quickBooking(event) {
+	event.preventDefault();
+	
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		
+		var showingName = event.data.showingName // markane ovo ce ti trebati
+		var culturalInstitutionName = event.data.culturalInstitutionName; // markane ovo ce ti trebati
+		
+		deleteAllExceptFirst();
+		$("#center").append('<div id="id_quick_booking_div"> </div>');
+		$("#id_quick_booking_div").load("html/partials/quick_booking.html", null, function(){
+			
+			// napravio sam ti fajl quick_booking.html
+			// ti ga napuni sadrzajem koji hoces
+			// markane cepaj ovde kod za brze rezevacije
+			
+		});
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
 }

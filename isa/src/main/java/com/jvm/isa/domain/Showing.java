@@ -34,8 +34,8 @@ public class Showing {
 	@Column(name="duration", unique=false, nullable=false)
 	private int duration;
 	
-	@Column(name="poster", unique=false, nullable=false)
-	private String poster;
+	//@Column(name="poster", unique=false, nullable=false)
+	//private String poster;
 	
 	@Column(name="average_rating", unique=false, nullable=false)
 	private double averageRating;
@@ -44,7 +44,7 @@ public class Showing {
 	private String shortDescription;
 	
 	@Column(name="type", unique=false, nullable=false)
-	private ShowingType showingType;
+	private ShowingType type;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	private List<Term> terms;
@@ -56,17 +56,17 @@ public class Showing {
 
 
 	public Showing(String name, String genre, String listOfActors, String nameOfDirector, int duration,
-			String poster, double averageRating, String shortDescription, ShowingType type) {
+			/*String poster,*/ double averageRating, String shortDescription, ShowingType type) {
 	
 		this.name = name;
 		this.genre = genre;
 		this.listOfActors = listOfActors;
 		this.nameOfDirector = nameOfDirector;
 		this.duration = duration;
-		this.poster = poster;
+		//this.poster = poster;
 		this.averageRating = averageRating;
 		this.shortDescription = shortDescription;
-		this.showingType = type;
+		this.type = type;
 		this.terms = new ArrayList<Term>();
 	}
 
@@ -131,14 +131,14 @@ public class Showing {
 	}
 
 
-	public String getPoster() {
+	/*public String getPoster() {
 		return poster;
 	}
 
 
 	public void setPoster(String poster) {
 		this.poster = poster;
-	}
+	}*/
 
 
 	public double getAverageRating() {
@@ -172,12 +172,12 @@ public class Showing {
 
 
 	public ShowingType getType() {
-		return showingType;
+		return type;
 	}
 
 
 	public void setType(ShowingType type) {
-		this.showingType = type;
+		this.type = type;
 	}
 	
 	

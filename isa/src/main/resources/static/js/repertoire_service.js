@@ -5,7 +5,8 @@ var getTermsURL = "/myapp/administrators/admin_cultural_institution/get_terms";
 var addTermURL = "/myapp/administrators/admin_cultural_institution/add_term";
 var deleteTermURL = "/myapp/administrators/admin_cultural_institution/delete_term";
 
-function getShowings() {
+function getShowings() 
+{
 	var showings = null;
 	
 	$.ajax({
@@ -27,7 +28,8 @@ function getShowings() {
 	return showings;
 }
 
-function getAllCulturalInstitutions() {
+function getAllCulturalInstitutions() 
+{
 	var culturalInstitutions = null;
 	
 	$.ajax({
@@ -49,7 +51,7 @@ function getAllCulturalInstitutions() {
 	return culturalInstitutions;
 }
 
-function changeАuditoriums()
+function changeAuditoriums()
 {
 	$('#id_auditorium').empty();
 	$("#div_for_terms").empty();
@@ -100,7 +102,7 @@ function repertoireMainPageComplete()
 				$("#id_cultural_institution").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
 			}
 			
-			$("#id_cultural_institution").change(changeАuditoriums);
+			$("#id_cultural_institution").change(changeAuditoriums);
 			
 			var showings = getShowings();
 			if(showings) {

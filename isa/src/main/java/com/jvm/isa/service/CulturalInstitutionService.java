@@ -30,11 +30,11 @@ public interface CulturalInstitutionService {
 	
 	Showing getShowing(String name);
 	
-	boolean showingExists(String name);
+	boolean showingExists(CulturalInstitution culturalInstitution, String name);
 	
 	boolean deleteShowing(String name);
 	
-	boolean save(Showing sh);
+	boolean save(Showing showing, CulturalInstitution culturalInstitution);
 	
 	boolean delete(CulturalInstitution ci);
 
@@ -45,4 +45,6 @@ public interface CulturalInstitutionService {
 	Auditorium getAuditorium(String oldName);
 
 	boolean deleteAuditorium(String name);
+
+	boolean save(Showing s);
 }

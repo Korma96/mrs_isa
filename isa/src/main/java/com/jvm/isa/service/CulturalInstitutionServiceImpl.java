@@ -41,7 +41,7 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Override
 	public ArrayList<Showing> getShowings()
 	{
-		return showingRepository.findAll();
+		return (ArrayList<Showing>) showingRepository.findAll();
 	}
 	
 	@Override
@@ -149,12 +149,14 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
-	public boolean showingExists(String name)
+	public boolean showingExists(CulturalInstitution culturalInstitution, String name)
 	{
-		return showingRepository.findByName(name) != null;
+		return culturalInstitution.getShowing(name) != null;
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean deleteShowing(String name)
 	{
@@ -174,12 +176,32 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		}		
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public boolean save(Showing sh)
+	public boolean save(Showing showing, CulturalInstitution culturalInstitution)
 	{
 		try 
 		{
-			showingRepository.save(sh);
+			showing = showingRepository.save(showing);			
+			culturalInstitution.getShowings().add(showing);
+			culturalInstitutionRepository.save(culturalInstitution);
+			
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Override
+	public boolean save(Showing showing)
+	{
+		try 
+		{
+			showingRepository.save(showing);			
+			
 		}
 		catch(Exception e)
 		{
@@ -230,6 +252,5 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 			return false;
 		}
 	}
-
 
 }

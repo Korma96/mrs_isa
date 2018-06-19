@@ -1,0 +1,8 @@
+#id_table_visited, #id_table_unvisited {
+    border: 5px solid #008000;
+}
+
+#id_visited_tr_header_visited, #id_unvisited_tr_header_unvisited {
+    border: 3px solid #008000;
+    background: #ffff00;
+}

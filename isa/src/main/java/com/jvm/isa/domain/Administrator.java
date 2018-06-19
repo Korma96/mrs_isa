@@ -3,6 +3,8 @@ package com.jvm.isa.domain;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -23,6 +25,9 @@ public class Administrator extends User {
 	@ColumnDefault("''")
 	@Column(name = "email", unique = false, nullable = false)
 	private String email;
+	
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	private CulturalInstitution culturalInstitution;
 
 	public Administrator() {
 		super();
@@ -59,6 +64,14 @@ public class Administrator extends User {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public CulturalInstitution getCulturalInstitution() {
+		return culturalInstitution;
+	}
+
+	public void setCulturalInstitution(CulturalInstitution culturalInstitution) {
+		this.culturalInstitution = culturalInstitution;
 	}
 
 }

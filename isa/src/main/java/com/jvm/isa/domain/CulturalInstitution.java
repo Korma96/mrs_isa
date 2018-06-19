@@ -1,5 +1,6 @@
 package com.jvm.isa.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -56,6 +57,7 @@ public class CulturalInstitution{
 		this.type = type;
 		this.auditoriums = auditoriums;
 		this.showings = showings;
+		this.tickets = new ArrayList<Ticket>();
 		//this.repertoires = repertoires;
 	}
 	
@@ -65,6 +67,9 @@ public class CulturalInstitution{
 		this.address = address;
 		this.description = description;
 		this.type = type;
+		this.auditoriums = new ArrayList<Auditorium>();
+		this.showings = new ArrayList<Showing>();
+		this.tickets = new ArrayList<Ticket>();
 	}
 
 	public Long getId() {
@@ -169,6 +174,28 @@ public class CulturalInstitution{
 		}
 		
 		return null;
+	}
+	
+	public Auditorium getAuditorium(String auditoriumName) {
+		for (Auditorium auditorium : auditoriums) {
+			if (auditorium.getName().equals(auditoriumName)) {
+				return auditorium;
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) return false;
+		
+		if(obj instanceof CulturalInstitution) {
+			CulturalInstitution ci = (CulturalInstitution) obj;
+			return ci.name.equals(name);
+		}
+		
+		return false;
 	}
 	
 }

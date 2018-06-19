@@ -1,6 +1,8 @@
 var addNewShowingURL = "/myapp/administrators/admin_cultural_institution/add_new_showing";
 var updateShowingURL = "/myapp/administrators/admin_cultural_institution/update_showing";
 var deleteShowingURL = "/myapp/administrators/admin_cultural_institution/delete_showing";
+var uploadShowingImageURL = "/myapp/administrators/admin_cultural_institution/upload_showing_image";
+
 
 var currentShowings = null;
 
@@ -92,7 +94,8 @@ function add_showing()
 		deleteAllExceptFirst();
 		
 		$("#center").append(
-				'<form > \
+				'<div class="image_preview"><img alt="Niste odabrali sliku" src="#" class="previewing" /></div> \
+				<form > \
 				<table> \
 					<tr><td><label for="id_name">Name:</label></td><td><input type="text" id="id_name"/></td></tr> \
 					<tr>  <td><label for="id_type">Type:</label></td>  <td class = "select"> \
@@ -108,11 +111,16 @@ function add_showing()
                     <tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors"/></td></tr> \
                     <tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director"/></td></tr> \
                     <tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
+				<tr>  <td><label for="id_showing_image"> Showing image:</label></td>  <td><input type="file" id="id_showing_image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
 				</table> \
 				<div align="center"><input type="button" id="id_btn_save_new_showing" class="buttons" value="Save showing"/> \
 				</div> \
 				<br/> \
 			</form>');
+		
+		$('.previewing').width($('.previewing').parent().width());
+		$('.previewing').height('230px');
+		drawImage();
 		
 		$("#id_btn_save_new_showing").click(function(event) {
 			event.preventDefault();
@@ -169,6 +177,8 @@ function addShowingAjax()
                 $("#id_actors").val("");
                 $("#id_director").val("");
                 $("#id_description").val("");	
+                
+                uploadImage(uploadShowingImageURL);
 	    		
 	    		toastr.success("You have successfully added new showing!");
 	    		

@@ -1,6 +1,6 @@
 package com.jvm.isa.repository;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.repository.Repository;
 
@@ -10,9 +10,9 @@ import com.jvm.isa.domain.ShowingType;
 public interface ShowingRepository  extends Repository<Showing, Long>
 {	
 
-	ArrayList<Showing> findByShowingType(ShowingType type);
+	List<Showing> findByType(ShowingType type);
 	
-	ArrayList<Showing> findAll();
+	List<Showing> findAll();
 
 	Showing findByName(String name);
 	

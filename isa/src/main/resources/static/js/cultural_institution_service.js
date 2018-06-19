@@ -2,6 +2,8 @@ var addNewCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institu
 var updateCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/update_cultural_institution";
 var deleteCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/delete_cultural_institution";
 var showCulturalInstitutionsPath = "/myapp/home_page/cultural_institutions";
+var uploadCulturalInstitutionImageURL = "/myapp/administrators/admin_cultural_institution/upload_cultural_institution_image";
+
 var cultural_institutions = null;
 
 $(document).on("click", "#cinemas_div", function(event)
@@ -209,16 +211,22 @@ function addCulturalInstitution(type)
 		deleteAllExceptFirst();
 		
 		$("#center").append(
-				'<form > \
+				'<div class="image_preview"><img alt="Niste odabrali sliku" src="#" class="previewing" /></div> \
+				<form > \
 				<table> \
 					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
 					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address"/></td></tr> \
 					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
+				<tr>  <td><label for="id_cultural_institution_image">Cultural institution image:</label></td>  <td><input type="file" id="id_cultural_institution_image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
 				</table> \
 				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
 				</div> \
 				<br/> \
 			</form>');
+		
+		$('.previewing').width($('.previewing').parent().width());
+		$('.previewing').height('230px');
+		drawImage();
 		
 		$("#id_btn_save_new_institution").click(function(event) {
 			event.preventDefault();
@@ -232,22 +240,76 @@ function addCulturalInstitution(type)
 	}
 }
 
-function addCulturalInstitutionAjax(type)
+function uploadImage(urlParam) {
+	var image = $(".id_image")[0].files[0];
+	
+	if(image) {
+		$.ajax({ 
+			async: false,
+		    type: "POST",
+			url:  urlParam,
+			//contentType : "multipart/form-data",  StackOverflow: The problem is that you are setting the Content-Type by yourself,
+			//                                                     let it be blank. Google Chrome will do it for you. The multipart
+			//                                                     Content-Type needs to know the file boundary, and when you remove 
+			//                                                     the Content-Type, Postman will do it automagically for you.
+	        data : image,
+			processData : false,
+		    success: function() {
+					toastr.success("You have successfully uploaded the image!");
+		   },
+			error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+			}
+		});
+	}
+	
+}
+
+function drawImage() {
+	$(".id_image").change(function() {
+		var file = this.files[0];
+		var reader = new FileReader();
+		
+		if(file) {
+			reader.onload = imageIsLoaded;
+			reader.readAsDataURL(file);
+		}
+		else {
+			resetImage();
+		}
+	});
+}
+
+function imageIsLoaded(e) {
+	$(".id_image").css("color","green");
+	$('.image_preview').css("display", "block");
+	$('.previewing').attr('src', e.target.result);
+	$('.previewing').width($('.previewing').parent().width());
+	$('.previewing').height('230px');
+};
+
+
+function resetImage() {
+	$('.previewing').attr('src', "#");
+	$(".id_image").css("color","black");
+}
+
+
+function addCulturalInstitutionAjax(typeOfCulturalInstitution)
 {
 	var obj = {};
 	var name = $("#id_institution_name").val();
 	var address = $("#id_address").val();
 	var description = $("#id_description").val();
-	var role = type; //$("#id_institution_role").val();
+	var type = typeOfCulturalInstitution; //$("#id_institution_role").val();
 
 	obj["name"] = name;
 	obj["address"] = address;	
 	obj["description"] = description;
-	obj["role"] = role;
+	obj["type"] = type;
 	
 	$.ajax({ 
 	    type: "POST",
-	    async: false,
 		url:  addNewCulturalInstitutionURL,
 	    data: JSON.stringify(obj),
 	    dataType: "json", 
@@ -258,16 +320,18 @@ function addCulturalInstitutionAjax(type)
 	    		$("#id_address").val("");
 	    		$("#id_description").val("");		
 	    		
+	    		uploadImage(uploadCulturalInstitutionImageURL);
+	    		
 	    		toastr.success("You have successfully added new institution!");
 	    		
 	    		deleteAllExceptFirst();
     	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
     	        
-	    		if(role == "CINEMA")
+	    		if(type == "CINEMA")
 	    		{
 	    	        get_data_extended('0');
 	    		}
-	    		else if(role == "THEATER")
+	    		else if(type == "THEATER")
 	    		{
 	    	        get_data_extended('1');
 	    		}
@@ -293,10 +357,10 @@ function delete_institution()
 	obj["name"] = ci.name;
 	obj["address"] = ci.address;	
 	obj["description"] = ci.description;
-	obj["role"] = ci.type;
+	obj["type"] = ci.type;
 	
 	$.ajax({ 
-	    type: "POST",
+	    type: "DELETE",
 	    async: false,
 		url:  deleteCulturalInstitutionURL,
 	    data: JSON.stringify(obj),
