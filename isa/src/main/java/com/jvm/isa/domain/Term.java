@@ -33,6 +33,9 @@ public class Term {
 	@Column(name="seats", unique=false, nullable=false)
 	private Boolean[] seats;
 	
+	@Column(name="price", unique=false, nullable=false)
+	private double price;
+	
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	private CulturalInstitution culturalInstitution;
 	
@@ -59,9 +62,7 @@ public class Term {
 		
 	}
 	
-	
-	
-	public Term(LocalDate date, LocalTime time, CulturalInstitution culturalInstitution,  Auditorium auditorium, Showing showing) {
+	public Term(LocalDate date, LocalTime time, CulturalInstitution culturalInstitution,  Auditorium auditorium, Showing showing, double price) {
 		this.date = date;
 		this.time = time;
 		this.seats = new Boolean[auditorium.getNumOfRows() * auditorium.getNumOfCols()];
@@ -71,6 +72,7 @@ public class Term {
 		this.culturalInstitution = culturalInstitution;
 		this.auditorium = auditorium;
 		this.showing = showing;
+		this.price = price;
 	}
 
 	public Long getId() {
@@ -148,5 +150,14 @@ public class Term {
 		}
 		
 		return false;
+	}
+	
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
 }

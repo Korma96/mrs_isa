@@ -1474,6 +1474,8 @@ function getCulturalInstitutionsForReservation() {
 }
 
 function loadAllForReservation() {
+	$("#id_price").text(0);
+	
 	var culturalInstitutions = getCulturalInstitutionsForReservation();
 	if(culturalInstitutions) {
 		if(culturalInstitutions.length > 0) {
@@ -2019,40 +2021,47 @@ var settings = {
 };
 
 function getIndexesOfBusySeatsAndRowsCols() {
-	var indexesOfBusySeatsAndRowsCols = null;
-	
 	var date = $("#id_date").val();
 	var auditorium = $("#id_auditorium").val();
 	var time = $("#id_time").val();
 	var culturalInstitution = $("#id_cultural_institution").val();
 	var showing = $("#id_showing").val();
 	
-	$.ajax({ 
-		async: false,
-	    type: "PUT",
-		url: getIndexesOfBusySeatsAndRowsColsURL,
-		dataType : "json",
-		data: JSON.stringify({"date": date.trim(), 
-								"time": time.trim(), 
-								"culturalInstitution": culturalInstitution.trim(), 
-								"showing": showing.trim(),
-								"auditorium": auditorium.trim()
-		}),
-	    contentType: "application/json",
-	    cache: false,
-	    success: function(retValue) {
-	    	if(retValue.existsTerm) {
-	    		indexesOfBusySeatsAndRowsCols =  retValue.indexOfBusySeatsAndRowsCols;
-	    	}
-	    	
-				
-	   },
-		error : function(XMLHttpRequest, textStatus, errorThrown) { 
-					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-		}
-	});
+	if(date == null || auditorium == null || time == null || culturalInstitution == null || showing == null){
+		toastr.error("You did not select all the necessary options!");
+		return null;
+	}
+	else {
+		var indexesOfBusySeatsAndRowsCols = null;
+		
+		$.ajax({ 
+			async: false,
+		    type: "PUT",
+			url: getIndexesOfBusySeatsAndRowsColsURL,
+			dataType : "json",
+			data: JSON.stringify({"date": date.trim(), 
+									"time": time.trim(), 
+									"culturalInstitution": culturalInstitution.trim(), 
+									"showing": showing.trim(),
+									"auditorium": auditorium.trim()
+			}),
+		    contentType: "application/json",
+		    cache: false,
+		    success: function(retValue) {
+		    	if(retValue.existsTerm) {
+		    		indexesOfBusySeatsAndRowsCols =  retValue.indexOfBusySeatsAndRowsCols;
+		    	}
+		    	
+					
+		   },
+			error : function(XMLHttpRequest, textStatus, errorThrown) { 
+						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+			}
+		});
+		
+		return indexesOfBusySeatsAndRowsCols;
+	}
 	
-	return indexesOfBusySeatsAndRowsCols;
 }
 
 function bookSelectedSeats(selectedSeats) {

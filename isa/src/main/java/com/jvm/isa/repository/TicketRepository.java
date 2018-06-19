@@ -16,4 +16,6 @@ public interface TicketRepository extends Repository<Ticket, Long> {
 
 	Ticket save(Ticket ticket);
 	
+	List<Ticket> findAll();
+	
 }

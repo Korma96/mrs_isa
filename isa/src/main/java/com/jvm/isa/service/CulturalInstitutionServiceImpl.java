@@ -125,7 +125,10 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		
 		if(culturalInstitution != null) {
 			for (Showing showing : culturalInstitution.getShowings()) {
-				showings.add(showing.getName());
+				if(!showings.contains(showing.getName()))
+				{
+					showings.add(showing.getName());
+				}
 			}
 		}
 		

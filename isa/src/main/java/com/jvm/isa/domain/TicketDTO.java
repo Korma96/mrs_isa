@@ -24,7 +24,7 @@ public class TicketDTO {
 		this.time = ticket.getTerm().getTime().toString();
 		this.auditorium = ticket.getTerm().getAuditorium().getName();
 		this.seat = ticket.getSeat();
-		this.price = ticket.getPrice();
+		this.price = ticket.getTerm().getPrice();
 		this.reservedBy = ticket.getReservedBy().getFirstName() + " " + ticket.getReservedBy().getLastName();
 		this.reservedDateAndTime = ticket.getReservedDateAndTime().toString();
 	}

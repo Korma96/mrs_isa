@@ -1,6 +1,9 @@
 package com.jvm.isa.controller;
 
 import java.io.InputStream;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +37,9 @@ import com.jvm.isa.service.AdminService;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
 import com.jvm.isa.service.TermService;
+import com.jvm.isa.service.TicketService;
 import com.jvm.isa.service.UserService;
+
 
 @RestController
 @RequestMapping(value = "/administrators")
@@ -50,6 +55,9 @@ public class AdminController {
 	@Autowired
 	private AdminService adminService;
 
+	@Autowired
+	private TicketService ticketService;
+	
 	@Autowired
 	private EmailService emailService;
 	
@@ -193,6 +201,19 @@ public class AdminController {
 		return new ResponseEntity<ArrayList<Showing>>(returnList, HttpStatus.OK);
 	}
 	
+	@RequestMapping(value = "/admin_cultural_institution/get_showings_for_ci", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<Showing>> getShowingsForCI(@RequestBody HashMap<String, String> hm) 
+	{
+		String ciName = hm.get("ci");
+		ArrayList<String> returnList = culturalInstitutionService.getShowings(ciName);
+		ArrayList<Showing> showingList = new ArrayList<Showing>();
+		for(String name : returnList)
+		{
+			showingList.add(culturalInstitutionService.getShowing(name));
+		}
+		return new ResponseEntity<ArrayList<Showing>>(showingList, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/admin_cultural_institution/get_auditoriums_for_ci", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getAuditoriumsForCI(@RequestBody HashMap<String, String> hm) 
 	{
@@ -217,11 +238,10 @@ public class AdminController {
 	@RequestMapping(value = "/admin_cultural_institution/get_terms", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getTerms(@RequestBody HashMap<String, String> hm) 
 	{
-		String showingName = hm.get("showing");
 		String auditoriumName = hm.get("auditorium");
 		String date = hm.get("date");
 		
-		List<String> returnList = termService.getTermsByDateAndAuditoriumAndShowing(date, auditoriumName, showingName);
+		List<String> returnList = termService.getTermsByDateAndAuditorium(date, auditoriumName);
 
 		return new ResponseEntity<List<String>>(returnList, HttpStatus.OK);
 	}
@@ -234,8 +254,8 @@ public class AdminController {
 		String auditoriumName = hm.get("auditorium");
 		String date = hm.get("date");
 		String time = hm.get("time");
-		
-		boolean success = termService.addTerm(culturalInstitution, date, auditoriumName, showingName, time);
+		String price = hm.get("price");
+		boolean success = termService.addTerm(culturalInstitution, date, auditoriumName, showingName, time, new Double(price));
 		if(success)
 			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
@@ -460,7 +480,6 @@ public class AdminController {
 				}
 			}
 		}
-		
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 	
@@ -468,8 +487,19 @@ public class AdminController {
 	public ResponseEntity<Boolean> deleteShowing(@RequestBody HashMap<String, String> hm)
 	{
 		String name = hm.get("name");
-		boolean success = culturalInstitutionService.deleteShowing(name);
-		return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+		String ci = hm.get("ci");
+		Showing s = culturalInstitutionService.getShowing(name);
+		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+		List<Showing> showings = c.getShowings();
+		showings.remove(s);
+		c.setShowings(showings);
+		boolean success = culturalInstitutionService.save(c);
+		if(!success)
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		boolean success2 = culturalInstitutionService.deleteShowing(name);
+		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
 	}
 	
@@ -557,6 +587,97 @@ public class AdminController {
 		boolean success2 = culturalInstitutionService.deleteAuditorium(name);
 		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
+	}
+
+	@RequestMapping(value = "/admin_cultural_institution/get_data_for_line_chart", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<int[][]> getDataForLineChart(@RequestBody HashMap<String, String> hm)
+	{
+		int[][] returnList = null;
+		String ci = hm.get("ci");
+		String date = hm.get("date");
+		String timePeriodType = hm.get("timePeriodType");
+		LocalDate dateLocal = null;
+		try {
+			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		switch(timePeriodType)
+		{
+			case "DAY":
+			{
+				int numberOfTickets = ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci);
+				int dayOfMonth = dateLocal.getDayOfMonth();
+				int[] firstList = new int[] {numberOfTickets};
+				int[] secondList = new int[] {dayOfMonth};
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+			case "WEEK":
+			{
+				DayOfWeek dayOfWeek = dateLocal.getDayOfWeek();
+				// set date on the beggining of the week
+				while(dayOfWeek.compareTo(DayOfWeek.MONDAY) != 0)
+				{
+					dateLocal = dateLocal.minusDays(1);
+					dayOfWeek = dateLocal.getDayOfWeek();
+				}
+				// now current date is monday
+				int[] firstList = new int[7];
+				int[] secondList = new int[7];
+				for(int i=0; i<7; i++)
+				{
+					firstList[i] = ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci);
+					secondList[i] = dateLocal.getDayOfMonth();
+					dateLocal = dateLocal.plusDays(1);
+				}
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+			case "MONTH":
+			{
+				int dayOfMonth = dateLocal.getDayOfMonth();
+				dateLocal = dateLocal.minusDays(dayOfMonth - 1);
+				ArrayList<Integer> helpList = new ArrayList<Integer>();
+				do
+				{
+					helpList.add(ticketService.getNumberOfTicketsByDateAndCulturalInstitution(dateLocal, ci));
+					dateLocal = dateLocal.plusDays(1);
+				}
+				while(dateLocal.getDayOfMonth() != 1);
+				int[] firstList = new int[helpList.size()];
+				int[] secondList = new int[helpList.size()];
+				for(int i=0; i<helpList.size(); i++)
+				{
+					firstList[i] = helpList.get(i);
+					secondList[i] = i+1;
+				}
+				returnList = new int[][] {firstList, secondList};
+				break;
+			}
+		}
+		
+		return new ResponseEntity<int[][]>(returnList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/get_income", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> getIncome(@RequestBody HashMap<String, String> hm)
+	{
+		String ci = hm.get("ci");
+		String date1 = hm.get("date1");
+		String date2 = hm.get("date2");
+		LocalDate dateLocal1 = null;
+		try {
+			dateLocal1 = LocalDate.parse(date1, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		LocalDate dateLocal2 = null;
+		try {
+			dateLocal2 = LocalDate.parse(date2, DateTimeFormatter.ISO_DATE);
+		} catch (Exception e) {}
+		
+		int income = ticketService.getIncome(ci, dateLocal1, dateLocal2);
+		String Income = (new Integer(income)).toString();
+		return new ResponseEntity<String>(Income, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/admin_funzone/get_showings_of_cultural_institution/{culturalInstitutionName}", method = RequestMethod.GET, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

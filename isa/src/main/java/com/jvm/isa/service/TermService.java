@@ -27,11 +27,11 @@ public interface TermService {
 	
 	int thereAreRepetitionsOrNotPutYourself(Collection<String> values, String loggedUsername);
 	
-	List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium, String showing);
+	List<String> getTermsByDateAndAuditorium(String date, String auditorium);
 	
 	ArrayList<String> getTimes(String culturalInstitutionName, String showingName, String dateStr, String auditoriumStr);
 	
-	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time);
+	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time, double price);
 	
 	boolean deleteTerm(String id);
 	

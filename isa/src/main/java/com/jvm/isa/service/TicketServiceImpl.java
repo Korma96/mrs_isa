@@ -1,5 +1,7 @@
 package com.jvm.isa.service;
 
+
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +58,36 @@ public class TicketServiceImpl implements TicketService {
 		}
 		
 		return savedTicket;
+	}
+
+	@Override
+	public int getNumberOfTicketsByDateAndCulturalInstitution(LocalDate date, String ci) {
+		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+		int counter = 0;
+		for(Ticket t : tickets)
+		{
+			Term term = t.getTerm();
+			if((term.getDate().compareTo(date) == 0) && term.getCulturalInstitution().getName().equals(ci))
+			{
+				counter++;
+			}
+		}
+		return counter;
+	}
+
+	@Override
+	public int getIncome(String ci, LocalDate dateLocal1, LocalDate dateLocal2) {
+		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+		int income = 0;
+		for(Ticket t : tickets)
+		{
+			Term term = t.getTerm();
+			if((term.getDate().compareTo(dateLocal1) >= 0) && (term.getDate().compareTo(dateLocal2) <= 0) && term.getCulturalInstitution().getName().equals(ci))
+			{
+				income += term.getPrice();
+			}
+		}
+		return income;
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)

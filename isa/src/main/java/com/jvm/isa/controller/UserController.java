@@ -556,6 +556,7 @@ public class UserController {
 		if(loggedUser != null) {
 			if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser loggedRegisteredUser = (RegisteredUser) loggedUser;
+
 				
 				String dateStr = ((String) hm.get("date")).trim();
 				String timeStr = ((String) hm.get("time")).trim();
@@ -584,7 +585,7 @@ public class UserController {
 				for (String seatStr : seatsAndFriends.keySet()) {
 					//ticket = ticketService.getTicket(term, Integer.parseInt(seat));
 					seat = Integer.parseInt(seatStr) - 1;
-					ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat, 1000);
+					ticket = new Ticket(term, loggedRegisteredUser, loggedRegisteredUser, seat);
 					
 					savedTicket = ticketService.save(ticket);
 					savedTickets.add(savedTicket);
@@ -593,23 +594,24 @@ public class UserController {
 					if(seatsAndFriends.get(seatStr).equals(loggedRegisteredUser.getUsername())) {
 						loggedRegisteredUserTickets.add(savedTicket);
 					}
+					
 					else {
 						user = userService.getUser(seatsAndFriends.get(seatStr));
 						if(user.getUserType() == UserType.REGISTERED_USER) {
 							friend = (RegisteredUser) user;
 							try {
-								emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, ticket.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+								emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, term.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
 								
-							} catch (Exception e) {
+								friend.getInvitations().add(savedTicket);
+								userService.registrate(friend);
+							}
+							catch (Exception e) {
 								System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
 							}
 							
-							friend.getInvitations().add(savedTicket);
-							userService.registrate(friend);
 						}
 						
 					}
-					
 				}
 				
 				if(loggedRegisteredUserTickets.size() > 0) saveTicketsForLoggedUser(loggedRegisteredUser, loggedRegisteredUserTickets);

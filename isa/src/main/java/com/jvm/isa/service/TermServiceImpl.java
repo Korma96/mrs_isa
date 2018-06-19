@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,25 +293,36 @@ public class TermServiceImpl implements TermService {
 	}
 
 	@Override
-	public List<String> getTermsByDateAndAuditoriumAndShowing(String date, String auditorium,
-			String showing) {
-		
-		Showing showingDB = showingRepository.findByName(showing);
-		
+	public List<String> getTermsByDateAndAuditorium(String date, String auditorium) {
+
 		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
 		
 		LocalDate dateLocal = null;
+		
 		try {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {}
 		
-		List<Term> terms = termRepository.findByDateAndAuditoriumAndShowing(dateLocal, auditoriumDB, showingDB);
+		List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditoriumDB);
+		// sort terms ascending by time
+		for(int i=0; i<terms.size(); i++)
+		{
+			for(int j=i+1; j<terms.size(); j++)
+			{
+				if(terms.get(i).getTime().compareTo(terms.get(j).getTime()) > 0)
+				{
+					Term temp = terms.get(i);
+					terms.set(i, terms.get(j));
+					terms.set(j, temp);
+				}
+			}
+		}
 		
-		int duration = showingDB.getDuration();
 		List<String> termsReturn = new ArrayList<String>();
 		for(Term t : terms)
-		{			
-			String term = t.getId().toString() + "*" + t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString();
+		{		
+			int duration = t.getShowing().getDuration();
+			String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString()  + "*" + (new Double(t.getPrice())).toString();
 			termsReturn.add(term);
 		}
 		
@@ -319,7 +331,7 @@ public class TermServiceImpl implements TermService {
 
 	@Override
 	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
-			String time) {
+			String time, double price) {
 		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
 		if(culturalInstitution == null) return false;
 		
@@ -337,6 +349,7 @@ public class TermServiceImpl implements TermService {
 		}
 		
 		List<Term> terms = termRepository.findByCulturalInstitutionAndAuditorium(culturalInstitution, auditorium);
+
 		
 		int duration = showing.getDuration();
 		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
@@ -364,7 +377,7 @@ public class TermServiceImpl implements TermService {
 			}
 		}
 		
-		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing);
+		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing, price);
 		termRepository.save(term);
 		return true;
 	}
