@@ -2871,13 +2871,8 @@ function quickBooking(event) {
 		
 		deleteAllExceptFirst();
 		$("#center").append('<div id="id_quick_booking_div"> </div>');
-		$("#id_quick_booking_div").load("html/partials/quick_booking.html", null, function(){
-			
-			// napravio sam ti fajl quick_booking.html
-			// ti ga napuni sadrzajem koji hoces
-			// markane cepaj ovde kod za brze rezevacije
-			
-		});
+
+		quick_tickets_page(showingName, culturalInstitutionName);
 	}
 	else {
 		$("#center").load("html/partials/login.html", null, loadLoginComplete);

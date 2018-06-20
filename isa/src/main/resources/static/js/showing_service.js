@@ -65,9 +65,9 @@ function get_all_cis()
 	return cis;
 }
 
-function ci_changed()
+function showingsMainPage()
 {
-	var ci = $("#id_cultural_institution").find(":selected").text().trim();
+	var ci = getCIForAdmin();
     var showings = get_showings_for_ci(ci);
     if(showings)
     {
@@ -75,42 +75,8 @@ function ci_changed()
     }
     else
     {
-        toastr.error("No data found!");
+        toastr.error("There are no showings!");
     }
-}
-
-function showingsMainPage()
-{
-	var culturalInstitutions = getAllCulturalInstitutions();
-	var html_string = '<label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select>';
-	$("#search_bar").append(html_string);
-	if(culturalInstitutions) {
-		if(culturalInstitutions.length > 0) {
-			var html_string = "";
-			for(ci in culturalInstitutions)
-			{
-				html_string += "<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>";
-			}
-			if(lastCi != null)
-			{
-				$("#id_cultural_institution").append(html_string);
-				$("#id_cultural_institution").val(lastCi);
-			}
-			else
-			{
-				html_string = '<option disabled selected value> -- select an option -- </option>' + html_string;
-				$("#id_cultural_institution").append(html_string);
-			}
-
-			$("#id_cultural_institution").change(ci_changed);
-		}
-		else {
-			toastr.error("Cultural institutions are not available!");
-		}
-	}
-	else {
-		toastr.error("Cultural institutions are not available!");
-	}
 }
 
 
@@ -119,7 +85,6 @@ function show_all_showings(data)
 	currentShowings = data;
 	var html_string = "";
 	html_string += '<table><tr><th>Name</th><th>Type</th><th>Genre</th><th>Duration</th><th>Rating</th><th>Actors</th><th>Director</th><th>Description</th><th><input type="button" id="id_btn_add_new_showing" class="buttons" value="Add"/><th/></tr>';
-	var counter = 0;
 	for(x in data)
 	{
 		html_string += "<tr>";
@@ -148,28 +113,21 @@ function show_all_showings(data)
 		html_string += data[x].shortDescription;
         html_string += "</td>";
 		html_string += "<td>";
-		html_string += '<button id="';
-		var update_button_id = 'id_btn_update_showing' + counter.toString();
-		html_string += update_button_id;
-		html_string += '" class="buttons_update">Update</button>';
-		html_string += '<button id="';
-		var delete_button_id = 'id_btn_delete_showing' + counter.toString();
-		html_string += delete_button_id;
-		html_string += '" class="buttons_remove">Delete</button>';
+		html_string += '<button id="id_btn_update_showing' + data[x].id + '" class="buttons_update">Update</button>';
+		html_string += '<button id="id_btn_delete_showing' + data[x].id + '" class="buttons_remove">Delete</button>';
 		html_string += "</td>";
 		html_string += "</tr>";
-		counter += 1;
 	}
 	html_string += "</table>";
-	$("#cultural_institutions").html(html_string);
-	var newCounter = 0;
-	while(newCounter < counter)
+	$("#showings").html(html_string);
+
+	for(x in data)
 	{
-		var id = "id_btn_update_showing" + newCounter.toString();
+		// button id is same as showing id
+		var id = "id_btn_update_showing" + data[x].id;
 		document.getElementById(id).onclick = update_showing;
-		var id2 = "id_btn_delete_showing" + newCounter.toString();
+		var id2 = "id_btn_delete_showing" + data[x].id;
 		document.getElementById(id2).onclick = delete_showing;
-		newCounter++;
 	}
 
 	$("#id_btn_add_new_showing").click(function(event) {
@@ -184,8 +142,7 @@ function add_showing()
 {
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
-		var ci = $("#id_cultural_institution").find(":selected").text().trim();
-		lastCi = ci;
+
 		deleteAllExceptFirst();
 		
 		$("#center").append(
@@ -202,7 +159,6 @@ function add_showing()
 					</tr> \
                     <tr><td><label for="id_genre">Genre:</label></td><td><input type="text" id="id_genre"/></td></tr> \
                     <tr><td><label for="id_duration">Duration:</label></td><td><input type="number" id="id_duration"/></td></tr> \
-                    <tr><td><label for="id_rating">Rating:</label></td><td><input type="number" min="1" max="10" id="id_rating"/></td></tr> \
                     <tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors"/></td></tr> \
                     <tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director"/></td></tr> \
                     <tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
@@ -220,7 +176,7 @@ function add_showing()
 		$("#id_btn_save_new_showing").click(function(event) {
 			event.preventDefault();
 			
-			addShowingAjax(ci);
+			addShowingAjax();
 		});
 		
 	}
@@ -229,29 +185,29 @@ function add_showing()
 	}
 }
 
-function addShowingAjax(ci)
+function addShowingAjax()
 {
 	var obj = {};
 	var name = $("#id_name").val();
     var type = $("#id_type").val();
     var genre = $("#id_genre").val();
     var duration = $("#id_duration").val();
-    var rating = $("#id_rating").val();
     var actors = $("#id_actors").val();
     var director = $("#id_director").val();
     var description = $("#id_description").val();
     
-	if(name == "" || type == "" || genre == "" || duration == "" || rating == "" || actors == "" || director == "" || description == "")
+	if(name == "" || type == "" || genre == "" || duration == "" || actors == "" || director == "" || description == "")
 	{
 		toastr.error("Field(s) can not be empty!"); 
 		return;
 	}
 
+	var ci = getCIForAdmin();
+
     obj["name"] = name;
     obj["type"] = type ;
     obj["genre"] = genre;
     obj["duration"] = duration;
-    obj["rating"] = rating;
     obj["actors"] = actors;
     obj["director"] = director;
 	obj["description"] = description;
@@ -276,13 +232,11 @@ function addShowingAjax(ci)
                 
                 uploadImage(uploadShowingImageURL);
 	    		
-	    		toastr.success("You have successfully added new showing!");
-	    		
-	    		deleteAllExceptFirst();
-    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
-    	        
+				toastr.success("You have successfully added new showing!");
+				deleteAllExceptFirst();
+        		$("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
 				showingsMainPage();
-				ci_changed();
+    	        
 	    	}
 	    	else {
 	    		toastr.error("Name already exists!"); 
@@ -302,10 +256,26 @@ function update_showing()
 		var button_id = this.id;
 		var numb = button_id.match(/\d/g);
 		numb = numb.join("");
-		var s = currentShowings[parseInt(numb)];
+		var s_id = numb;
+		var s = null;
+		var ci = getCIForAdmin();
+		var showings = get_showings_for_ci(ci);
+		for(x in showings)
+		{
+			if(showings[x].id == s_id)
+			{
+				s = showings[x];
+				break;
+			}
+		}
+		if(s == null)
+		{
+			toastr.error("Showing don`t exists!");
+			deleteAllExceptFirst();
+			$("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
+			showingsMainPage();
+		}
 		
-		var ci = $("#id_cultural_institution").find(":selected").text().trim();
-		lastCi = ci;
 		deleteAllExceptFirst();
 		
 		var update_html = 
@@ -333,7 +303,6 @@ function update_showing()
 		}
 		update_html += '<tr><td><label for="id_genre">Genre:</label></td><td><input type="text" id="id_genre" value="' + s.genre + '" /></td></tr> \
 				<tr><td><label for="id_duration">Duration:</label></td><td><input type="number" id="id_duration" value="' + s.duration + '" /></td></tr> \
-				<tr><td><label for="id_rating">Rating:</label></td><td><input type="number" min="1" max="10" id="id_rating" value="' + s.averageRating + '" /></td></tr> \
 				<tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors" value="' + s.listOfActors + '" /></td></tr> \
 				<tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director" value="' + s.nameOfDirector + '" /></td></tr> \
 				<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" value="' + s.shortDescription + '" /></td></tr> \
@@ -346,7 +315,7 @@ function update_showing()
 		$("#id_btn_update_showing").click(function(event) {
 			event.preventDefault();
 			
-			updateShowingAjax(s.name, ci);
+			updateShowingAjax(s.name, s_id);
 		});
 	}
 	else
@@ -355,30 +324,30 @@ function update_showing()
 	}
 }
 
-function updateShowingAjax(old_name, ci)
+function updateShowingAjax(old_name, ID)
 {
 	var obj = {};
 	var name = $("#id_name").val();
     var type = $("#id_type").val();
     var genre = $("#id_genre").val();
     var duration = $("#id_duration").val();
-    var rating = $("#id_rating").val();
     var actors = $("#id_actors").val();
     var director = $("#id_director").val();
     var description = $("#id_description").val();
 
-	if(name == "" || type == "" || genre == "" || duration == "" || rating == "" || actors == "" || director == "" || description == "")
+	if(name == "" || type == "" || genre == "" || duration == "" || actors == "" || director == "" || description == "")
 	{
 		toastr.error("Field(s) can not be empty!"); 
 		return;
 	}
+	var ci = getCIForAdmin();
 	
+	obj["id"] = ID.toString();
 	obj["old_name"] = old_name;
     obj["name"] = name;
     obj["type"] = type ;
     obj["genre"] = genre;
     obj["duration"] = duration;
-    obj["rating"] = rating;
     obj["actors"] = actors;
     obj["director"] = director;
 	obj["description"] = description;
@@ -394,12 +363,9 @@ function updateShowingAjax(old_name, ci)
 	    success: function(success) {
 	    	if(success) {	    		
 	    		toastr.success("You have successfully updated showing!");
-	    		
-	    		deleteAllExceptFirst();
-    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
-    	        
+				deleteAllExceptFirst();
+        		$("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
 				showingsMainPage();
-				ci_changed();
 	    	}
 	    	else {
 	    		toastr.error("Wrong data!"); 
@@ -416,12 +382,28 @@ function delete_showing()
 	var button_id = this.id;
 	var numb = button_id.match(/\d/g);
 	numb = numb.join("");
-	var s = currentShowings[parseInt(numb)];
-	var ci = $("#id_cultural_institution").find(":selected").text().trim();
-	lastCi = ci;
+	var s_id = numb;
+	var s = null;
+	var ci = getCIForAdmin();
+	var showings = get_showings_for_ci(ci);
+	for(x in showings)
+	{
+		if(showings[x].id == s_id)
+		{
+			s = showings[x];
+			break;
+		}
+	}
+	if(s == null)
+	{
+		toastr.error("Showing don`t exists!");
+		deleteAllExceptFirst();
+		$("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
+		showingsMainPage();
+	}
 
 	var obj = {};
-	obj["name"] = s.name;
+	obj["id"] = s_id.toString();
 	obj["ci"] = ci;
 	
 	$.ajax({ 
@@ -432,14 +414,12 @@ function delete_showing()
 	    dataType: "json", 
 	    contentType: "application/json",
 	    success: function(success) {
-	    	if(success) {
+			if(success) 
+			{
 				toastr.success("You have successfully deleted showing!");
-				
 				deleteAllExceptFirst();
-    	        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
-    	        
+        		$("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
 				showingsMainPage();
-				ci_changed();
 	    	}
 	    	else {
 	    		toastr.error("Wrong data!"); 

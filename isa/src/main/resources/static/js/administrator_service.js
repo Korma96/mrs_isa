@@ -38,6 +38,7 @@ function adminSystemPage(loggedUser) {
 function adminSystemMainPage() {
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/sys_admin/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/sys_admin/update_profile"> Update profile </a>');
+	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
 	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/sys_admin/register"> Register administrator </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
@@ -83,6 +84,17 @@ function adminSystemMainPage() {
 		}
 		
 		logout();
+	});
+	
+	$("#id_cultural_institutions").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
+		}
+		
+		culturalInstitutions();
 	});
 }
 
@@ -225,7 +237,7 @@ function adminCulturalInstitutionsMainPage() {
 																		// URL
 		}
 		
-		culturalInstitutions();
+		showCulturalInstitutionCIA();
 	});
 	
 	$("#id_auditoriums").click(function(event) {
@@ -293,6 +305,100 @@ function adminCulturalInstitutionsMainPage() {
 		
 		income();
 	});
+}
+
+function getOneCi(ci)
+{
+	var c = null;
+	
+	$.ajax({ 
+	    async: false,
+		type: "POST",
+		url:  "/myapp/administrators/admin_cultural_institution/get_cultural_institution",
+		dataType : "json",
+		data: JSON.stringify({"ci" : ci}),
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(data) {
+					if(data) {
+						c = data[0];
+					}
+					else {
+						toastr.error("Missing cultural institution!"); 
+					}			
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});	
+	
+	return c;
+}
+
+
+function showCulturalInstitutionCIA() {
+	event.preventDefault();
+	
+	var ci = getCIForAdmin();
+	var c = getOneCi(ci);
+	if(c == null)
+	{
+		toastr.error('Missing cultural institution!');
+	}
+	
+	var logged = isLogged();
+	if (logged) { // ako je  ulogovan
+		if(c.name) {
+			deleteAllExceptFirst();
+			$("#center").append('<div> <table id="id_main_table"> </table></div>');
+			
+			var showings = getShowingsOfCulturalInstitution(c.name);
+			
+			$("#id_main_table").append('<tr> <td> <div class="div_image_or_google_map cultural_institution_div"><img id="id_img"alt="No image" src="#" class="medium_img"/></div> </td> <td> <div class="div_image_or_google_map cultural_institution_div" id="google_map"></div>  </td>  </tr>');
+			$("#id_main_table").append('<tr><td colspan="2"><div class="cultural_institution_div"> <table id="id_cultural_institution_table"></table></div>');
+			$("#id_main_table").append('<tr><td colspan="2"><div class="cultural_institution_div"> <table id="id_showings_table"></table></div>');
+			
+			$("#id_cultural_institution_table").append('<tr> <td><b>Name:</b></td> <td class="blue"> <b>'+c.name+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Address:</b></td> <td class="blue"> <b>'+c.address+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Description:</b></td> <td class="blue"> <b>'+c.description+'</b> </td>  </tr>');
+			$("#id_cultural_institution_table").append('<tr> <td><b>Type:</b></td> <td class="blue"> <b>'+c.type+'</b> </td>  </tr>');
+			
+			loadAndSetImage("cultural_institution_" + c.name, "id_img");
+			
+			showGoogleMap(c.address);
+				
+			$("#id_showings_table").append('<tr> <th colspan="2"> Showings </th> </tr>');
+			
+			if(showings) {
+				if(showings.length > 0) {
+					$.each(showings, function(index, item) {
+						$("#id_showings_table").append('<tr> <td><img class="small_img" id="id_showing_img_'+index+'" alt="No image" src="#"/></td> <td> <a id="id_showing_'+index+'" href="/myapp/#/users/showing" > <h3>' + item + ' </h3> </a> </td> </tr>');
+						$("#id_showing_img_" + index).on("click", {name: item}, showShowing);
+						$("#id_showing_" + index).on("click", {name: item, culturalInstitutionName: c.name}, showShowing);
+						
+						loadAndSetImage(c.name + "_" + item, "id_showing_img_" + index);
+					});
+				}
+				else {
+					toastr.error("Not found showings for this cultural institution!");
+				}
+			}
+			else {
+				toastr.error("Not found showings for this cultural institution!");
+			}
+			
+			
+			loadCulturalInstitutionPageComplete();
+		}
+		else {
+			toastr.error("Not found this cultural institution!");
+		}
+		
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	
 }
 
 function forceAdminToChangeUsernameAndPassword(url)
@@ -595,6 +701,7 @@ function registerAdmin() {
 					<table> \
 						<tr id="id_tr_first_name">  <td><label for="id_first_name_a">First name:</label></td>  <td><input type="text" id="id_first_name_a"/></td>  </tr> \
 						<tr id="id_tr_last_name">  <td><label for="id_last_name_a">Last name:</label></td>  <td><input type="text" id="id_last_name_a"/></td>  </tr> \
+						<tr id="id_tr_ci"><td><label for="id_ci">Cultural institution:</label></td>  <td class = "select"><select id="id_ci"></select></td></tr> \
 						<tr id="id_tr_email">  <td><label for="id_email_a">Email:</label></td>  <td><input type="text" id="id_email_a" /></td>  </tr> \
 						<tr>  <td><label for="id_role_a">Role:</label></td>  <td class = "select"> \
 						<select id="id_role_a"> \
@@ -612,6 +719,7 @@ function registerAdmin() {
 		
 		$("#id_tr_first_name").hide();
 		$("#id_tr_last_name").hide();
+		$("#id_tr_ci").hide();
 		
 		$("#id_role_a").change(changedAdminRole);
 		
@@ -632,8 +740,23 @@ function changedAdminRole() {
 	if(adminRole == "SA") {
 		$("#id_tr_first_name").hide();
 		$("#id_tr_last_name").hide();
+		$("#id_tr_ci").hide();
 	}
 	else {
+		if(adminRole == "CIA")
+		{
+			$("#id_tr_ci").show();
+			$("#id_ci").empty();
+			var culturalInstitutions = getAllCulturalInstitutions();
+			for(ci in culturalInstitutions)
+			{
+				$("#id_ci").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
+			}
+		}
+		else
+		{
+			$("#id_tr_ci").hide();
+		}	
 		$("#id_tr_first_name").show();
 		$("#id_tr_last_name").show();
 	}
@@ -653,6 +776,11 @@ function saveAdmin(){
 		
 		obj["firstName"] = firstName;
 		obj["lastName"] = lastName;
+		if(adminRole == "CIA")
+		{
+			var ci = $("#id_ci").find(":selected").text().trim();
+			obj["ci"] = ci;
+		}		
 	}
 
 	$.ajax({ 
@@ -697,7 +825,6 @@ function repertoires()
 				<table> \
 					<tr> <td> \
 							<table class="ui-widget"> \
-								<tr>  <td><label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select></td>  </tr> \
 								<tr> <td><label for="id_date"> Date: </label></td>  <td><input type="text" id="id_date"/></td> </tr> \
 								<tr> <td><label for="id_auditorium"> Auditorium: </label></td>  <td><select id="id_auditorium"></select></td> </tr> \
 							</table> \
@@ -729,8 +856,7 @@ function attendance()
 		
 		deleteAllExceptFirst();
 		
-		center.append('<div><table><tr><td><label for="id_cultural_institution">  Cultural institution:</label></td><td><select id="id_cultural_institution"></select></td>  \
-						<td><label>  Time period:</label></td><td><select id="id_line_chart_type"> \
+		center.append('<div><table><tr><td><label>  Time period:</label></td><td><select id="id_line_chart_type"> \
         				<option value="DAY">DAY</option>\
         				<option value="WEEK">WEEK</option>\
         				<option value="MONTH">MONTH</option>\
@@ -754,8 +880,7 @@ function income()
 		
 		deleteAllExceptFirst();
 		
-		center.append('<div><table><tr><td><label for="id_cultural_institution">  Cultural institution:</label></td><td><select id="id_cultural_institution"></select></td>  \
-						<td><label for="id_date1">  Start date:</label></td><td><input type="text" id="id_date1"/></td> \
+		center.append('<div><table><tr><td><label for="id_date1">  Start date:</label></td><td><input type="text" id="id_date1"/></td> \
 						<td><label for="id_date2">  End date:</label></td><td><input type="text" id="id_date2"/></td> \
 						<td><input type="button" id="id_btn_show_income" class="buttons" value="Calculate income"/></td></tr></table></div>');
 		
@@ -772,7 +897,7 @@ function showings()
 	var logged = isLogged();
 	if (logged) {  
 		deleteAllExceptFirst();
-        $("#center").append('<div><div id="search_bar"></div><div id="cultural_institutions"></div></div>');
+        $("#center").append('<div><div id="search_bar"></div><div id="showings"></div></div>');
 		showingsMainPage();
 	}
 	else {
@@ -790,19 +915,7 @@ function auditoriums()
 		
 		deleteAllExceptFirst();
 		
-		center.append(
-				'<div> \
-				<form> \
-				<table> \
-					<tr> <td> \
-							<table class="ui-widget"> \
-								<tr>  <td><label for="id_cultural_institution">Cultural institution:</label></td>  <td><select id="id_cultural_institution"></select></td>  </tr> \
-							</table> \
-						</td>  \
-					</tr> \
-				</table> \
-			</form></div> \
-			<div id="div_for_auditoriums"></div>');
+		center.append('<div id="div_for_auditoriums"></div>');
 		
 		auditoriumsMainPage();
 	}
