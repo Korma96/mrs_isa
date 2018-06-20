@@ -2,7 +2,7 @@ var addNewAuditoriumURL = "/myapp/administrators/admin_cultural_institution/add_
 var updateAuditoriumURL = "/myapp/administrators/admin_cultural_institution/update_auditorium";
 var deleteAuditoriumURL = "/myapp/administrators/admin_cultural_institution/delete_auditorium";
 var getAuditoriumsForCIURL = "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_cultural_institution";
-var getCIForAdminURL = "/myapp/administrators/admin_cultural_institution/get_ci_for_admin";
+var getCIForAdminURL = "/myapp/administrators/admin_cultural_institution/get_cultural_institution_for_admin";
 
 var currentInstitution = null;
 
@@ -17,8 +17,10 @@ function getCIForAdmin()
 		dataType : "json",
 		contentType: "application/json",
 		cache: false,
-		success : function(arrayList) {
-			ci = arrayList[0];
+		success : function(hm) {
+			if(hm["has"]) {
+				ci = hm["institution"];
+			}
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
@@ -29,20 +31,21 @@ function getCIForAdmin()
 	return ci;
 }
 
-function getAuditoriumsForCI(ciName)
+function getAuditoriumsForCI()
 {
 	var auditoriums = null;
 	
 	$.ajax({
 		async: false,
-		type : "POST",
+		type : "GET",
 		url : getAuditoriumsForCIURL,
 		dataType : "json",
-		contentType: "application/json",
-		data: JSON.stringify({"ciName" : ciName}),
 		cache: false,
 		success : function(receivedAuditoriums) {
-			auditoriums = receivedAuditoriums;
+			if(["has"]) {
+				auditoriums = receivedAuditoriums["auditoriums"];
+			}
+			
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
@@ -82,7 +85,7 @@ function auditoriumsMainPage()
 	var logged = isLogged();
 	if (logged) { // ako je ulogovan
 		currentInstitution = getCIForAdmin();
-		var auditoriums = getAuditoriumsForCI(currentInstitution);
+		var auditoriums = getAuditoriumsForCI();
 		if(auditoriums)
 		{ 
 			show_auditoriums(auditoriums);
@@ -118,7 +121,7 @@ function auditoriumsMainPage()
 function show_auditoriums(data)
 {
 	var html_string = "";
-	html_string += '<table><tr><th>Name</th><th>Rows</th><th>Columns</th><th><input type="button" id="id_btn_add_new_auditorium" class="buttons" value="Add"/><th/></tr>';
+	html_string += '<table id="id_auditoriums_table"><tr><th>Name</th><th>Rows</th><th>Columns</th><th><input type="button" id="id_btn_add_new_auditorium" class="buttons" value="Add"/><th/></tr>';
 	for(x in data)
 	{
 		html_string += "<tr>";
@@ -193,7 +196,6 @@ function addAuditoriumAjax()
 {
 	var obj = {};
 	var name = $("#id_name").val();
-    var ci = currentInstitution;
     var numOfRows = $("#id_numOfRows").val();
     var numOfCols = $("#id_numOfCols").val();
     
@@ -204,7 +206,6 @@ function addAuditoriumAjax()
 	}
 
     obj["name"] = name;
-    obj["ci"] = ci;
     obj["numOfRows"] = numOfRows;
     obj["numOfCols"] = numOfCols;
 	
@@ -245,7 +246,7 @@ function update_auditorium()
 		numb = numb.join("");
 		var a_id = numb;
 		var a = null;
-		var auditoriums = getAuditoriumsForCI(currentInstitution);
+		var auditoriums = getAuditoriumsForCI();
 		for(x in auditoriums)
 		{
 			if(auditoriums[x].id == a_id)
@@ -300,16 +301,13 @@ function updateAuditoriumAjax(old_name, ID)
 	}
 
 	var obj = {};
-	obj["id"] = ID.toString();
 	obj["name"] = name;
 	obj["old_name"] = old_name;
-    obj["ci"] = ci;
     obj["numOfRows"] = numOfRows;
     obj["numOfCols"] = numOfCols;
 
 	$.ajax({ 
-	    type: "POST",
-	    async: false,
+	    type: "PUT",
 		url:  updateAuditoriumURL,
 	    data: JSON.stringify(obj),
 	    dataType: "json", 
@@ -337,7 +335,7 @@ function delete_auditorium()
 	numb = numb.join("");
 	var a_id = numb;
 	var a = null;
-	var auditoriums = getAuditoriumsForCI(currentInstitution);
+	var auditoriums = getAuditoriumsForCI();
 	for(x in auditoriums)
 	{
 		if(auditoriums[x].id == a_id)
@@ -354,11 +352,9 @@ function delete_auditorium()
 
 	var obj = {};
 	obj["id"] = a_id.toString();
-	obj["ci"] = currentInstitution;
 	
 	$.ajax({ 
-	    type: "POST",
-	    async: false,
+	    type: "DELETE",
 		url:  deleteAuditoriumURL,
 	    data: JSON.stringify(obj),
 	    dataType: "json", 

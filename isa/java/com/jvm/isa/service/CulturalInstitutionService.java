@@ -47,4 +47,5 @@ public interface CulturalInstitutionService {
 	boolean deleteAuditorium(String name);
 
 	boolean save(Showing s);
+
 }

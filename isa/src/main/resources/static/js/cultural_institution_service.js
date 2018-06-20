@@ -397,12 +397,17 @@ function delete_institution()
 function put_data_in_html(data)
 {
 	var html_string = "";
-	html_string += "<table><tr><th>Name</th><th>Address</th><th>Description</th></tr>";
+	html_string += "<table id='id_cul_ins_table'><tr><th>Name</th><th>Address</th><th>Description</th></tr>";
 	for(x in data)
 	{
 		html_string += "<tr>";
 		html_string += "<td>";
+		html_string += "<img class='small_img' id='id_cultural_institution_img_"+x+"' alt='No image' src='#'/>";
+		html_string += "</td>";
+		html_string += "<td>";
+		html_string +=  "<a href='/myapp/#/users/culturual_institution' id='id_cultural_institution_"+x+"'>"; 
 		html_string += data[x].name;
+		html_string += "</a>";
 		html_string += "</td>";
 		html_string += "<td>";
 		html_string += data[x].address;
@@ -411,6 +416,11 @@ function put_data_in_html(data)
 		html_string += data[x].description;
 		html_string += "</td>";
 		html_string += "</tr>";
+		
+		$("#id_cultural_institution_" + x).on("click", {name: data[x].name, address: data[x].address, description: data[x].descrption, type: data[x].type}, showCulturalInstitution);
+		$("#id_cultural_institution_img_" + x).on("click", {name: data[x].name, address: data[x].address, description: data[x].descrption, type: data[x].type}, showCulturalInstitution);
+		
+		loadAndSetImage("cultural_institution_" + data[x].name, "id_cultural_institution_img_" + x);
 	}
 	html_string += "</table>"
 	$("#cultural_institutions").html(html_string);

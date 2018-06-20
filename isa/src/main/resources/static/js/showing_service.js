@@ -9,23 +9,18 @@ var getAllCIsURL = "/myapp/administrators/admin_cultural_institution/get_cultura
 var currentShowings = null;
 var lastCi = null;
 
-function get_showings_for_ci(ci)
+function get_showings_for_ci()
 {
 	var showings = null;
-
-	var obj = {};
-	obj["ci"] = ci;
 	
 	$.ajax({ 
-	    type: "POST",
+	    type: "GET",
 	    async: false,
 		url:  getShowingsForChosenCIURL,
-	    data: JSON.stringify(obj),
 	    dataType: "json", 
-	    contentType: "application/json",
 	    success: function(data) {
-	    	if(data) {    	        
-				showings = data;
+	    	if(data["has"]) {    	        
+				showings = data["showings"];
 	    	}
 	    	else {
 				toastr.error("There are no showings for chosen cultural institution!"); 

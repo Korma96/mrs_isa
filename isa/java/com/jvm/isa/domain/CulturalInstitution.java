@@ -197,5 +197,21 @@ public class CulturalInstitution{
 		
 		return false;
 	}
+
+	public Auditorium getAuditoriumById(String idStr) {
+		try {
+			int idAuditorium = Integer.parseInt(idStr);
+			
+			for (Auditorium auditorium : auditoriums) {
+				if(auditorium.getId() == idAuditorium) return auditorium;
+			}
+		}
+		catch(Exception e) {
+			return null;
+		}
+		
+		
+		return null;
+	}
 	
 }

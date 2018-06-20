@@ -55,15 +55,19 @@ function changeAuditoriums()
 {
 	$('#id_auditorium').empty();
 	$("#div_for_terms").empty();
-	var ciName = getCIForAdmin();
-	var auditoriums = getAuditoriumsForCulturalInstitution(ciName);
-	$("#id_auditorium").append('<option disabled selected value> -- select an option -- </option>');
-	for(au in auditoriums)
-	{
-		$("#id_auditorium").append("<option " + auditoriums[au] + "> " + auditoriums[au] + " </option>");
+	var auditoriums = getAuditoriumsForCI();
+	if(auditoriums) {
+		$("#id_auditorium").append('<option disabled selected value> -- select an option -- </option>');
+		for(au in auditoriums)
+		{
+			$("#id_auditorium").append("<option>" + auditoriums[au].name + " </option>");
+		}
+		
+		$("#id_auditorium").change(searchTerms);
 	}
-	
-	$("#id_auditorium").change(searchTerms);
+	else {
+		toastr.error("No auditorium found!");
+	}
 }
 
 function getAuditoriumsForCulturalInstitution(ciName)
@@ -157,7 +161,7 @@ function addTermsToUI(receivedTerms)
 	$("#div_for_terms").html(html_string);
 
 	var currentInstitution = getCIForAdmin();
-	var showings = get_showings_for_ci(currentInstitution);
+	var showings = get_showings_for_ci();
 	if(showings) {
 		if (showings.length > 0) {
 			$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');
@@ -209,10 +213,8 @@ function addTerm()
 	{
 		return;
 	}
-	var currentInstitution = getCIForAdmin();
 	
 	var obj = {}
-	obj["ci"] = currentInstitution;
 	obj["showing"] = showing;
 	obj["auditorium"] = auditorium;
 	obj["date"] = date;

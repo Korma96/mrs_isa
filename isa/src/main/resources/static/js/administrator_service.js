@@ -38,7 +38,7 @@ function adminSystemPage(loggedUser) {
 function adminSystemMainPage() {
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/sys_admin/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/sys_admin/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
+	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institution </a>');
 	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/sys_admin/register"> Register administrator </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
@@ -307,7 +307,7 @@ function adminCulturalInstitutionsMainPage() {
 	});
 }
 
-function getOneCi(ci)
+/*function getOneCi(ci)
 {
 	var c = null;
 	
@@ -333,21 +333,22 @@ function getOneCi(ci)
 	});	
 	
 	return c;
-}
+}*/
 
 
 function showCulturalInstitutionCIA() {
 	event.preventDefault();
 	
-	var ci = getCIForAdmin();
-	var c = getOneCi(ci);
-	if(c == null)
-	{
-		toastr.error('Missing cultural institution!');
-	}
-	
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
+		var c = getCIForAdmin();
+		//var c = getOneCi(ci);
+		if(c == null)
+		{
+			toastr.error('Missing cultural institution!');
+			return
+		}
+		
 		if(c.name) {
 			deleteAllExceptFirst();
 			$("#center").append('<div> <table id="id_main_table"> </table></div>');

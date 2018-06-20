@@ -390,9 +390,9 @@ public class TermServiceImpl implements TermService {
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
+	public boolean addTerm(CulturalInstitution culturalInstitution, String date, String auditoriumName, String showingName,
 			String time, double price) {
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+		
 		if(culturalInstitution == null) return false;
 		
 		Showing showing = showingRepository.findByName(showingName);
@@ -413,6 +413,11 @@ public class TermServiceImpl implements TermService {
 		
 			int duration = showing.getDuration();
 			LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
+			
+			if(userService.computeSubtractTwoDateTime(LocalDate.now(), dateLocal, LocalTime.now(), insertedTimeStart) <= 0) {
+				  return false;
+			}
+			
 			LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
 			
 			for(Term t : terms)

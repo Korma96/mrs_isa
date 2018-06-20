@@ -8,10 +8,10 @@
 
 .cultural_institution_div { border-width:4px; border-style:solid; border-color:red; }
 
-#id_cul_ins_table {
+#id_cul_ins_table, #id_auditoriums_table {
     border-collapse: collapse;
 }
 
-#id_cul_ins_table, #id_cul_ins_table th, #id_cul_ins_table td {
+#id_cul_ins_table, #id_auditoriums_table, #id_cul_ins_table th, #id_auditoriums_table th, #id_cul_ins_table td, #id_auditoriums_table td {
     border: 1px solid blue;
 }

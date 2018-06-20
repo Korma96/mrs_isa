@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Term;
 
@@ -31,7 +32,8 @@ public interface TermService {
 	
 	ArrayList<String> getTimes(String culturalInstitutionName, String showingName, String dateStr, String auditoriumStr);
 	
-	boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName, String time, double price);
+	boolean addTerm(CulturalInstitution culturalInstitution, String date, String auditoriumName, String showingName,
+			String time, double price);
 	
 	boolean deleteTerm(String id);
 	
