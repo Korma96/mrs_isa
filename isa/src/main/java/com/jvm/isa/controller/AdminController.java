@@ -25,6 +25,7 @@ import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionType;
+import com.jvm.isa.domain.QuickTicket;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.Showing;
@@ -36,6 +37,7 @@ import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.AdminService;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
+import com.jvm.isa.service.QuickTicketService;
 import com.jvm.isa.service.TermService;
 import com.jvm.isa.service.TicketService;
 import com.jvm.isa.service.UserService;
@@ -72,6 +74,9 @@ public class AdminController {
 	
 	@Autowired
 	private TermService termService;
+	
+	@Autowired
+	private QuickTicketService quickTicketService;
 	
 
 	@RequestMapping(value = "/sys_admin/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -419,13 +424,46 @@ public class AdminController {
 
 	}
 	
-	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ArrayList<CulturalInstitution>> getCulturalInstitution(@RequestBody HashMap<String, String> hm) {
+	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institution", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<CulturalInstitution>> getCulturalInstitution() {
+		User loggedUser = userController.getLoggedUserLocalMethod();
+		
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
+				Administrator loggedAdministrator = (Administrator) loggedUser; 
+				CulturalInstitution ci = loggedAdministrator.getCulturalInstitution();
+				ArrayList<CulturalInstitution> arrayList = new ArrayList<CulturalInstitution>();
+				arrayList.add(ci);
+				return new ResponseEntity<ArrayList<CulturalInstitution>>(arrayList, HttpStatus.OK);
+			}
+		}
+		return null;
+	}
+	
+	@RequestMapping(value ="/admin_cultural_institution/get_quick_tickets", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<QuickTicket>> getQuickTickets(@RequestBody HashMap<String, String> hm)
+	{
 		String ci = hm.get("ci");
-		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
-		ArrayList<CulturalInstitution> cc = new ArrayList<CulturalInstitution>();
-		cc.add(c);
-		return new ResponseEntity<ArrayList<CulturalInstitution>>(cc, HttpStatus.OK);
+		String sh = hm.get("showing");
+		ArrayList<QuickTicket> quickTickets = quickTicketService.findByCulturalInstitutionAndShowing(ci, sh);
+		if(quickTickets == null)
+			return new ResponseEntity<ArrayList<QuickTicket>>(new ArrayList<QuickTicket>(), HttpStatus.OK);
+		return new ResponseEntity<ArrayList<QuickTicket>>(quickTickets, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value ="/admin_cultural_institution/get_reserved_quick_tickets", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getReservedQuickTickets(@RequestBody HashMap<String, String> hm)
+	{
+		String termId = hm.get("term_id");
+		ArrayList<String> returnList = quickTicketService.getReservedQuickTickets(termId);
+		return new ResponseEntity<ArrayList<String>>(returnList, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/admin_cultural_institution/add_new_quick_ticket", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> addNewQuickTicket(@RequestBody HashMap<String, String> hm)
+	{
+		
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/add_new_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

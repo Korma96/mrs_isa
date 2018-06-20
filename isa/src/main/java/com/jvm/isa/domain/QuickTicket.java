@@ -23,6 +23,9 @@ public class QuickTicket {
 	@Column(name="seat", unique=false, nullable=false)
 	private int seat;
 	
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	private RegisteredUser reservedBy;
+	
 	public QuickTicket() {
 		
 	}

@@ -201,8 +201,9 @@ function adminCulturalInstitutionsMainPage() {
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_auditoriums" href="/myapp/#/administrators/admin_cultural_institution/auditorium"> Auditoriums </a>');
 	$("#myDropdown").append('<a id="id_attendance" href="/myapp/#/administrators/admin_cultural_institution/attendance"> Attendance </a>');
-	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
+	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institution </a>');
 	$("#myDropdown").append('<a id="id_income" href="/myapp/#/administrators/admin_cultural_institution/income"> Income </a>');
+	$("#myDropdown").append('<a id="id_tickets" href="/myapp/#/administrators/admin_cultural_institution/quick_tickets"> Quick tickets </a>');
 	$("#myDropdown").append('<a id="id_repertoires" href="/myapp/#/administrators/admin_cultural_institution/repertoires"> Repertoires </a>');
 	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
@@ -305,6 +306,17 @@ function adminCulturalInstitutionsMainPage() {
 		
 		income();
 	});
+	
+	$("#id_tickets").click(function(event) {
+		event.preventDefault();
+		
+		if(window.history.pushState) {
+		    window.history.pushState(null, null, $(this).attr('href')); // set
+																		// URL
+		}
+		
+		quick_tickets_page("Military Fiction", "Srpsko narodno pozoriste");
+	});
 }
 
 /*function getOneCi(ci)
@@ -313,19 +325,15 @@ function adminCulturalInstitutionsMainPage() {
 	
 	$.ajax({ 
 	    async: false,
-		type: "POST",
+		type: "GET",
 		url:  "/myapp/administrators/admin_cultural_institution/get_cultural_institution",
 		dataType : "json",
-		data: JSON.stringify({"ci" : ci}),
-	    contentType: "application/json",
 	    cache: false,
 	    success: function(data) {
-					if(data) {
+					if(data) 
+					{
 						c = data[0];
-					}
-					else {
-						toastr.error("Missing cultural institution!"); 
-					}			
+					}		
 	   },
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
 					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
