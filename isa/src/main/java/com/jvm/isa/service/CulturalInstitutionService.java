@@ -42,9 +42,12 @@ public interface CulturalInstitutionService {
 
 	boolean saveAuditorium(Auditorium a);
 
-	Auditorium getAuditorium(String oldName);
+	Auditorium getAuditorium(Long id);
 
-	boolean deleteAuditorium(String name);
+	boolean deleteAuditorium(Long id);
 
 	boolean save(Showing s);
+
+	boolean deleteShowing(Long id);
+	
 }

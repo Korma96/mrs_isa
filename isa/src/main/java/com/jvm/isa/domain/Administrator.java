@@ -41,6 +41,15 @@ public class Administrator extends User {
 		this.email = email;
 		
 	}
+	
+	public Administrator(String username, String password, String firstName, String lastName, String email, UserType userType, CulturalInstitution ci) {
+	super(username, password, userType, UserStatus.PENDING);
+
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.culturalInstitution = ci;		
+	}
 
 	public String getFirstName() {
 		return firstName;

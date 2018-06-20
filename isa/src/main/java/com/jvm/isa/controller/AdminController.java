@@ -117,9 +117,19 @@ public class AdminController {
 					typeOfAdmin = "fun zone administrator";
 					userType = UserType.FUNZONE_ADMINISTRATOR;
 				}
-
-				Administrator admin = new Administrator(potentionalUsername, password, firstName, lastName, email,
+				Administrator admin = null;
+				if(adminRole.equals("CIA"))
+				{
+					String ci = hm.get("ci");
+					CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+					admin = new Administrator(potentionalUsername, password, firstName, lastName, email,
+							userType, c);
+				}
+				else
+				{
+					admin = new Administrator(potentionalUsername, password, firstName, lastName, email,
 						userType);
+				}
 				successregister = adminService.register(admin);
 
 				if (successregister) {
@@ -191,6 +201,22 @@ public class AdminController {
 	@RequestMapping(value = "/admin_funzone/update_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Integer> saveChangesOnProfileAdminFunZone(@RequestBody HashMap<String, String> hm) {
 		return saveChangesOnProfileAdmin(hm);
+	}
+	
+	
+	@RequestMapping(value = "/admin_cultural_institution/get_ci_for_admin", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<String>> getCIForAdmin() 
+	{
+		User loggedUser = userController.getLoggedUserLocalMethod();
+		ArrayList<String> returnList = new ArrayList<String>();
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
+				Administrator loggedAdministrator = (Administrator) loggedUser; 
+				String ciName = loggedAdministrator.getCulturalInstitution().getName();
+				returnList.add(ciName);
+			}
+		}
+		return new ResponseEntity<ArrayList<String>>(returnList, HttpStatus.OK);
 	}
 	
 	
@@ -393,6 +419,15 @@ public class AdminController {
 
 	}
 	
+	@RequestMapping(value = "/admin_cultural_institution/get_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ArrayList<CulturalInstitution>> getCulturalInstitution(@RequestBody HashMap<String, String> hm) {
+		String ci = hm.get("ci");
+		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+		ArrayList<CulturalInstitution> cc = new ArrayList<CulturalInstitution>();
+		cc.add(c);
+		return new ResponseEntity<ArrayList<CulturalInstitution>>(cc, HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/admin_cultural_institution/add_new_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> addNewShowing(@RequestBody HashMap<String, String> hm)
 	{
@@ -408,14 +443,13 @@ public class AdminController {
 					String type = hm.get("type");
 					String genre = hm.get("genre");
 					String duration = hm.get("duration");
-					String rating = hm.get("rating");
 					String actors = hm.get("actors");
 					String director = hm.get("director");
 					String description = hm.get("description");
 					ShowingType shType = ShowingType.valueOf(type);
 					try
 					{
-					Showing showing = new Showing(name, genre, actors, director, new Integer(duration), new Double(rating), description, shType);
+					Showing showing = new Showing(name, genre, actors, director, new Integer(duration), description, shType);
 					boolean success = culturalInstitutionService.save(showing, loggedAdministrator.getCulturalInstitution());
 					
 					if(success) userController.saveNewShowingOnSession(showing);
@@ -444,16 +478,29 @@ public class AdminController {
 				Administrator loggedAdministrator = (Administrator) loggedUser; 
 			
 				String oldName = hm.get("old_name");
+				String Id = hm.get("id");
+				String ci = hm.get("ci");
 				String name = hm.get("name");
 				String type = hm.get("type");
 				String genre = hm.get("genre");
 				String duration = hm.get("duration");
-				String rating = hm.get("rating");
 				String actors = hm.get("actors");
 				String director = hm.get("director");
 				String description = hm.get("description");
 				ShowingType shType = ShowingType.valueOf(type);
-				Showing s = culturalInstitutionService.getShowing(oldName);
+				Long id = new Long(Id);
+				CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+				List<Showing> showings = c.getShowings();
+				Showing s = null;
+				for(Showing sh : showings)
+				{
+					Long shId = sh.getId();
+					if(shId.longValue() == id.longValue())
+					{
+						s = sh;
+						break;
+					}
+				}
 				if (s != null) 
 				{
 					if(!oldName.equals(name) && culturalInstitutionService.showingExists(loggedAdministrator.getCulturalInstitution(), name))
@@ -463,8 +510,7 @@ public class AdminController {
 					s.setName(name);
 					try
 					{
-					s.setAverageRating(new Double(rating));
-					s.setDuration(new Integer(duration));
+						s.setDuration(new Integer(duration));
 					}
 					catch(Exception e)
 					{
@@ -475,6 +521,7 @@ public class AdminController {
 					s.setNameOfDirector(director);
 					s.setShortDescription(description);
 					s.setType(shType);
+					c.setShowings(showings);
 					boolean success = culturalInstitutionService.save(s);
 					return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 				}
@@ -486,11 +533,25 @@ public class AdminController {
 	@RequestMapping(value = "/admin_cultural_institution/delete_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> deleteShowing(@RequestBody HashMap<String, String> hm)
 	{
-		String name = hm.get("name");
+		String Id = hm.get("id");
 		String ci = hm.get("ci");
-		Showing s = culturalInstitutionService.getShowing(name);
+		Long id = new Long(Id);
 		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
 		List<Showing> showings = c.getShowings();
+		Showing s = null;
+		for(Showing sh : showings)
+		{
+			Long shId = sh.getId();
+			if(shId.longValue() == id.longValue())
+			{
+				s = sh;
+				break;
+			}
+		}
+		if(s == null)
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
 		showings.remove(s);
 		c.setShowings(showings);
 		boolean success = culturalInstitutionService.save(c);
@@ -498,7 +559,7 @@ public class AdminController {
 		{
 			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 		}
-		boolean success2 = culturalInstitutionService.deleteShowing(name);
+		boolean success2 = culturalInstitutionService.deleteShowing(id);
 		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
 	}
@@ -507,28 +568,32 @@ public class AdminController {
 	public ResponseEntity<Boolean> addNewAuditorium(@RequestBody HashMap<String, String> hm)
 	{
 		String name = hm.get("name");
-		if (!culturalInstitutionService.auditoriumExists(name)) 
+		String ci = hm.get("ci");
+		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+		List<Auditorium> auditoriums = c.getAuditoriums();
+		for(Auditorium au : auditoriums)
 		{
-			String numOfRows = hm.get("numOfRows");
-			String numOfCols = hm.get("numOfCols");
-			try
-			{
-				Auditorium a = new Auditorium(name, new Integer(numOfRows), new Integer(numOfCols));		
-				// izvadi ci iz baze, dodaj u listu auditoriuma ovaj auditorium, ponovo ga sacuvaj
-				String ci = hm.get("ci");
-				CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
-				List<Auditorium> auditoriums = c.getAuditoriums();
-				auditoriums.add(a);
-				c.setAuditoriums(auditoriums);
-				boolean success = culturalInstitutionService.save(c);
-				return new ResponseEntity<Boolean>(success, HttpStatus.OK);
-			}
-			catch(Exception e)
+			// new name already exists
+			if(au.getName().equals(name))
 			{
 				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 			}
 		}
-		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		String numOfRows = hm.get("numOfRows");
+		String numOfCols = hm.get("numOfCols");
+		try
+		{
+			Auditorium a = new Auditorium(name, new Integer(numOfRows), new Integer(numOfCols));		
+			// izvadi ci iz baze, dodaj u listu auditoriuma ovaj auditorium, ponovo ga sacuvaj
+			auditoriums.add(a);
+			c.setAuditoriums(auditoriums);
+			boolean success = culturalInstitutionService.save(c);
+			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+		}
+		catch(Exception e)
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
 	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/update_auditorium", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -536,17 +601,37 @@ public class AdminController {
 	{
 		String oldName = hm.get("old_name");
 		String name = hm.get("name");
+		String Id = hm.get("id");
 		String ci = hm.get("ci");
-		String oldCi = hm.get("old_ci");
 		String numOfRows = hm.get("numOfRows");
 		String numOfCols = hm.get("numOfCols");
-		Auditorium a = culturalInstitutionService.getAuditorium(oldName);
+		Long id = new Long(Id);
+		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
+		List<Auditorium> auditoriums = c.getAuditoriums();
+		Auditorium a = null;
+		for(Auditorium au : auditoriums)
+		{
+			Long auId = au.getId();
+			if(auId.longValue() == id.longValue())
+			{
+				a = au;
+			}
+		}
 		if (a != null) 
 		{
-			if(!oldName.equals(name) && culturalInstitutionService.auditoriumExists(name))
+			// name changed
+			if(!oldName.equals(name))
 			{
-				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+				for(Auditorium au : auditoriums)
+				{
+					// new name already exists
+					if(au.getName().equals(name))
+					{
+						return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+					}
+				}
 			}
+			
 			a.setName(name);
 			
 			try
@@ -559,9 +644,6 @@ public class AdminController {
 				return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 			}
 
-			CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
-			List<Auditorium> auditoriums = c.getAuditoriums();
-			auditoriums.add(a);
 			c.setAuditoriums(auditoriums);
 			boolean success = culturalInstitutionService.save(c);
 			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
@@ -573,8 +655,13 @@ public class AdminController {
 	public ResponseEntity<Boolean> deleteAuditorium(@RequestBody HashMap<String, String> hm)
 	{
 		String ci = hm.get("ci");
-		String name = hm.get("name");
-		Auditorium a = culturalInstitutionService.getAuditorium(name);
+		String Id = hm.get("id");
+		Long id = new Long(Id);
+		Auditorium a = culturalInstitutionService.getAuditorium(id);
+		if(a == null)
+		{
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
 		CulturalInstitution c = culturalInstitutionService.getCulturalInstitution(ci);
 		List<Auditorium> auditoriums = c.getAuditoriums();
 		auditoriums.remove(a);
@@ -584,7 +671,7 @@ public class AdminController {
 		{
 			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 		}
-		boolean success2 = culturalInstitutionService.deleteAuditorium(name);
+		boolean success2 = culturalInstitutionService.deleteAuditorium(id);
 		return new ResponseEntity<Boolean>(success2, HttpStatus.OK);
 
 	}

@@ -1,18 +1,7 @@
 var getDataForLineChartURL = "/myapp/administrators/admin_cultural_institution/get_data_for_line_chart";
 
 function line_chart_main_page()
-{
-	var culturalInstitutions = getAllCulturalInstitutions();
-	if(culturalInstitutions) {
-		if(culturalInstitutions.length > 0) {
-			$("#id_cultural_institution").append('<option disabled selected value> -- select an option -- </option>');
-			for(ci in culturalInstitutions)
-			{
-				$("#id_cultural_institution").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
-			}
-		}
-	}	
-	
+{	
 	$( function() {
 	    $( "#id_date" ).datepicker();
 	  } );
@@ -25,15 +14,12 @@ function line_chart_main_page()
 			toastr.error("Date field can not be empty!");
 			return;
 		}
-		var ci = $("#id_cultural_institution").find(":selected").text().trim();
-		if(ci == "-- select an option --")
-		{
-			toastr.error("Cultural institution field can not be empty!");
-			return;
-		}
+
 		var date = date.split("/");
 		var date = date[2] + "-" + date[0] + "-" + date[1];
 		var timePeriodType = $("#id_line_chart_type").find(":selected").text().trim();
+
+		var ci = getCIForAdmin();
 		get_data_for_line_chart(ci, date, timePeriodType);
 	});
 	

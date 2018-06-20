@@ -342,6 +342,7 @@ public class TermServiceImpl implements TermService {
 		if(auditorium == null) return false;
 		
 		LocalDate dateLocal = null;
+		
 		try {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {
@@ -354,6 +355,22 @@ public class TermServiceImpl implements TermService {
 		int duration = showing.getDuration();
 		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
 		LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
+		
+		// check if user enters wrong date and time params
+		if(dateLocal.isBefore(LocalDate.now()))
+		{
+			return false;
+		}
+		else
+		{
+			if(dateLocal.compareTo(LocalDate.now()) == 0)
+			{
+				if(insertedTimeStart.isBefore(LocalTime.now()))
+				{
+					return false;
+				}
+			}
+		}
 		
 		for(Term t : terms)
 		{			

@@ -1,18 +1,7 @@
 var getIncomeURL = "/myapp/administrators/admin_cultural_institution/get_income";
 
 function income_main_page()
-{
-	var culturalInstitutions = getAllCulturalInstitutions();
-	if(culturalInstitutions) {
-		if(culturalInstitutions.length > 0) {
-			$("#id_cultural_institution").append('<option disabled selected value> -- select an option -- </option>');
-			for(ci in culturalInstitutions)
-			{
-				$("#id_cultural_institution").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
-			}
-		}
-	}	
-	
+{	
 	$( function() {
 	    $( "#id_date1" ).datepicker();
 	  } );
@@ -35,17 +24,13 @@ function income_main_page()
 			toastr.error("Date field can not be empty!");
 			return;
 		}
-		var ci = $("#id_cultural_institution").find(":selected").text().trim();
-		if(ci == "-- select an option --")
-		{
-			toastr.error("Cultural institution field can not be empty!");
-			return;
-		}
+
 		var date1 = date1.split("/");
 		var date1 = date1[2] + "-" + date1[0] + "-" + date1[1];
 		var date2 = date2.split("/");
 		var date2 = date2[2] + "-" + date2[0] + "-" + date2[1];
 
+		var ci = getCIForAdmin();
 		calculate_income(ci, date1, date2);
 	});
 }

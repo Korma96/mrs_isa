@@ -15,6 +15,7 @@ import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.repository.RequisiteRepository;
+import com.jvm.isa.repository.UserRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -24,6 +25,9 @@ public class AdminServiceImpl implements AdminService {
 	
 	@Autowired
 	private RequisiteRepository requisiteRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService; 
@@ -237,6 +241,22 @@ public class AdminServiceImpl implements AdminService {
 		}
 		
 		return true;
+	}
+
+	@Override
+	public String getCIForAdmin(String username) 
+	{
+		User user = userRepository.findByUsername(username);
+		Administrator admin = (Administrator) user;
+		CulturalInstitution ci = admin.getCulturalInstitution();
+		if(ci != null)
+		{
+			return ci.getName();
+		}
+		else
+		{
+			return "";
+		}
 	}
 
 	

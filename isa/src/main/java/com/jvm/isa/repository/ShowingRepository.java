@@ -16,6 +16,8 @@ public interface ShowingRepository  extends Repository<Showing, Long>
 
 	Showing findByName(String name);
 	
+	Showing findById(Long id);
+	
 	Showing save(Showing s);
 	
 	void delete(Showing s);

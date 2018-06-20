@@ -2,9 +2,32 @@ var addNewAuditoriumURL = "/myapp/administrators/admin_cultural_institution/add_
 var updateAuditoriumURL = "/myapp/administrators/admin_cultural_institution/update_auditorium";
 var deleteAuditoriumURL = "/myapp/administrators/admin_cultural_institution/delete_auditorium";
 var getAuditoriumsForCIURL = "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_cultural_institution";
+var getCIForAdminURL = "/myapp/administrators/admin_cultural_institution/get_ci_for_admin";
 
-var currentAuditoriums = null;
-var lastInstitution = null;
+var currentInstitution = null;
+
+function getCIForAdmin()
+{	
+	var ci = null;
+
+	$.ajax({
+		async: false,
+		type : "GET",
+		url : getCIForAdminURL,
+		dataType : "json",
+		contentType: "application/json",
+		cache: false,
+		success : function(arrayList) {
+			ci = arrayList[0];
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+					return null;
+		}
+	});
+
+	return ci;
+}
 
 function getAuditoriumsForCI(ciName)
 {
@@ -29,7 +52,7 @@ function getAuditoriumsForCI(ciName)
 	
 	return auditoriums;
 }
-
+/*
 function cultural_institution_changed()
 {
 	$("#div_for_auditoriums").empty();
@@ -45,18 +68,34 @@ function cultural_institution_changed()
 		toastr.error('Auditoriums not found!');
 	}
 }
-
+*/
 function goBackToAuditoriumsMainPage()
 {
 	auditoriums();
-	if(lastInstitution == null)
+	if(currentInstitution == null)
 		return;
-	$("#id_cultural_institution").val(lastInstitution);
-	cultural_institution_changed();
+	auditoriumsMainPage();
 }
 
 function auditoriumsMainPage()
 {
+	var logged = isLogged();
+	if (logged) { // ako je ulogovan
+		currentInstitution = getCIForAdmin();
+		var auditoriums = getAuditoriumsForCI(currentInstitution);
+		if(auditoriums)
+		{ 
+			show_auditoriums(auditoriums);
+		}
+		else
+		{
+			toastr.error('Auditoriums not found!');
+		}
+	}
+	else {
+		$("#center").load("html/partials/login.html", null, loadLoginComplete);
+	}
+	/*
 	var culturalInstitutions = getAllCulturalInstitutions();
 	if(culturalInstitutions) {
 		if(culturalInstitutions.length > 0) {
@@ -73,15 +112,13 @@ function auditoriumsMainPage()
 	{
 		toastr.error('Cultural institutions not found!');
 	}
-
+	*/
 }
 
 function show_auditoriums(data)
 {
 	var html_string = "";
 	html_string += '<table><tr><th>Name</th><th>Rows</th><th>Columns</th><th><input type="button" id="id_btn_add_new_auditorium" class="buttons" value="Add"/><th/></tr>';
-	var counter = 0;
-	currentAuditoriums = data;
 	for(x in data)
 	{
 		html_string += "<tr>";
@@ -95,28 +132,20 @@ function show_auditoriums(data)
 		html_string += data[x].numOfCols;
 		html_string += "</td>";
 		html_string += "<td>";
-		html_string += '<button id="';
-		var update_button_id = 'id_btn_update_auditorium' + counter.toString();
-		html_string += update_button_id;
-		html_string += '" class="buttons_update">Update</button>';
-		html_string += '<button id="';
-		var delete_button_id = 'id_btn_delete_auditorium' + counter.toString();
-		html_string += delete_button_id;
-		html_string += '" class="buttons_remove">Delete</button>';
+		html_string += '<button id="id_btn_update_auditorium' + data[x].id + '" class="buttons_update">Update</button>';
+		html_string += '<button id="id_btn_delete_auditorium' + data[x].id + '" class="buttons_remove">Delete</button>';
 		html_string += "</td>";
 		html_string += "</tr>";
-		counter += 1;
 	}
 	html_string += "</table>";
 	$("#div_for_auditoriums").html(html_string);
-	var newCounter = 0;
-	while(newCounter < counter)
+	for(x in data)
 	{
-		var id = "id_btn_update_auditorium" + newCounter.toString();
+		// button id is same as auditorium id
+		var id = "id_btn_update_auditorium" + data[x].id;
 		document.getElementById(id).onclick = update_auditorium;
-		var id2 = "id_btn_delete_auditorium" + newCounter.toString();
+		var id2 = "id_btn_delete_auditorium" + data[x].id;
 		document.getElementById(id2).onclick = delete_auditorium;
-		newCounter++;
 	}
 
 	$("#id_btn_add_new_auditorium").click(function(event) {
@@ -132,25 +161,12 @@ function add_auditorium()
 	var logged = isLogged();
 	if (logged) { // ako je  ulogovan
 		
-		lastInstitution = $("#id_cultural_institution").find(":selected").text().trim();
 		deleteAllExceptFirst();
 		
 		var html_string = "";
 		html_string += '<form > \
 						<table> \
 						<tr><td><label for="id_name">Name:</label></td><td><input type="text" id="id_name"/></td></tr> \
-						<tr>  <td><label for="id_ci">Cultural institution:</label></td>  <td class = "select"> \
-						<select id="id_ci">';
-		html_string += '<option disabled selected value> -- select an option -- </option>';
-		var culturalInstitutions = getAllCulturalInstitutions();
-		if(ci != null)
-		{
-			for(ci in culturalInstitutions)
-			{
-				html_string += "<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>";
-			}
-		}
-		html_string += '</select></td></tr> \
 						<tr><td><label for="id_numOfRows">Num of rows:</label></td><td><input type="number" id="id_numOfRows" min="1" max="100"/></td></tr> \
 						<tr><td><label for="id_numOfCols">Num of cols:</label></td><td><input type="number" id="id_numOfCols" min="1" max="100"/></td></tr> \
 						</table> \
@@ -177,11 +193,11 @@ function addAuditoriumAjax()
 {
 	var obj = {};
 	var name = $("#id_name").val();
-    var ci = $("#id_ci").find(":selected").text().trim();
+    var ci = currentInstitution;
     var numOfRows = $("#id_numOfRows").val();
     var numOfCols = $("#id_numOfCols").val();
     
-	if(name == "" || ci == "-- select an option --" || numOfRows == "" || numOfCols == "")
+	if(name == "" || numOfRows == "" || numOfCols == "")
 	{
 		toastr.error("Field(s) can not be empty!"); 
 		return;
@@ -202,7 +218,6 @@ function addAuditoriumAjax()
 	    success: function(success) {
 	    	if(success) {
                 $("#id_name").val("");
-                $("#id_ci").val("-- select an option --");
                 $("#id_numOfRows").val(1);
                 $("#id_numOfCols").val(1);	
 	    		
@@ -228,33 +243,28 @@ function update_auditorium()
 		var button_id = this.id;
 		var numb = button_id.match(/\d/g);
 		numb = numb.join("");
-		var a = currentAuditoriums[parseInt(numb)];
-		
-		lastInstitution = $("#id_cultural_institution").find(":selected").text().trim();
+		var a_id = numb;
+		var a = null;
+		var auditoriums = getAuditoriumsForCI(currentInstitution);
+		for(x in auditoriums)
+		{
+			if(auditoriums[x].id == a_id)
+			{
+				a = auditoriums[x];
+			}
+		}
+		if(a == null)
+		{
+			toastr.error("Auditorium don`t exists!");
+			goBackToAuditoriumsMainPage();
+		}
+
 		deleteAllExceptFirst();
 		
 		var html_string = "";
 		html_string += '<form > \
 						<table> \
 						<tr><td><label for="id_name">Name:</label></td><td><input type="text" value="' + a.name + '" id="id_name"/></td></tr> \
-						<tr>  <td><label for="id_ci">Cultural institution:</label></td>  <td class = "select"> \
-						<select id="id_ci">';
-		var c = $("#id_ci").find(":selected").text().trim();
-		html_string += '<option disabled selected value> -- select an option -- </option>';
-		var culturalInstitutions = getAllCulturalInstitutions();
-		if(ci != null)
-		{
-			for(ci in culturalInstitutions)
-			{
-				if(c.name == ci.name)
-				{
-					html_string += '<option selected value="' + culturalInstitutions[ci] + '" >' + culturalInstitutions[ci] + "</option>";
-					continue;
-				}
-				html_string += "<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>";
-			}
-		}
-		html_string += '</select></td></tr> \
 						<tr><td><label for="id_numOfRows">Num of rows:</label></td><td><input type="number" id="id_numOfRows" min="1" max="100" value="' + a.numOfRows + '" /></td></tr> \
 						<tr><td><label for="id_numOfCols">Num of cols:</label></td><td><input type="number" id="id_numOfCols" min="1" max="100" value="' + a.numOfCols + '" /></td></tr> \
 						</table> \
@@ -267,7 +277,7 @@ function update_auditorium()
 		$("#id_btn_update_auditorium").click(function(event) {
 			event.preventDefault();
 			
-			updateAuditoriumAjax(a.name);
+			updateAuditoriumAjax(a.name, a_id);
 		});
 	}
 	else
@@ -276,11 +286,10 @@ function update_auditorium()
 	}
 }
 
-function updateAuditoriumAjax(old_name)
+function updateAuditoriumAjax(old_name, ID)
 {
-	var obj = {};
 	var name = $("#id_name").val();
-    var ci = $("#id_ci").find(":selected").text().trim();
+    var ci = currentInstitution;
     var numOfRows = $("#id_numOfRows").val();
     var numOfCols = $("#id_numOfCols").val();
     
@@ -290,6 +299,8 @@ function updateAuditoriumAjax(old_name)
 		return;
 	}
 
+	var obj = {};
+	obj["id"] = ID.toString();
 	obj["name"] = name;
 	obj["old_name"] = old_name;
     obj["ci"] = ci;
@@ -324,12 +335,26 @@ function delete_auditorium()
 	var button_id = this.id;
 	var numb = button_id.match(/\d/g);
 	numb = numb.join("");
-	var a = currentAuditoriums[parseInt(numb)];
-	lastInstitution = $("#id_cultural_institution").find(":selected").text().trim();
+	var a_id = numb;
+	var a = null;
+	var auditoriums = getAuditoriumsForCI(currentInstitution);
+	for(x in auditoriums)
+	{
+		if(auditoriums[x].id == a_id)
+		{
+			a = auditoriums[x];
+			break;
+		}
+	}
+	if(a == null)
+	{
+		toastr.error("Auditorium don`t exists!");
+		goBackToAuditoriumsMainPage();
+	}
 
 	var obj = {};
-	obj["name"] = a.name;
-	obj["ci"] = lastInstitution;
+	obj["id"] = a_id.toString();
+	obj["ci"] = currentInstitution;
 	
 	$.ajax({ 
 	    type: "POST",
@@ -345,7 +370,7 @@ function delete_auditorium()
 				goBackToAuditoriumsMainPage();
 	    	}
 	    	else {
-	    		toastr.error("Wrong data!"); 
+	    		toastr.error("Error deleting auditorium!"); 
 	    	}
 	   },
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 

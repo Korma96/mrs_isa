@@ -70,6 +70,20 @@ public class Showing {
 		this.terms = new ArrayList<Term>();
 	}
 
+	public Showing(String name, String genre, String listOfActors, String nameOfDirector, int duration,
+			/*String poster,*/ String shortDescription, ShowingType type) {
+	
+		this.name = name;
+		this.genre = genre;
+		this.listOfActors = listOfActors;
+		this.nameOfDirector = nameOfDirector;
+		this.duration = duration;
+		//this.poster = poster;
+		this.shortDescription = shortDescription;
+		this.type = type;
+		this.terms = new ArrayList<Term>();
+	}
+
 
 	public Long getId() {
 		return id;

@@ -55,8 +55,7 @@ function changeAuditoriums()
 {
 	$('#id_auditorium').empty();
 	$("#div_for_terms").empty();
-	var ciName = $('#id_cultural_institution').find(":selected").text();
-	ciName = ciName.trim();
+	var ciName = getCIForAdmin();
 	var auditoriums = getAuditoriumsForCulturalInstitution(ciName);
 	$("#id_auditorium").append('<option disabled selected value> -- select an option -- </option>');
 	for(au in auditoriums)
@@ -74,7 +73,7 @@ function getAuditoriumsForCulturalInstitution(ciName)
 	$.ajax({
 		async: false,
 		type : "POST",
-		url : getAuditoriumsForCIURL,
+		url : "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_ci",
 		dataType : "json",
 		contentType: "application/json",
 		data: JSON.stringify({"ciName" : ciName}),
@@ -92,57 +91,13 @@ function getAuditoriumsForCulturalInstitution(ciName)
 }
 
 function repertoireMainPageComplete()
-{
-	var culturalInstitutions = getAllCulturalInstitutions();
-	if(culturalInstitutions) {
-		if(culturalInstitutions.length > 0) {
-			$("#id_cultural_institution").append('<option disabled selected value> -- select an option -- </option>');
-			for(ci in culturalInstitutions)
-			{
-				$("#id_cultural_institution").append("<option " + culturalInstitutions[ci] + "> " + culturalInstitutions[ci] + " </option>");
-			}
-			
-			$("#id_cultural_institution").change(changeAuditoriums);	
-			$("#id_date").change(searchTerms);		
-			
-			var showings = getShowings();
-			if(showings) {
-				if (showings.length > 0) {
-					$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');
-					for(sh in showings)
-					{
-						$("#id_showing").append("<option " + showings[sh].name + "> " + showings[sh].name+" - "+showings[sh].duration+"min" + " </option>");
-					}
-					$("#id_showing").change(searchTerms);
-					$("#id_date").change(searchTerms);
-				}
-				else {
-					toastr.error("Showings are not available!");
-				}
-			}
-			else {
-				toastr.error("Showings are not available!");
-			}
-		}
-		else {
-			toastr.error("Cultural institutions are not available!");
-		}
-	}
-	else {
-		toastr.error("Cultural institutions are not available!");
-	}
+{		
+	$("#id_date").change(searchTerms);
+	changeAuditoriums();
 }
 
 function searchTerms()
 {
-	var ci = $("#id_cultural_institution").find(":selected").text().trim();
-	if(ci == "-- select an option --")
-	{
-		return;
-	}
-	//var showing = $("#id_showing").find(":selected").text().trim();
-	//if(showing == "-- select an option --")
-	//	return;
 	var auditorium = $("#id_auditorium").find(":selected").text().trim();
 	if(auditorium == "-- select an option --")
 		return;
@@ -151,11 +106,8 @@ function searchTerms()
 		return;
 	var date = date.split("/");
 	var date = date[2] + "-" + date[0] + "-" + date[1];
-	//var showing = showing.split(" - ");
-	//var showing = showing[0];
 	
 	var obj = {}
-	//obj["showing"] = showing;
 	obj["auditorium"] = auditorium;
 	obj["date"] = date;
 	
@@ -204,8 +156,8 @@ function addTermsToUI(receivedTerms)
 	html_string += "</table>";
 	$("#div_for_terms").html(html_string);
 
-	var ci = $("#id_cultural_institution").find(":selected").text().trim();
-	var showings = get_showings_for_ci(ci);
+	var currentInstitution = getCIForAdmin();
+	var showings = get_showings_for_ci(currentInstitution);
 	if(showings) {
 		if (showings.length > 0) {
 			$("#id_showing").append('<option disabled selected value> -- select an option -- </option>');
@@ -239,9 +191,6 @@ function addTerm()
 	var time = $("#id_time").val();
 	if(time == "")
 		return;
-	var ci = $("#id_cultural_institution").find(":selected").text().trim();
-	if(ci == "-- select an option --")
-		return;
 	var showing = $("#id_showing").find(":selected").text().trim();
 	if(showing == "-- select an option --")
 		return;
@@ -260,9 +209,10 @@ function addTerm()
 	{
 		return;
 	}
+	var currentInstitution = getCIForAdmin();
 	
 	var obj = {}
-	obj["ci"] = ci;
+	obj["ci"] = currentInstitution;
 	obj["showing"] = showing;
 	obj["auditorium"] = auditorium;
 	obj["date"] = date;

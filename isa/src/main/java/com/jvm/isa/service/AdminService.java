@@ -43,7 +43,7 @@ public interface AdminService {
 	
 	int validChangedUsernameAndPassword(User user, String username, String password, String password2,
 			String repeatPassword);
-	
 
+	String getCIForAdmin(String username);
 
 }

@@ -12,4 +12,6 @@ public interface AuditoriumRepository extends Repository<Auditorium, Long> {
 	
 	void delete(Auditorium a);
 
+	Auditorium findById(Long id);
+
 }

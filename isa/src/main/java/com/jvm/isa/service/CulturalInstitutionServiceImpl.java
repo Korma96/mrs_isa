@@ -185,7 +185,7 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	{
 		try 
 		{
-			showing = showingRepository.save(showing);			
+			//showing = showingRepository.save(showing);			
 			culturalInstitution.getShowings().add(showing);
 			culturalInstitutionRepository.save(culturalInstitution);
 			
@@ -239,15 +239,30 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	}
 
 	@Override
-	public Auditorium getAuditorium(String oldName) {
-		return auditoriumRepository.findByName(oldName);
+	public Auditorium getAuditorium(Long id) {
+		return auditoriumRepository.findById(id);
 	}
+	
 	@Override
-	public boolean deleteAuditorium(String name) {
-		Auditorium a = auditoriumRepository.findByName(name);
+	public boolean deleteAuditorium(Long id) {
+		Auditorium a = auditoriumRepository.findById(id);
 		try
 		{
 			auditoriumRepository.delete(a);
+			return true;
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+	}
+
+	@Override
+	public boolean deleteShowing(Long id) {
+		Showing s = showingRepository.findById(id);
+		try
+		{
+			showingRepository.delete(s);
 			return true;
 		}
 		catch(Exception e)
