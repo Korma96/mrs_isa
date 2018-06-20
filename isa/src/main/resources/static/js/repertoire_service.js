@@ -1,6 +1,6 @@
 var getAllCulturalInstitutionsURL = "/myapp/administrators/admin_cultural_institution/get_cultural_institutions";
 var getShowingsURL = "/myapp/administrators/admin_cultural_institution/get_showings";
-var getAuditoriumsForCIURL = "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_ci";
+var getAuditoriumsForCulInsURL = "/myapp/administrators/admin_cultural_institution/get_auditoriums_for_ci";
 var getTermsURL = "/myapp/administrators/admin_cultural_institution/get_terms";
 var addTermURL = "/myapp/administrators/admin_cultural_institution/add_term";
 var deleteTermURL = "/myapp/administrators/admin_cultural_institution/delete_term";
@@ -74,7 +74,7 @@ function getAuditoriumsForCulturalInstitution(ciName)
 	$.ajax({
 		async: false,
 		type : "POST",
-		url : getAuditoriumsForCIURL,
+		url : getAuditoriumsForCulInsURL,
 		dataType : "json",
 		contentType: "application/json",
 		data: JSON.stringify({"ciName" : ciName}),

@@ -1,5 +1,6 @@
 package com.jvm.isa.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jvm.isa.domain.CulturalInstitution;
+import com.jvm.isa.domain.CulturalInstitutionDTO;
 import com.jvm.isa.domain.CulturalInstitutionType;
 import com.jvm.isa.service.CulturalInstitutionService;
 
@@ -26,12 +28,17 @@ public class HomePageController
 	
 	@RequestMapping(value = "/cultural_institutions", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<CulturalInstitution>> getCulturalInstitutions(@RequestBody HashMap<String, String> hm)
+	public ResponseEntity<List<CulturalInstitutionDTO>> getCulturalInstitutions(@RequestBody HashMap<String, String> hm)
 	{
 		int type = Integer.parseInt(hm.get("type"));
 		CulturalInstitutionType cit = CulturalInstitutionType.values()[type];
 		List<CulturalInstitution> cis = culturalInstitutionService.getCulturalInstitutionsByType(cit);
-		return new ResponseEntity<List<CulturalInstitution>>(cis, HttpStatus.OK);
+		ArrayList<CulturalInstitutionDTO> ciDTOs = new ArrayList<CulturalInstitutionDTO>();
+		for (CulturalInstitution culturalInstitution : cis) {
+			ciDTOs.add(new CulturalInstitutionDTO(culturalInstitution));
+		}
+		
+		return new ResponseEntity<List<CulturalInstitutionDTO>>(ciDTOs, HttpStatus.OK);
 	}
 }
 

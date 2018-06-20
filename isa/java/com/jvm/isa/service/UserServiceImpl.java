@@ -12,7 +12,6 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,32 +37,47 @@ public class UserServiceImpl implements UserService {
 	public boolean registrate(User user) {
 		try {
 			userRepository.save(user);
+			return true;
 		}
 		catch(Exception e) {
 			return false;
 		}
 		
-		return true;
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean exists(String username) {
-		return userRepository.findByUsername(username) != null;
+		try {
+			return userRepository.findByUsername(username) != null;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public User getUser(String username) {
-		User user = userRepository.findByUsername(username);
-		return user;
+		try {
+			User user = userRepository.findByUsername(username);
+			return user;
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public User getUser(String username, String password) {
-		User user = userRepository.findByUsernameAndPassword(username, password);
-		return user;
+		try {
+			User user = userRepository.findByUsernameAndPassword(username, password);
+			return user;
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
 	
@@ -125,34 +139,42 @@ public class UserServiceImpl implements UserService {
 	public ArrayList<String> getPeople(RegisteredUser ru) {
 		ArrayList<String> people = new ArrayList<String>();
 	
-		List<User> registeredUsers = userRepository.findByUserTypeAndUserStatus(UserType.REGISTERED_USER, UserStatus.ACTIVATED);
-		
-		for (User user : registeredUsers) {
-			if (user.equals(ru)) continue;
+		try {
+			List<User> registeredUsers = userRepository.findByUserTypeAndUserStatus(UserType.REGISTERED_USER, UserStatus.ACTIVATED);
 			
-			people.add(((RegisteredUser) user).toString());
+			for (User user : registeredUsers) {
+				if (user.equals(ru)) continue;
+				
+				people.add(((RegisteredUser) user).toString());
+			}
+			
+			return people;
 		}
-		
-		return people;
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
-	@Async
+	//@Async
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public void saveImageinDatabase(String fileName, InputStream uploadedInputStream) {
+	public void saveImageinDatabase(String fileName, InputStream is) {
 		/*Thread thread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {*/
-		ImageModel newImageModel = null;
+
 		try {
-			newImageModel = new ImageModel(fileName, IOUtils.toByteArray(uploadedInputStream));
+			ImageModel newImageModel = new ImageModel(fileName, IOUtils.toByteArray(is));
+			imageModelService.save(newImageModel);
+			System.out.println("File successfully uploaded to : " + fileName); 
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Error upload image!");
 		}
-		imageModelService.save(newImageModel);
-		System.out.println("File successfully uploaded to : " + fileName); 
+		
+		
 				
 		//	}
 		//});

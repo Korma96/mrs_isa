@@ -823,26 +823,39 @@ public class AdminController {
 	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/upload_cultural_institution_image", method = RequestMethod.POST/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE*/)
-	public void uploadCulturalInstitutionImage(InputStream uploadedInputStream) {
-		CulturalInstitution newCulturalInstitution = userController.getNewCulturalInstitutionOnSession();
-		String fileName = "cultural_institution_" + newCulturalInstitution.getName();  
-		userController.removeNewCulturalInstitutionOnSession();
+	public void uploadCulturalInstitutionImage(@RequestBody InputStream is) {
+		User loggedUser = userController.getLoggedUserLocalMethod();
 		
-		userService.saveImageinDatabase(fileName, uploadedInputStream);
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
+				CulturalInstitution newCulturalInstitution = userController.getNewCulturalInstitutionOnSession();
+				if(newCulturalInstitution != null) {
+					String fileName = "cultural_institution_" + newCulturalInstitution.getName();  
+					userController.removeNewCulturalInstitutionOnSession();
+					
+					userService.saveImageinDatabase(fileName, is);
+				}
+				
+			}
+		}
+		
 	}
 	
 	@RequestMapping(value = "/admin_cultural_institution/upload_showing_image", method = RequestMethod.POST/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE*/)
-	public void uploadShowingImage(InputStream uploadedInputStream) {
+	public void uploadShowingImage(@RequestBody InputStream is) {
 		User loggedUser = userController.getLoggedUserLocalMethod();
 		if(loggedUser != null) {
 			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
 				Administrator loggedAdministrator = (Administrator) loggedUser;
 				
 				Showing newShowing = userController.getNewShowingOnSession();
-				String fileName = loggedAdministrator.getCulturalInstitution().getName() + "_" + newShowing.getName();
-				userController.removeNewShowingOnSession();
+				if(newShowing != null) {
+					String fileName = loggedAdministrator.getCulturalInstitution().getName() + "_" + newShowing.getName();
+					userController.removeNewShowingOnSession();
+					
+					userService.saveImageinDatabase(fileName, is);
+				}
 				
-				userService.saveImageinDatabase(fileName, uploadedInputStream);
 			}
 		}
 		

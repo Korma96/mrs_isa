@@ -2216,7 +2216,7 @@ function sendSeatsAndFriendsAndMe(loggedUser) {
 		    		toastr.error("There was a problem. No logged user!");
 		    		break;
 		    	case 0:
-		    		toastr.success("You have successfully invite friends!");
+		    		toastr.success("You have successfully booked tickets!");
 		    		break;
 		    	case 1:
 		    		toastr.error("You did not assign any seat to yourself!");
@@ -2709,15 +2709,16 @@ function loadAndSetImage(imageName, id) {
 			if(retValue["hasImage"]) {
 				var imageModel = retValue["imageModel"];
 				if(imageModel) {
-					$("#"+id).attr('src', `data:image/png;base64,${imageModel.pic}`); // pic je niz byte-ova koji pretstavlja sliku
+					if(imageModel.pic != "") {
+						$("#"+id).attr('src', `data:image/png;base64,${imageModel.pic}`); // pic je niz byte-ova koji pretstavlja sliku
+						return;
+					}
+					
 				}
-				else {
-					$("#"+id).attr('src', 'images/no_image_available.jpg');					
-				}
+				
 			}
-			else {
-				$("#"+id).attr('src', 'images/no_image_available.jpg');					
-			}
+			
+			$("#"+id).attr('src', 'images/no_image_available.jpg');					
 			
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 
@@ -2781,7 +2782,7 @@ function showCulturalInstitution(event) {
 				if(showings.length > 0) {
 					$.each(showings, function(index, item) {
 						$("#id_showings_table").append('<tr> <td><img class="small_img" id="id_showing_img_'+index+'" alt="No image" src="#"/></td> <td> <a id="id_showing_'+index+'" href="/myapp/#/users/showing" > <h3>' + item + ' </h3> </a> </td> </tr>');
-						$("#id_showing_img_" + index).on("click", {name: item}, showShowing);
+						$("#id_showing_img_" + index).on("click", {name: item, culturalInstitutionName: event.data.name}, showShowing);
 						$("#id_showing_" + index).on("click", {name: item, culturalInstitutionName: event.data.name}, showShowing);
 						
 						loadAndSetImage(event.data.name + "_" + item, "id_showing_img_" + index);

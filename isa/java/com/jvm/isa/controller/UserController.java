@@ -35,8 +35,6 @@ import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserDTO;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
-import com.jvm.isa.repository.AuditoriumRepository;
-import com.jvm.isa.repository.TermRepository;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
 import com.jvm.isa.service.ImageModelService;
@@ -61,14 +59,14 @@ public class UserController {
 	@Autowired
 	private TicketService ticketService;
 	
-	@Autowired
-	private AuditoriumRepository auditoriumRepository;
+	//@Autowired
+	//private AuditoriumRepository auditoriumRepository;
 	
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
 	
-	@Autowired
-	private TermRepository termRepository;
+	//@Autowired
+	//private TermRepository termRepository;
 	
 	@Autowired
 	private ImageModelService imageModelService;
@@ -945,4 +943,5 @@ public class UserController {
 		
 		return new ResponseEntity<HashMap<String, Object>>(hm, HttpStatus.OK);
 	}
+	
 }

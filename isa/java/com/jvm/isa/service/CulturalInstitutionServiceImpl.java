@@ -34,16 +34,27 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Override
 	public boolean exists(String name)
 	{
-		return culturalInstitutionRepository.findByName(name) != null;
+		try {
+			return culturalInstitutionRepository.findByName(name) != null;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 	
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<Showing> getShowings()
 	{
-		return (ArrayList<Showing>) showingRepository.findAll();
+		try {
+			return (ArrayList<Showing>) showingRepository.findAll();
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean save(CulturalInstitution ci)
 	{
@@ -61,59 +72,69 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public List<Auditorium> getAuditoriums(String culturalInstitutionName) {
-		CulturalInstitution ci = culturalInstitutionRepository.findByName(culturalInstitutionName);
-		List<Auditorium> auditoriums = ci.getAuditoriums();
-		return auditoriums;
+		try {
+			CulturalInstitution ci = culturalInstitutionRepository.findByName(culturalInstitutionName);
+			if(ci == null) return null;
+			
+			List<Auditorium> auditoriums = ci.getAuditoriums();
+			return auditoriums;
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
 	@Override
 	public List<CulturalInstitution> getCulturalInstitutionsByType(CulturalInstitutionType type) 
 	{
-		return this.culturalInstitutionRepository.findByType(type);
+		try {
+			return this.culturalInstitutionRepository.findByType(type);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	} 	
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public CulturalInstitution getCulturalInstitution(String name) {
-		return culturalInstitutionRepository.findByName(name);
+		try {
+			return culturalInstitutionRepository.findByName(name);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<CulturalInstitution> getAllCulturalInstitutions()
 	{
-		return (ArrayList<CulturalInstitution>) culturalInstitutionRepository.findAll();
+		try {
+			return (ArrayList<CulturalInstitution>) culturalInstitutionRepository.findAll();
+		}
+		catch(Exception e) {
+			return null;
+		}
+		
 	}
 	
 	@Override
 	public ArrayList<String> getCulturalInstitutions() {
 		ArrayList<String> culturalInstitutions = new ArrayList<String>();
 		
-		/*ArrayList<Showing> showings =  new ArrayList<Showing>();
-		showings.add(new Showing("Rambo 1", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Rambo 2", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Rambo 3", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		CulturalInstitution c = new CulturalInstitution("SNP", "AAA", "BBB", CulturalInstitutionType.THEATER, showings, new ArrayList<Auditorium>(), new ArrayList<Repertoire>());
-		culturalInstitutionRepository.save(c);
-		showings =  new ArrayList<Showing>();
-		showings.add(new Showing("Roki 1", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Roki 2", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Roki 3", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		c = new CulturalInstitution("Jugoslovensko dramsko", "AAA", "BBB", CulturalInstitutionType.THEATER, showings, new ArrayList<Auditorium>(), new ArrayList<Repertoire>());
-		culturalInstitutionRepository.save(c);
-		showings =  new ArrayList<Showing>();
-		showings.add(new Showing("Robocop 1", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Robocop 2", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		showings.add(new Showing("Robocop 3", "aaaa", "qwqwqwqw", "xcxcx", 150, "wqwqw", 5, "ssdsds"));
-		c = new CulturalInstitution("Atelje 212", "AAA", "BBB", CulturalInstitutionType.THEATER, showings, new ArrayList<Auditorium>(), new ArrayList<Repertoire>());
-		culturalInstitutionRepository.save(c);*/
-		
-		List<CulturalInstitution> cs = culturalInstitutionRepository.findAll();
-		
-		for (CulturalInstitution culturalInstitution : cs) {
-			culturalInstitutions.add(culturalInstitution.getName());
+		try {
+			List<CulturalInstitution> cs = culturalInstitutionRepository.findAll();
+			
+			for (CulturalInstitution culturalInstitution : cs) {
+				culturalInstitutions.add(culturalInstitution.getName());
+			}
+			
+			return culturalInstitutions;
+		}
+		catch(Exception e) {
+			return null;
 		}
 		
-		return culturalInstitutions;
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -121,19 +142,24 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	public ArrayList<String> getShowings(String culturalInstitutionName) {
 		ArrayList<String> showings = new ArrayList<String>();
 		
-		CulturalInstitution culturalInstitution = culturalInstitutionRepository.findByName(culturalInstitutionName);
-		
-		if(culturalInstitution != null) {
-			for (Showing showing : culturalInstitution.getShowings()) {
-				if(!showings.contains(showing.getName()))
-				{
-					showings.add(showing.getName());
+		try {
+			CulturalInstitution culturalInstitution = culturalInstitutionRepository.findByName(culturalInstitutionName);
+			
+			if(culturalInstitution != null) {
+				for (Showing showing : culturalInstitution.getShowings()) {
+					if(!showings.contains(showing.getName()))
+					{
+						showings.add(showing.getName());
+					}
 				}
 			}
+			
+			
+			return showings;
 		}
-		
-		
-		return showings;
+		catch(Exception e) {
+			return null;
+		}
 	}
 	
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -156,7 +182,12 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Override
 	public boolean showingExists(CulturalInstitution culturalInstitution, String name)
 	{
-		return culturalInstitution.getShowing(name) != null;
+		try {
+			return culturalInstitution.getShowing(name) != null;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -216,13 +247,23 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 	@Override
 	public Showing getShowing(String name)
 	{
-		return showingRepository.findByName(name);
+		try {
+			return showingRepository.findByName(name);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Override
 	public boolean auditoriumExists(String name) 
 	{
-		return auditoriumRepository.findByName(name) != null;
+		try {
+			return auditoriumRepository.findByName(name) != null;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -230,17 +271,23 @@ public class CulturalInstitutionServiceImpl implements CulturalInstitutionServic
 		try 
 		{
 			auditoriumRepository.save(a);
+			return true;
 		}
 		catch(Exception e)
 		{
 			return false;
 		}
-		return true;
+	
 	}
 
 	@Override
 	public Auditorium getAuditorium(String oldName) {
-		return auditoriumRepository.findByName(oldName);
+		try {
+			return auditoriumRepository.findByName(oldName);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 	@Override
 	public boolean deleteAuditorium(String name) {

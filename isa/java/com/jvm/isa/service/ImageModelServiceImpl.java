@@ -14,7 +14,12 @@ public class ImageModelServiceImpl implements ImageModelService {
 	
 	@Override
 	public ImageModel getImageModel(String name) {
-		return imageModelRepository.findByName(name);
+		try {
+			return imageModelRepository.findByName(name);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Override

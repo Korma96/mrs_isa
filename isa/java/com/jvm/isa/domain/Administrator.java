@@ -4,9 +4,12 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 // ovom anotacijom se navodi vrednost diskriminatorske kolone koja vazi za
@@ -26,7 +29,9 @@ public class Administrator extends User {
 	@Column(name = "email", unique = false, nullable = false)
 	private String email;
 	
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cultural_institution_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
 	private CulturalInstitution culturalInstitution;
 
 	public Administrator() {

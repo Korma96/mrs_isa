@@ -419,14 +419,19 @@ function put_data_in_html(data)
 function put_data_in_html_extended(data)
 {
 	var html_string = "";
-	html_string += '<table><tr><th>Name</th><th>Address</th><th>Description</th><th><input type="button" id="id_btn_add_new_institution" class="buttons" value="Add"/><th/></tr>';
+	html_string += '<table id="id_cul_ins_table"><tr> <th></th ><th>Name</th><th>Address</th><th>Description</th><th><input type="button" id="id_btn_add_new_institution" class="buttons" value="Add"/><th/></tr>';
 	var counter = 0;
 	cultural_institutions = data;
 	for(x in data)
 	{
 		html_string += "<tr>";
 		html_string += "<td>";
+		html_string += "<img class='small_img' id='id_cultural_institution_img_"+x+"' alt='No image' src='#'/>";
+		html_string += "</td>";
+		html_string += "<td>";
+		html_string +=  "<a href='/myapp/#/users/culturual_institution' id='id_cultural_institution_"+x+"'>"; 
 		html_string += data[x].name;
+		html_string += "</a>";
 		html_string += "</td>";
 		html_string += "<td>";
 		html_string += data[x].address;
@@ -446,6 +451,11 @@ function put_data_in_html_extended(data)
 		html_string += "</td>";
 		html_string += "</tr>";
 		counter += 1;
+		
+		$("#id_cultural_institution_" + x).on("click", {name: data[x].name, address: data[x].address, description: data[x].descrption, type: data[x].type}, showCulturalInstitution);
+		$("#id_cultural_institution_img_" + x).on("click", {name: data[x].name, address: data[x].address, description: data[x].descrption, type: data[x].type}, showCulturalInstitution);
+		
+		loadAndSetImage("cultural_institution_" + data[x].name, "id_cultural_institution_img_" + x);
 	}
 	html_string += "</table>";
 	$("#cultural_institutions").html(html_string);

@@ -24,7 +24,7 @@ public interface UserService {
 
 	int correctChangepassword(User user, String oldPassword, String newPassword, String repeatNewPassword);
 
-	void saveImageinDatabase(String fileName, InputStream uploadedInputStream);
+	void saveImageinDatabase(String fileName, InputStream is);
 	
 	long computeSubtractTwoDateTime(LocalDate ld1, LocalDate ld2, LocalTime lt1, LocalTime lt2);
 }

@@ -34,7 +34,12 @@ public class TicketServiceImpl implements TicketService {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public Ticket getTicket(Term term, int seat) {
-		return ticketRepository.findByTermAndSeat(term, seat);
+		try {
+			return ticketRepository.findByTermAndSeat(term, seat);
+		}
+		catch (Exception e) {
+			return null;
+		}
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -53,41 +58,53 @@ public class TicketServiceImpl implements TicketService {
 		Ticket savedTicket;
 		try {
 			savedTicket = ticketRepository.save(ticket);
+			return savedTicket;
+			
 		} catch (Exception e) {
 			return null;
 		}
 		
-		return savedTicket;
+		
 	}
 
 	@Override
 	public int getNumberOfTicketsByDateAndCulturalInstitution(LocalDate date, String ci) {
-		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
-		int counter = 0;
-		for(Ticket t : tickets)
-		{
-			Term term = t.getTerm();
-			if((term.getDate().compareTo(date) == 0) && term.getCulturalInstitution().getName().equals(ci))
+		try {
+			ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+			int counter = 0;
+			for(Ticket t : tickets)
 			{
-				counter++;
+				Term term = t.getTerm();
+				if((term.getDate().compareTo(date) == 0) && term.getCulturalInstitution().getName().equals(ci))
+				{
+					counter++;
+				}
 			}
+			return counter;
 		}
-		return counter;
+		catch (Exception e) {
+				return 0;
+		}
 	}
 
 	@Override
 	public int getIncome(String ci, LocalDate dateLocal1, LocalDate dateLocal2) {
-		ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
-		int income = 0;
-		for(Ticket t : tickets)
-		{
-			Term term = t.getTerm();
-			if((term.getDate().compareTo(dateLocal1) >= 0) && (term.getDate().compareTo(dateLocal2) <= 0) && term.getCulturalInstitution().getName().equals(ci))
+		try {
+			ArrayList<Ticket> tickets = (ArrayList<Ticket>) ticketRepository.findAll();
+			int income = 0;
+			for(Ticket t : tickets)
 			{
-				income += term.getPrice();
+				Term term = t.getTerm();
+				if((term.getDate().compareTo(dateLocal1) >= 0) && (term.getDate().compareTo(dateLocal2) <= 0) && term.getCulturalInstitution().getName().equals(ci))
+				{
+					income += term.getPrice();
+				}
 			}
+			return income;
 		}
-		return income;
+		 catch (Exception e) {
+				return 0;
+			}
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -97,39 +114,46 @@ public class TicketServiceImpl implements TicketService {
 		ArrayList<CulturalInstitutionDTO> visitedCulturalInstitutions = new ArrayList<CulturalInstitutionDTO>();
 		ArrayList<CulturalInstitutionDTO> unvisitedCulturalInstitutions = new ArrayList<CulturalInstitutionDTO>();
 		
-		List<Ticket> tickets = ticketRepository.findByOwner(registeredUser);
-		ArrayList<CulturalInstitution> culturalInstitutions = culturalInstitutionService.getAllCulturalInstitutions();
-		
-		Term term;
-		boolean visited;
-		
-		for (CulturalInstitution culturalInstitution : culturalInstitutions) {
-			visited = false;
+		try {
+			List<Ticket> tickets = ticketRepository.findByOwner(registeredUser);
+			ArrayList<CulturalInstitution> culturalInstitutions = culturalInstitutionService.getAllCulturalInstitutions();
 			
-			for (Ticket ticket : tickets) {
-				term = ticket.getTerm();
-				if(culturalInstitution.equals(term.getCulturalInstitution())) {
-					if(term.getTime().compareTo(LocalTime.now()) < 0) {
-						visited = true;
-						break;
+			Term term;
+			boolean visited;
+			
+			for (CulturalInstitution culturalInstitution : culturalInstitutions) {
+				visited = false;
+				
+				for (Ticket ticket : tickets) {
+					term = ticket.getTerm();
+					if(culturalInstitution.equals(term.getCulturalInstitution())) {
+						if(term.getTime().compareTo(LocalTime.now()) < 0) {
+							visited = true;
+							break;
+						}
 					}
+					
 				}
 				
+				if(visited) {
+					visitedCulturalInstitutions.add(new CulturalInstitutionDTO(culturalInstitution));
+				}
+				else {
+					unvisitedCulturalInstitutions.add(new CulturalInstitutionDTO(culturalInstitution));
+				}
 			}
-			
-			if(visited) {
-				visitedCulturalInstitutions.add(new CulturalInstitutionDTO(culturalInstitution));
-			}
-			else {
-				unvisitedCulturalInstitutions.add(new CulturalInstitutionDTO(culturalInstitution));
-			}
-		}
 
-		HashMap<String, Object> hm = new HashMap<>();
-		hm.put("visited", visitedCulturalInstitutions);
-		hm.put("unvisited", unvisitedCulturalInstitutions);
+			HashMap<String, Object> hm = new HashMap<>();
+			hm.put("visited", visitedCulturalInstitutions);
+			hm.put("unvisited", unvisitedCulturalInstitutions);
+			
+			return hm;
+		}
+		catch (Exception e) {
+				return null;
+		}
+			
 		
-		return hm;
 	}
 
 	

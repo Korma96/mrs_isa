@@ -1,7 +1,5 @@
 package com.jvm.isa.domain;
 
-import javax.persistence.Column;
-
 public class ShowingDTO {
 	private String name;
 	private String genre;

@@ -10,7 +10,7 @@ public class CulturalInstitutionDTO {
 	public CulturalInstitutionDTO(CulturalInstitution ci) {
 		this.name = ci.getName();
 		this.address = ci.getAddress();
-		this.description = ci.getAddress();
+		this.description = ci.getDescription();
 		this.type = ci.getType().toString();
 	}
 
