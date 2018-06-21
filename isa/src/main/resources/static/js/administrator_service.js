@@ -788,7 +788,7 @@ function saveAdmin(){
 		if(adminRole == "CIA")
 		{
 			var ci = $("#id_ci").find(":selected").text().trim();
-			obj["ci"] = ci;
+			obj["culturalInstitutionName"] = ci;
 		}		
 	}
 

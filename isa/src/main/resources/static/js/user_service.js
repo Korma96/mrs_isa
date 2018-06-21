@@ -2593,7 +2593,7 @@ function getVisitedAndUnvisitedCulturalInstitutions() {
 		contentType: "application/json",
 		cache: false,
 		success : function(receiveVisitedAndUnvisitedCulturalInstitutions) {
-			if(receiveVisitedAndUnvisitedCulturalInstitutions["visited"]) {
+			if(receiveVisitedAndUnvisitedCulturalInstitutions["has"]) {
 				visitedAndUnvisitedCulturalInstitutions = receiveVisitedAndUnvisitedCulturalInstitutions;
 			}
 			else {
@@ -2627,73 +2627,75 @@ function workWithVisitedAndUnvisitedCulturalInstitutions() {
 	$("#id_visited_and_unvisited_cultural_institutions").prepend("<br/><br/>");
 	
 	var visitedAndUnvisitedCulturalInstitutions = getVisitedAndUnvisitedCulturalInstitutions();
-	var visitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["visited"];
-	var unvisitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["unvisited"];
-	
-	//popunjavanje tabele visited
-	if(visitedCulturalInstitutions) {
-		for (var i in visitedCulturalInstitutions) {
-			  $( "#id_table_visited" ).append('<tr> <td></td> <td>  <a href="/myapp/#/users/culturual_institution" id="id_visited_culturual_institution"> ' + visitedCulturalInstitutions[i].name + '</a> </td> <td>' + visitedCulturalInstitutions[i].address + ' </td> <td> ' + visitedCulturalInstitutions[i].description + '</td> <td>'+ visitedCulturalInstitutions[i].type +'</td> </tr>');
-			  $("#id_visited_culturual_institution").on("click", {name: visitedCulturalInstitutions[i].name, address: visitedCulturalInstitutions[i].address, description: visitedCulturalInstitutions[i].description, type: visitedCulturalInstitutions[i].type}, showCulturalInstitution);
+	if(visitedAndUnvisitedCulturalInstitutions) {
+		var visitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["visited"];
+		var unvisitedCulturalInstitutions = visitedAndUnvisitedCulturalInstitutions["unvisited"];
+		
+		//popunjavanje tabele visited
+		if(visitedCulturalInstitutions) {
+			for (var i in visitedCulturalInstitutions) {
+				  $( "#id_table_visited" ).append('<tr> <td></td> <td>  <a href="/myapp/#/users/culturual_institution" id="id_visited_culturual_institution"> ' + visitedCulturalInstitutions[i].name + '</a> </td> <td>' + visitedCulturalInstitutions[i].address + ' </td> <td> ' + visitedCulturalInstitutions[i].description + '</td> <td>'+ visitedCulturalInstitutions[i].type +'</td> </tr>');
+				  $("#id_visited_culturual_institution").on("click", {name: visitedCulturalInstitutions[i].name, address: visitedCulturalInstitutions[i].address, description: visitedCulturalInstitutions[i].description, type: visitedCulturalInstitutions[i].type}, showCulturalInstitution);
+			}
+			
+			$("#id_header_visited_name").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(1, "id_table_visited");
+			});
+			
+			$("#id_header_visited_address").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(2, "id_table_visited");
+			});
+			
+			$("#id_header_visited_description").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(3, "id_table_visited");
+			});
+			
+			$("#id_header_visited_type").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(4, "id_table_visited");
+			});
+			
 		}
 		
-		$("#id_header_visited_name").click(function(event) {
-			event.preventDefault();
+		//popunjavanje tabele unvisited
+		if(unvisitedCulturalInstitutions) {
+			for (var i in unvisitedCulturalInstitutions) {
+				  $( "#id_table_unvisited" ).append('<tr> <td></td> <td> <a href="/myapp/#/users/culturual_institution" id="id_unvisited_culturual_institution_'+i+'"> ' + unvisitedCulturalInstitutions[i].name + '</a>  </td> <td>' + unvisitedCulturalInstitutions[i].address + ' </td> <td> ' + unvisitedCulturalInstitutions[i].description + '</td> <td>'+ unvisitedCulturalInstitutions[i].type +'</td> </tr>');
+				  $("#id_unvisited_culturual_institution_"+i).on("click", {name: unvisitedCulturalInstitutions[i].name, address: unvisitedCulturalInstitutions[i].address, description: unvisitedCulturalInstitutions[i].description, type: unvisitedCulturalInstitutions[i].type}, showCulturalInstitution);
+			}
 			
-			sortTable(1, "id_table_visited");
-		});
-		
-		$("#id_header_visited_address").click(function(event) {
-			event.preventDefault();
+			$("#id_header_unvisited_name").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(1, "id_table_unvisited");
+			});
 			
-			sortTable(2, "id_table_visited");
-		});
-		
-		$("#id_header_visited_description").click(function(event) {
-			event.preventDefault();
+			$("#id_header_unvisited_address").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(2, "id_table_unvisited");
+			});
 			
-			sortTable(3, "id_table_visited");
-		});
-		
-		$("#id_header_visited_type").click(function(event) {
-			event.preventDefault();
+			$("#id_header_unvisited_description").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(3, "id_table_unvisited");
+			});
 			
-			sortTable(4, "id_table_visited");
-		});
-		
-	}
-	
-	//popunjavanje tabele unvisited
-	if(unvisitedCulturalInstitutions) {
-		for (var i in unvisitedCulturalInstitutions) {
-			  $( "#id_table_unvisited" ).append('<tr> <td></td> <td> <a href="/myapp/#/users/culturual_institution" id="id_unvisited_culturual_institution_'+i+'"> ' + unvisitedCulturalInstitutions[i].name + '</a>  </td> <td>' + unvisitedCulturalInstitutions[i].address + ' </td> <td> ' + unvisitedCulturalInstitutions[i].description + '</td> <td>'+ unvisitedCulturalInstitutions[i].type +'</td> </tr>');
-			  $("#id_unvisited_culturual_institution_"+i).on("click", {name: unvisitedCulturalInstitutions[i].name, address: unvisitedCulturalInstitutions[i].address, description: unvisitedCulturalInstitutions[i].description, type: unvisitedCulturalInstitutions[i].type}, showCulturalInstitution);
+			$("#id_header_unvisited_type").click(function(event) {
+				event.preventDefault();
+				
+				sortTable(4, "id_table_unvisited");
+			});
+			
 		}
-		
-		$("#id_header_unvisited_name").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(1, "id_table_unvisited");
-		});
-		
-		$("#id_header_unvisited_address").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(2, "id_table_unvisited");
-		});
-		
-		$("#id_header_unvisited_description").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(3, "id_table_unvisited");
-		});
-		
-		$("#id_header_unvisited_type").click(function(event) {
-			event.preventDefault();
-			
-			sortTable(4, "id_table_unvisited");
-		});
-		
 	}
 	
 }

@@ -62,8 +62,7 @@ function get_all_cis()
 
 function showingsMainPage()
 {
-	var ci = getCIForAdmin();
-    var showings = get_showings_for_ci(ci);
+    var showings = get_showings_for_ci();
     if(showings)
     {
         show_all_showings(showings);
@@ -79,7 +78,7 @@ function show_all_showings(data)
 {
 	currentShowings = data;
 	var html_string = "";
-	html_string += '<table><tr><th>Name</th><th>Type</th><th>Genre</th><th>Duration</th><th>Rating</th><th>Actors</th><th>Director</th><th>Description</th><th><input type="button" id="id_btn_add_new_showing" class="buttons" value="Add"/><th/></tr>';
+	html_string += '<table id="id_showings_table"><tr><th>Name</th><th>Type</th><th>Genre</th><th>Duration</th><th>Rating</th><th>Actors</th><th>Director</th><th>Description</th><th><input type="button" id="id_btn_add_new_showing" class="buttons" value="Add"/><th/></tr>';
 	for(x in data)
 	{
 		html_string += "<tr>";
@@ -206,7 +205,6 @@ function addShowingAjax()
     obj["actors"] = actors;
     obj["director"] = director;
 	obj["description"] = description;
-	obj["ci"] = ci;
 	
 	$.ajax({ 
 	    type: "POST",
@@ -254,7 +252,7 @@ function update_showing()
 		var s_id = numb;
 		var s = null;
 		var ci = getCIForAdmin();
-		var showings = get_showings_for_ci(ci);
+		var showings = get_showings_for_ci();
 		for(x in showings)
 		{
 			if(showings[x].id == s_id)
@@ -335,7 +333,6 @@ function updateShowingAjax(old_name, ID)
 		toastr.error("Field(s) can not be empty!"); 
 		return;
 	}
-	var ci = getCIForAdmin();
 	
 	obj["id"] = ID.toString();
 	obj["old_name"] = old_name;
@@ -346,7 +343,6 @@ function updateShowingAjax(old_name, ID)
     obj["actors"] = actors;
     obj["director"] = director;
 	obj["description"] = description;
-	obj["ci"] = ci;
 
 	$.ajax({ 
 	    type: "POST",
@@ -380,7 +376,7 @@ function delete_showing()
 	var s_id = numb;
 	var s = null;
 	var ci = getCIForAdmin();
-	var showings = get_showings_for_ci(ci);
+	var showings = get_showings_for_ci();
 	for(x in showings)
 	{
 		if(showings[x].id == s_id)
@@ -399,10 +395,9 @@ function delete_showing()
 
 	var obj = {};
 	obj["id"] = s_id.toString();
-	obj["ci"] = ci;
 	
 	$.ajax({ 
-	    type: "POST",
+	    type: "DELETE",
 	    async: false,
 		url:  deleteShowingURL,
 	    data: JSON.stringify(obj),

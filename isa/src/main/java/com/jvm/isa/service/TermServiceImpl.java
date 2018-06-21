@@ -5,10 +5,10 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +18,7 @@ import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.Term;
+import com.jvm.isa.domain.Ticket;
 import com.jvm.isa.repository.AuditoriumRepository;
 import com.jvm.isa.repository.ShowingRepository;
 import com.jvm.isa.repository.TermRepository;
@@ -40,6 +41,11 @@ public class TermServiceImpl implements TermService {
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private TicketService ticketService;
+	
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public Boolean bookSelectedSeats(String dateStr, String timeStr, String culturalInstitutionName, String showingName, String auditoriumName, String selectedSeats, RegisteredUser owner) {
 		String[] tokens = selectedSeats.split(",");
@@ -100,12 +106,18 @@ public class TermServiceImpl implements TermService {
 		Auditorium auditorium = culturalInstitution.getAuditorium(auditoriumName);
 		if(auditorium == null) return null;
 		
-		Term term = termRepository.findByCulturalInstitutionAndShowingAndDateAndTimeAndAuditorium(culturalInstitution, showing, date, time, auditorium);
+		try {
+			Term term = termRepository.findByCulturalInstitutionAndShowingAndDateAndTimeAndAuditorium(culturalInstitution, showing, date, time, auditorium);	
+			return term;
+		}
+		catch (Exception e) {
+			return null;
+		}
 		
-		return term;
 	}
 	
-	//TODO Mozda treba staviti @Transactional zbog ovog term.getAuditorium() jer je sve podeseno na LAZY
+	//Mozda treba staviti @Transactional zbog ovog term.getAuditorium() jer je sve podeseno na LAZY
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<Integer> getIndexOfBusySeatsAndRowsCols(Term term) {
 		
@@ -114,6 +126,8 @@ public class TermServiceImpl implements TermService {
 		ArrayList<Integer> indexes = getIndexesOfBusySeats(seats);
 		
 		Auditorium auditorium = term.getAuditorium();
+		if(auditorium == null) return null;
+		
 		indexes.add(auditorium.getNumOfRows());
 		indexes.add(auditorium.getNumOfCols());
 		
@@ -163,65 +177,86 @@ public class TermServiceImpl implements TermService {
 	public boolean save(Term term) {
 		try {
 			termRepository.save(term);
-		} catch (Exception e) {
+			return true;
+		} 
+		catch (Exception e) {
 			return false;
 		}
-		
-		return true;
 		
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getCulturalInstitutions() {
-		List<Term> terms = termRepository.findAll();
-		ArrayList<String> culturalInstitutions = new ArrayList<String>();
+		try {
+			List<Term> terms = termRepository.findAll();
+			ArrayList<String> culturalInstitutions = new ArrayList<String>();
 		
-		for (Term term : terms) {
-			if(!culturalInstitutions.contains(term.getCulturalInstitution().getName())) {
-				culturalInstitutions.add(term.getCulturalInstitution().getName());
+			for (Term term : terms) {
+				if(!culturalInstitutions.contains(term.getCulturalInstitution().getName())) {
+					culturalInstitutions.add(term.getCulturalInstitution().getName());
+				}
+				
 			}
 			
+			return culturalInstitutions;
 		}
-		
-		return culturalInstitutions;
+		catch (Exception e) {
+			return null;
+		}
 	}
-
+	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getShowings(String culturalInstitutionName) {
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
-		List<Term> terms = termRepository.findByCulturalInstitution(culturalInstitution);
-		ArrayList<String> showings = new ArrayList<String>();
-		
-		for (Term term : terms) {
-			if(!showings.contains(term.getShowing().getName())) {
-				showings.add(term.getShowing().getName());
+		try {
+			CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+			List<Term> terms = termRepository.findByCulturalInstitution(culturalInstitution);
+			ArrayList<String> showings = new ArrayList<String>();
+			
+			for (Term term : terms) {
+				if(!showings.contains(term.getShowing().getName())) {
+					showings.add(term.getShowing().getName());
+				}
+				
 			}
 			
+			return showings;
 		}
-		
-		return showings;
+		catch (Exception e) {
+			return null;
+		}
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public ArrayList<String> getDates(String culturalInstitutionName, String showingName) {
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
-		Showing showing = culturalInstitution.getShowing(showingName);
-		List<Term> terms = termRepository.findByCulturalInstitutionAndShowing(culturalInstitution, showing);
-		ArrayList<String> dates = new ArrayList<String>();
-		
-		for (Term term : terms) {
-			if(userService.computeSubtractTwoDateTime(LocalDate.now(), term.getDate(), LocalTime.now(), term.getTime()) <= 0) continue;
+		try {
+			CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+			if(culturalInstitution == null) return null;
 			
-			if(!dates.contains(term.getDate().toString())) {
-				dates.add(term.getDate().toString());
+			Showing showing = culturalInstitution.getShowing(showingName);
+			if(showing == null) return null;
+			
+			List<Term> terms = termRepository.findByCulturalInstitutionAndShowing(culturalInstitution, showing);
+			if(terms == null) return null;
+			
+			ArrayList<String> dates = new ArrayList<String>();
+			
+			for (Term term : terms) {
+				if(userService.computeSubtractTwoDateTime(LocalDate.now(), term.getDate(), LocalTime.now(), term.getTime()) <= 0) continue;
+				
+				if(!dates.contains(term.getDate().toString())) {
+					dates.add(term.getDate().toString());
+				}
+				
 			}
 			
+			return dates;
 		}
-		
-		return dates;
+		catch (Exception e) {
+			return null;
+		}
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -237,24 +272,30 @@ public class TermServiceImpl implements TermService {
 		LocalDate date = null;
 		try {
 			date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE);
-			if(date.compareTo(LocalDate.now()) <= 0) return auditoriums;
+			if(date.compareTo(LocalDate.now()) < 0) return auditoriums;
 		} 
 		catch (Exception e) {
 			return auditoriums;
 		}
 		
-		List<Term> terms = termRepository.findByDateAndCulturalInstitutionAndShowing(date, culturalInstitution, showing);
+		try {
+			List<Term> terms = termRepository.findByDateAndCulturalInstitutionAndShowing(date, culturalInstitution, showing);
 		
-		String a;
-		for (Term term : terms) {
-			a = term.getAuditorium().getName();
-			if(!auditoriums.contains(a)) {
-				auditoriums.add(a);
+			String a;
+			for (Term term : terms) {
+				a = term.getAuditorium().getName();
+				if(!auditoriums.contains(a)) {
+					auditoriums.add(a);
+				}
+				
 			}
 			
+			return auditoriums;
+		}
+		catch (Exception e) {
+			return null;
 		}
 		
-		return auditoriums;
 	}
 	
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -270,69 +311,88 @@ public class TermServiceImpl implements TermService {
 		LocalDate date = null;
 		try {
 			date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE);
-			if(date.compareTo(LocalDate.now()) <= 0) return times;
+			if(date.compareTo(LocalDate.now()) < 0) return times;
 		} 
 		catch (Exception e) {
 			return times;
 		}
 		
 		Auditorium auditorium = culturalInstitution.getAuditorium(auditoriumStr);
+		if(auditorium == null) return times;
 		
-		List<Term> terms = termRepository.findByCulturalInstitutionAndShowingAndDateAndAuditorium(culturalInstitution, showing, date, auditorium);
-		
-		String t;
-		for (Term term : terms) {
-			t = term.getTime().format(DateTimeFormatter.ISO_TIME);
-			if(!times.contains(t)) {
-				times.add(t);
+		try {
+			List<Term> terms = termRepository.findByCulturalInstitutionAndShowingAndDateAndAuditorium(culturalInstitution, showing, date, auditorium);
+			String t;
+			for (Term term : terms) {
+				t = term.getTime().format(DateTimeFormatter.ISO_TIME);
+				if(!times.contains(t)) {
+					times.add(t);
+				}
+				
 			}
 			
+			return times;
+		}
+		catch (Exception e) {
+			return null;
 		}
 		
-		return times;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public List<String> getTermsByDateAndAuditorium(String date, String auditorium) {
-
-		Auditorium auditoriumDB = auditoriumRepository.findByName(auditorium);
+		Auditorium auditoriumDB;
+		
+		try {
+			auditoriumDB = auditoriumRepository.findByName(auditorium);
+		}
+		catch (Exception e) {
+			return null;
+		}
 		
 		LocalDate dateLocal = null;
 		
 		try {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
-		} catch (Exception e) {}
+		} catch (Exception e) { return null; }
 		
-		List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditoriumDB);
-		// sort terms ascending by time
-		for(int i=0; i<terms.size(); i++)
-		{
-			for(int j=i+1; j<terms.size(); j++)
+		try {
+			List<Term> terms = termRepository.findByDateAndAuditorium(dateLocal, auditoriumDB);
+			// sort terms ascending by time
+			for(int i=0; i<terms.size(); i++)
 			{
-				if(terms.get(i).getTime().compareTo(terms.get(j).getTime()) > 0)
+				for(int j=i+1; j<terms.size(); j++)
 				{
-					Term temp = terms.get(i);
-					terms.set(i, terms.get(j));
-					terms.set(j, temp);
+					if(terms.get(i).getTime().compareTo(terms.get(j).getTime()) > 0)
+					{
+						Term temp = terms.get(i);
+						terms.set(i, terms.get(j));
+						terms.set(j, temp);
+					}
 				}
 			}
+			
+			List<String> termsReturn = new ArrayList<String>();
+			for(Term t : terms)
+			{		
+				int duration = t.getShowing().getDuration();
+				String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString()  + "*" + (new Double(t.getPrice())).toString();
+				termsReturn.add(term);
+			}
+			
+			return termsReturn;
 		}
-		
-		List<String> termsReturn = new ArrayList<String>();
-		for(Term t : terms)
-		{		
-			int duration = t.getShowing().getDuration();
-			String term = t.getId().toString() + "*" + t.getShowing().getName() + "*" +t.getTime().toString() + " - " + (t.getTime().plusMinutes(duration)).toString()  + "*" + (new Double(t.getPrice())).toString();
-			termsReturn.add(term);
+		catch (Exception e) {
+			return null;
 		}
-		
-		return termsReturn;
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public boolean addTerm(String culturalInstitutionName, String date, String auditoriumName, String showingName,
+	public boolean addTerm(CulturalInstitution culturalInstitution, String date, String auditoriumName, String showingName,
 			String time, double price) {
-		CulturalInstitution culturalInstitution = culturalInstitutionService.getCulturalInstitution(culturalInstitutionName);
+		
 		if(culturalInstitution == null) return false;
 		
 		Showing showing = showingRepository.findByName(showingName);
@@ -342,63 +402,57 @@ public class TermServiceImpl implements TermService {
 		if(auditorium == null) return false;
 		
 		LocalDate dateLocal = null;
-		
 		try {
 			dateLocal = LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
 		} catch (Exception e) {
 			return false;
 		}
 		
-		List<Term> terms = termRepository.findByCulturalInstitutionAndAuditorium(culturalInstitution, auditorium);
-
+		try {
+			List<Term> terms = termRepository.findByCulturalInstitutionAndAuditorium(culturalInstitution, auditorium);
 		
-		int duration = showing.getDuration();
-		LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
-		LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
-		
-		// check if user enters wrong date and time params
-		if(dateLocal.isBefore(LocalDate.now()))
-		{
+			int duration = showing.getDuration();
+			LocalTime insertedTimeStart = LocalTime.parse(time, DateTimeFormatter.ISO_LOCAL_TIME);
+			
+			if(userService.computeSubtractTwoDateTime(LocalDate.now(), dateLocal, LocalTime.now(), insertedTimeStart) <= 0) {
+				  return false;
+			}
+			
+			LocalTime insertedTimeEnd = insertedTimeStart.plusMinutes(duration);
+			
+			for(Term t : terms)
+			{			
+				if(userService.computeSubtractTwoDateTime(LocalDate.now(), t.getDate(), LocalTime.now(), t.getTime()) <= 0) continue;
+				
+				LocalTime startTime = t.getTime();
+				LocalTime endTime = t.getTime().plusMinutes(duration);
+				if(insertedTimeStart.compareTo(startTime) <= 0)
+				{
+					if(insertedTimeEnd.compareTo(startTime) >= 0)
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if(insertedTimeStart.compareTo(endTime) < 0)
+					{
+						return false;
+					}
+				}
+			}
+			
+			Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing, price);
+			termRepository.save(term);
+			return true;
+		}
+		catch (Exception e) {
 			return false;
 		}
-		else
-		{
-			if(dateLocal.compareTo(LocalDate.now()) == 0)
-			{
-				if(insertedTimeStart.isBefore(LocalTime.now()))
-				{
-					return false;
-				}
-			}
-		}
 		
-		for(Term t : terms)
-		{			
-			if(userService.computeSubtractTwoDateTime(LocalDate.now(), t.getDate(), LocalTime.now(), t.getTime()) <= 0) continue;
-			
-			LocalTime startTime = t.getTime();
-			LocalTime endTime = t.getTime().plusMinutes(duration);
-			if(insertedTimeStart.compareTo(startTime) <= 0)
-			{
-				if(insertedTimeEnd.compareTo(startTime) >= 0)
-				{
-					return false;
-				}
-			}
-			else
-			{
-				if(insertedTimeStart.compareTo(endTime) < 0)
-				{
-					return false;
-				}
-			}
-		}
-		
-		Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing, price);
-		termRepository.save(term);
-		return true;
 	}
 
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean deleteTerm(String id) {
 		try
@@ -413,4 +467,56 @@ public class TermServiceImpl implements TermService {
 		}
 	}
 	
+	/*
+     * Logika pocinje da se izvrsava u fiksnim intervalima sa odlozenim
+     * pocetkom izvrsavanja prilikom pokretanja aplikacije.
+     * <code>fixedRate</code> se koristi kao indikacija u kojem intervalu
+     * ce se pozivati metoda. <code>initialDelay</code> se koristi kao indikacija
+     * koliko posle pokretanja aplikacije treba da se ceka do prvog pokretanja metode.
+     */
+   @Scheduled(initialDelayString = "5000", fixedRateString = "1800000") // 1 800 000 ms = 30 min
+   @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+   @Override
+    public void scheduleRemoveOldTerms() {
+	   try {
+		   List<Term> terms = termRepository.findAll();
+		   
+		   for (Term term : terms) {
+			   if(userService.computeSubtractTwoDateTime(LocalDate.now(), term.getDate(), LocalTime.now(), term.getTime()) <= 0) {
+				   termRepository.delete(term);
+			   }
+		   }
+	   }
+	   catch (Exception e) {}
+	
+    }
+   
+   @Scheduled(initialDelayString = "5000", fixedRateString = "120000") // 120 000 ms = 2 min
+   @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+   @Override
+   public void scheduledReleaseSeats() {
+	   try {
+		   List<Term> terms = termRepository.findAll();
+		   Ticket  ticket;
+		   boolean saveChanges;
+		   
+		   for (Term term : terms) {
+			   saveChanges = false;
+			   if(userService.computeSubtractTwoDateTime(LocalDate.now(), term.getDate(), LocalTime.now(), term.getTime()) <= 0) {
+				   for (int i = 0; i < term.getSeats().length; i++) {
+						if(term.getSeats()[i]) {
+							ticket = ticketService.getTicket(term, i);
+							if(ticket == null) {
+								term.getSeats()[i] = false;
+								saveChanges = true;
+							}
+						}
+				   }
+			   }
+			   
+			   if(saveChanges) save(term);
+		   }
+	   }
+	   catch (Exception e) {}
+   }
 }

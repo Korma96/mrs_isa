@@ -32,7 +32,7 @@ public interface CulturalInstitutionService {
 	
 	boolean showingExists(CulturalInstitution culturalInstitution, String name);
 	
-	boolean deleteShowing(String name);
+	boolean deleteShowing(Showing s);
 	
 	boolean save(Showing showing, CulturalInstitution culturalInstitution);
 	
@@ -42,12 +42,10 @@ public interface CulturalInstitutionService {
 
 	boolean saveAuditorium(Auditorium a);
 
-	Auditorium getAuditorium(Long id);
+	Auditorium getAuditorium(String oldName);
 
-	boolean deleteAuditorium(Long id);
+	boolean deleteAuditorium(String name);
 
 	boolean save(Showing s);
 
-	boolean deleteShowing(Long id);
-	
 }

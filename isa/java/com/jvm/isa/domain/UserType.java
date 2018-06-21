@@ -1,5 +1,0 @@
-package com.jvm.isa.domain;
-
-public enum UserType {
-	REGISTERED_USER, INSTITUTION_ADMINISTRATOR, FUNZONE_ADMINISTRATOR, SYS_ADMINISTRATOR
-}

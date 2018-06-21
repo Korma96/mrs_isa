@@ -176,13 +176,26 @@ function changeAuditoriumsModified()
 	$("#div_for_terms").empty();
 	var ciName = getCIForAdmin();
 	var auditoriums = getAuditoriumsForCulturalInstitution(ciName);
-	$("#id_auditorium").append('<option disabled selected value> -- select an option -- </option>');
-	for(au in auditoriums)
-	{
-		$("#id_auditorium").append("<option " + auditoriums[au] + "> " + auditoriums[au] + " </option>");
+	
+	if(auditoriums) {
+		if(auditoriums.length > 0) {
+			$("#id_auditorium").append('<option disabled selected value> -- select an option -- </option>');
+			for(au in auditoriums)
+			{
+				$("#id_auditorium").append("<option " + auditoriums[au] + "> " + auditoriums[au] + " </option>");
+			}
+			
+			$("#id_auditorium").change(searchTermsModified);
+		}
+		else {
+			toastr.error("No found auditpriums!");
+		}
+		
+	}
+	else {
+		toastr.error("No found auditpriums!");
 	}
 	
-	$("#id_auditorium").change(searchTermsModified);
 }
 
 function addTermsToUIModified(receivedTerms)

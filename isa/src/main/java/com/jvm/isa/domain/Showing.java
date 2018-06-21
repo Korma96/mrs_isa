@@ -56,7 +56,7 @@ public class Showing {
 
 
 	public Showing(String name, String genre, String listOfActors, String nameOfDirector, int duration,
-			/*String poster,*/ double averageRating, String shortDescription, ShowingType type) {
+			/*String poster, double averageRating,*/ String shortDescription, ShowingType type) {
 	
 		this.name = name;
 		this.genre = genre;
@@ -64,21 +64,7 @@ public class Showing {
 		this.nameOfDirector = nameOfDirector;
 		this.duration = duration;
 		//this.poster = poster;
-		this.averageRating = averageRating;
-		this.shortDescription = shortDescription;
-		this.type = type;
-		this.terms = new ArrayList<Term>();
-	}
-
-	public Showing(String name, String genre, String listOfActors, String nameOfDirector, int duration,
-			/*String poster,*/ String shortDescription, ShowingType type) {
-	
-		this.name = name;
-		this.genre = genre;
-		this.listOfActors = listOfActors;
-		this.nameOfDirector = nameOfDirector;
-		this.duration = duration;
-		//this.poster = poster;
+		this.averageRating = 0;
 		this.shortDescription = shortDescription;
 		this.type = type;
 		this.terms = new ArrayList<Term>();

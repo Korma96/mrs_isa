@@ -12,10 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.Requisite;
-import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.repository.RequisiteRepository;
-import com.jvm.isa.repository.UserRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -25,9 +23,6 @@ public class AdminServiceImpl implements AdminService {
 	
 	@Autowired
 	private RequisiteRepository requisiteRepository;
-	
-	@Autowired
-	private UserRepository userRepository;
 	
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService; 
@@ -49,7 +44,12 @@ public class AdminServiceImpl implements AdminService {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean existsRequisite(String name) {
-		return requisiteRepository.findByName(name) != null;
+		try {
+			return requisiteRepository.findByName(name) != null;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	/*@Override
@@ -215,19 +215,35 @@ public class AdminServiceImpl implements AdminService {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public List<Requisite> getRequisites() {
-		return requisiteRepository.findAll();
+		try {
+			return requisiteRepository.findAll();
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public void deleteRequisite(Requisite req) {
-		requisiteRepository.delete(req);
+	public boolean deleteRequisite(Requisite req) {
+		try {
+			requisiteRepository.delete(req);
+			return true;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	@Override
 	public Requisite getRequisite(String name) {
-		return requisiteRepository.findByName(name);
+		try {
+			return requisiteRepository.findByName(name);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -241,22 +257,6 @@ public class AdminServiceImpl implements AdminService {
 		}
 		
 		return true;
-	}
-
-	@Override
-	public String getCIForAdmin(String username) 
-	{
-		User user = userRepository.findByUsername(username);
-		Administrator admin = (Administrator) user;
-		CulturalInstitution ci = admin.getCulturalInstitution();
-		if(ci != null)
-		{
-			return ci.getName();
-		}
-		else
-		{
-			return "";
-		}
 	}
 
 	
