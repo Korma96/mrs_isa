@@ -65,7 +65,3 @@ insert into cultural_institution_showings values(103, 104);
 insert into cultural_institution_showings values(104, 110);
 insert into cultural_institution_showings values(101, 109);
 insert into cultural_institution_showings values(102, 110);
-
-
-
-SET GLOBAL max_allowed_packet=1073741824;
