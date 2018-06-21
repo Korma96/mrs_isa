@@ -1,0 +1,15 @@
+.small_img {
+	width: 150px; height: 150px
+}
+
+#id_showings_table {
+    border-collapse: collapse;
+}
+
+#id_showings_table, #id_showings_table th, #id_showings_table td {
+    border: 1px solid blue;
+}
+
+td.blue {color: blue;}  
+
+.showing_div { border-width:4px; border-style:solid; border-color:red; }
