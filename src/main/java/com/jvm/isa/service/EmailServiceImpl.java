@@ -80,7 +80,7 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Username: &nbsp; <b> " + user.getUsername() + " </b> <br/>";
 				htmlMsg += "&nbsp; Password: &nbsp; <b> " + user.getPassword() + " </b> <br/><br/>";
 				htmlMsg += "To activate your account, please click on the following link (if the link is disabled Copy and Paste the URL into your Browser): <br/>";
-				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/activate?id_for_activation=" + idForActivation + "'> http://localhost:8080/myapp/#/users/activate?id_for_activation=" + idForActivation + " </a> <br/><br/>";
+				htmlMsg += "<a href='https://isaapp.herokuapp.com/#/users/activate?id_for_activation=" + idForActivation + "'> https://isaapp.herokuapp.com/#/users/activate?id_for_activation=" + idForActivation + " </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");
@@ -113,7 +113,7 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Username: &nbsp; <b> " + username + " </b> <br/>";
 				htmlMsg += "&nbsp; Password: &nbsp; <b> " + password + " </b> <br/><br/>";
 				htmlMsg += "After logging in, please change your username and password <br/><br/>";
-				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/login'> http://localhost:8080/myapp/#/users/login </a> <br/><br/>";
+				htmlMsg += "<a href='https://isaapp.herokuapp.com/#/users/login'> https://isaapp.herokuapp.com/#/users/login </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");
@@ -181,7 +181,7 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Your seat: &nbsp; <b> " + seat + " </b> <br/>";
 				htmlMsg += "&nbsp; Duration: &nbsp; <b> " + duration + " min </b> <br/>";
 				htmlMsg += "&nbsp; Price: &nbsp; <b> " + price + " </b> <br/><br/>";
-				htmlMsg += "<a href='http://localhost:8080/myapp/#/users/invitations_and_tickets'> Go to invitations and tickets page </a> <br/><br/>";
+				htmlMsg += "<a href='https://isaapp.herokuapp.com/#/users/invitations_and_tickets'> Go to invitations and tickets page </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");
