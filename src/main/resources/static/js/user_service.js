@@ -269,10 +269,12 @@ function loadHomePageComplete() {
 }
 
 function loadRegisterComplete() {
+	$("#id_username").focus();
 	$("#title").html('REGISTER &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
 function loadLoginComplete() {
+	$("#login_username").focus();
 	$("#title").html('LOGIN &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/register" class="a_register" > Register </a> ');
 }
 
@@ -740,6 +742,8 @@ function changePassword(changePasswordUrl) {
 					<br/> \
 				</form>');
 		
+		$("#id_old_password").focus();
+		
 		$("#id_btn_save_changes_on_profile").click(function(event) {
 			event.preventDefault();
 			
@@ -821,6 +825,8 @@ function workWithFriends() {
 	var people = getPeople();
 	var friends = getFriends();
 	var requests = getRequests();
+	
+	$("#id_new_friend").focus();
 	
 	//popunjavanje tabele zahteva 
 	if(requests) {
@@ -2180,20 +2186,7 @@ function switchSelectedToReserved(selectedSeats) {
 			{
 		    	text: "Close",
 		    	click: function() {
-		    		var seats = new Array();
-		    		$('.autocomplete').each(function() {
-		    			seats.push($(this).attr('id'));	
-		    		});
-		    		
-		    		var retValue = sendSeatsForRelease(seats);
-		    		if(retValue) {
-		    			$.each(seats, function(index, seat) {
-		    				if ($("#id_seat_" + seat).hasClass(settings.selectedSeatCss)) {
-			    				 $("#id_seat_" + seat).removeClass(settings.selectedSeatCss);
-			    			 }
-		    			});
-		    			 
-		    		}
+		    		sendSeatsForRelease();
 		    		
 		    		$( this ).dialog( "close" );
 		    	}
@@ -2221,8 +2214,30 @@ function switchSelectedToReserved(selectedSeats) {
 	
 }
 
-function sendSeatsForRelease(seats) {
-	var retValue = false;
+$( window ).unload(function() {
+	var isOpen = $("#dialog").dialog( "isOpen" );
+	if(isOpen === true) {
+		sendSeatsForRelease();
+	}
+});
+
+$(window).on("beforeunload", function(e) { 
+	var isOpen = $("#dialog").dialog( "isOpen" );
+	if(isOpen === true) {
+		var dialogText = "The seats you have reserved will be released. Do you really want to close?";
+		e.returnValue = dialogText;
+		return dialogText;
+	}
+	
+    
+});
+
+
+function sendSeatsForRelease() {
+	var seats = new Array();
+	$('.autocomplete').each(function() {
+		seats.push($(this).attr('id'));	
+	});
 	
 	var obj = {};
 	
@@ -2234,7 +2249,6 @@ function sendSeatsForRelease(seats) {
 	obj["seats"] = seats;
 	
 	$.ajax({ 
-		async: false,
 	    type: "PUT",
 		url:  sendSeatsForReleaseURL,
 	    data: JSON.stringify(obj),
@@ -2242,9 +2256,13 @@ function sendSeatsForRelease(seats) {
 	    contentType: "application/json",
 	    cache: false,
 	    success: function(success) {
-	    	retValue = success;
-	    	
-	    	if(retValue) {
+	    	if(success) {
+	    		$.each(seats, function(index, seat) {
+    				if ($("#id_seat_" + seat).hasClass(settings.selectedSeatCss)) {
+	    				 $("#id_seat_" + seat).removeClass(settings.selectedSeatCss);
+	    			 }
+    			});
+	    		
 	    		toastr.success("Successful release of the seats!");
 	    	}
 	    	else {
@@ -2257,7 +2275,6 @@ function sendSeatsForRelease(seats) {
 		}
 	});
 	
-	return retValue;
 }
 
 
