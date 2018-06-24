@@ -37,8 +37,8 @@ public interface TermService {
 	
 	boolean deleteTerm(String id);
 	
-	void scheduledReleaseSeats();
+	// void scheduledReleaseSeats();
 	
-	 void scheduleRemoveOldTerms();
+	// void scheduleRemoveOldTerms();
 	
 }

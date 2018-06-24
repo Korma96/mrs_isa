@@ -623,6 +623,46 @@ public class UserController {
 		return new ResponseEntity<Integer>(-1, HttpStatus.OK);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/send_seats_for_release", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE,
+																					produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> sendSeatsForRelease(@RequestBody HashMap<String, Object> hm) { 
+		User loggedUser = getLoggedUserLocalMethod();
+
+		if(loggedUser != null) {
+			if(loggedUser.getUserType() == UserType.REGISTERED_USER) {
+				String dateStr = ((String) hm.get("date")).trim();
+				String timeStr = ((String) hm.get("time")).trim();
+				String culturalInstitutionName = ((String) hm.get("culturalInstitution")).trim();
+				String showingName = ((String) hm.get("showing")).trim();
+				String auditoriumName = ((String) hm.get("auditorium")).trim();
+				ArrayList<String> seats = (ArrayList<String>) hm.get("seats");
+				
+				Term term = termService.getTerm(dateStr, timeStr, culturalInstitutionName, showingName, auditoriumName);
+				if(term != null) {
+					boolean success = true;
+					
+					try {
+						for (String seatStr : seats) {
+							term.getSeats()[Integer.parseInt(seatStr) - 1] = false;
+						}
+					}
+					catch(Exception e) {
+						success = false;
+					}
+					
+					if(success) {
+						success = termService.save(term);
+					}
+					
+					return new ResponseEntity<Boolean>(success, HttpStatus.OK);
+				}
+			}
+		}
+	
+		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+	}
+	
 	private void saveTicketsForLoggedUser(RegisteredUser loggedRegisteredUser, ArrayList<Ticket> loggedRegisteredUserTickets) {
 		loggedRegisteredUser.getTickets().addAll(loggedRegisteredUserTickets);
 		userService.registrate(loggedRegisteredUser);

@@ -193,24 +193,37 @@ function addTermsToUI(receivedTerms)
 function addTerm()
 {
 	var time = $("#id_time").val();
-	if(time == "")
+	var time = $("#id_time").val();
+	if(time == "") {
+		toastr.error("You did not fill in all the fields!");
 		return;
+	}
+		
 	var showing = $("#id_showing").find(":selected").text().trim();
-	if(showing == "-- select an option --")
+	if(showing == "-- select an option --") {
+		toastr.error("You did not fill in all the fields!");
 		return;
+	}
+	
 	var showing = showing.split(" - ");
 	var showing = showing[0];
 	var auditorium = $("#id_auditorium").find(":selected").text().trim();
-	if(auditorium == "-- select an option --")
+	if(auditorium == "-- select an option --") {
+		toastr.error("You did not fill in all the fields!");
 		return;
+	}
 	var date = $("#id_date").val();
-	if(date == "")
+	if(date == "") {
+		toastr.error("You did not fill in all the fields!");
 		return;
+	}
+	
 	var date = date.split("/");
 	var date = date[2] + "-" + date[0] + "-" + date[1];
 	var price = $("#id_price_input").val();
 	if(price == "")
 	{
+		toastr.error("You did not fill in all the fields!");
 		return;
 	}
 	
@@ -236,7 +249,7 @@ function addTerm()
 			}
 			else
 			{
-				toastr.error("Time not set properly!");
+				toastr.error("Error! Term is not added!");
 			}
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) { 

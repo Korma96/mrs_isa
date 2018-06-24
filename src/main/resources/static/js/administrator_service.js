@@ -38,7 +38,7 @@ function adminSystemPage(loggedUser) {
 function adminSystemMainPage() {
 	$("#myDropdown").append('<a id="id_change_password" href="/myapp/#/administrators/sys_admin/change_password"> Change password </a>');
 	$("#myDropdown").append('<a id="id_update_profile" href="/myapp/#/administrators/sys_admin/update_profile"> Update profile </a>');
-	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institution </a>');
+	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institutions </a>');
 	$("#myDropdown").append('<a id="id_register_admin" href="/myapp/#/administrators/sys_admin/register"> Register administrator </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
@@ -141,6 +141,8 @@ function adminFunzoneMainPage() {
 	$("#myDropdown").append('<a id="show_requisites" href="/myapp/#/administrators/admin_funzone/get_requisites"> Show requisites </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
 	
+	requisitesPage();
+	
 	$("#id_change_password").click(function(event) {
 		event.preventDefault();
 		
@@ -201,12 +203,14 @@ function adminCulturalInstitutionsMainPage() {
 	$("#myDropdown").append('<a id="id_update_profile_cultural_institutions_admin" href="/myapp/#/administrators/admin_cultural_institution/update_profile"> Update profile </a>');
 	$("#myDropdown").append('<a id="id_auditoriums" href="/myapp/#/administrators/admin_cultural_institution/auditorium"> Auditoriums </a>');
 	$("#myDropdown").append('<a id="id_attendance" href="/myapp/#/administrators/admin_cultural_institution/attendance"> Attendance </a>');
-	$("#myDropdown").append('<a id="id_cultural_institutions" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institution </a>');
+	$("#myDropdown").append('<a id="id_cultural_institution" href="/myapp/#/administrators/admin_cultural_institution/cultural_institutions"> Cultural institution </a>');
 	$("#myDropdown").append('<a id="id_income" href="/myapp/#/administrators/admin_cultural_institution/income"> Income </a>');
 	$("#myDropdown").append('<a id="id_tickets" href="/myapp/#/administrators/admin_cultural_institution/quick_tickets"> Quick tickets </a>');
 	$("#myDropdown").append('<a id="id_repertoires" href="/myapp/#/administrators/admin_cultural_institution/repertoires"> Repertoires </a>');
 	$("#myDropdown").append('<a id="id_showings" href="/myapp/#/administrators/admin_cultural_institution/showings"> Showings </a>');
 	$("#myDropdown").append('<a id="id_logout" href="/myapp/#/users/login"> Logout </a>');
+	
+	showCulturalInstitutionCIA();
 	
 	$("#id_change_password").click(function(event) {
 		event.preventDefault();
@@ -230,7 +234,7 @@ function adminCulturalInstitutionsMainPage() {
 		updateProfileCulturalInstitutionsAdmin();
 	});
 	
-	$("#id_cultural_institutions").click(function(event) {
+	$("#id_cultural_institution").click(function(event) {
 		event.preventDefault();
 		
 		if(window.history.pushState) {
@@ -382,7 +386,7 @@ function showCulturalInstitutionCIA() {
 				if(showings.length > 0) {
 					$.each(showings, function(index, item) {
 						$("#id_showings_table").append('<tr> <td><img class="small_img" id="id_showing_img_'+index+'" alt="No image" src="#"/></td> <td> <a id="id_showing_'+index+'" href="/myapp/#/users/showing" > <h3>' + item + ' </h3> </a> </td> </tr>');
-						$("#id_showing_img_" + index).on("click", {name: item}, showShowing);
+						$("#id_showing_img_" + index).on("click", {name: item, culturalInstitutionName: c.name}, showShowing);
 						$("#id_showing_" + index).on("click", {name: item, culturalInstitutionName: c.name}, showShowing);
 						
 						loadAndSetImage(c.name + "_" + item, "id_showing_img_" + index);

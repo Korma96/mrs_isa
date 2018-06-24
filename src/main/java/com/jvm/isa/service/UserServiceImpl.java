@@ -36,8 +36,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean registrate(User user) {
 		try {
-			userRepository.save(user);
-			return true;
+			user = userRepository.save(user);
+			return user.getId() != null;
 		}
 		catch(Exception e) {
 			return false;

@@ -27,7 +27,7 @@ public class AdminServiceImpl implements AdminService {
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService; 
 
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
 	public boolean register(User admin) {
 			return userService.registrate(admin);

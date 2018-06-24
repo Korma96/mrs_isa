@@ -32,8 +32,8 @@ public class TermServiceImpl implements TermService {
 	@Autowired
 	private CulturalInstitutionService culturalInstitutionService;
 	
-	@Autowired
-	private ShowingRepository showingRepository;
+	//@Autowired
+	//private ShowingRepository showingRepository;
 	
 	@Autowired
 	private AuditoriumRepository auditoriumRepository;
@@ -395,10 +395,10 @@ public class TermServiceImpl implements TermService {
 		
 		if(culturalInstitution == null) return false;
 		
-		Showing showing = showingRepository.findByName(showingName);
+		Showing showing = culturalInstitution.getShowing(showingName);
 		if(showing == null) return false;
 		
-		Auditorium auditorium = auditoriumRepository.findByName(auditoriumName);
+		Auditorium auditorium = culturalInstitution.getAuditorium(auditoriumName);
 		if(auditorium == null) return false;
 		
 		LocalDate dateLocal = null;
@@ -443,8 +443,8 @@ public class TermServiceImpl implements TermService {
 			}
 			
 			Term term = new Term(dateLocal, insertedTimeStart, culturalInstitution, auditorium, showing, price);
-			termRepository.save(term);
-			return true;
+			term = termRepository.save(term);
+			return term.getId() != null;
 		}
 		catch (Exception e) {
 			return false;
@@ -474,6 +474,7 @@ public class TermServiceImpl implements TermService {
      * ce se pozivati metoda. <code>initialDelay</code> se koristi kao indikacija
      * koliko posle pokretanja aplikacije treba da se ceka do prvog pokretanja metode.
      */
+	/*
    @Scheduled(initialDelayString = "5000", fixedRateString = "1800000") // 1 800 000 ms = 30 min
    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
    @Override
@@ -489,8 +490,9 @@ public class TermServiceImpl implements TermService {
 	   }
 	   catch (Exception e) {}
 	
-    }
+    }*/
    
+   /*
    @Scheduled(initialDelayString = "5000", fixedRateString = "120000") // 120 000 ms = 2 min
    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
    @Override
@@ -518,5 +520,5 @@ public class TermServiceImpl implements TermService {
 		   }
 	   }
 	   catch (Exception e) {}
-   }
+   }*/
 }

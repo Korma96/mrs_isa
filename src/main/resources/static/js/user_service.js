@@ -836,7 +836,7 @@ function workWithFriends() {
 		$("#id_header_requests").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(1, "id_table_requests");
+			sortTable(1, 1, "id_table_requests");
 		});
 	}
 	
@@ -852,7 +852,7 @@ function workWithFriends() {
 		$("#id_header_friends").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(1, "id_table_friends");
+			sortTable(1, 1, "id_table_friends");
 		});
 	}
 	
@@ -1346,7 +1346,7 @@ $(document).on("click", ".dropbtn", function(event)  {
 	
 
 
-function sortTable(n, id_for_table) {
+function sortTable(startIndexRow, n, id_for_table) {
 	  var rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
 	  //table = $("#id_table_friends")
 	  switching = true;
@@ -1360,30 +1360,51 @@ function sortTable(n, id_for_table) {
 	    rows = $("#" + id_for_table + " tr")
 	    /* Loop through all table rows (except the
 	    first, which contains table headers): */
-	    for (var i = 1; i < (rows.length - 1); i++) {
-	      // Start by saying there should be no switching:
-	      shouldSwitch = false;
-	      /* Get the two elements you want to compare,
-	      one from current row and one from the next: */
-	      x = $(rows[i]).children()[n];
-	      y = $(rows[i + 1]).children()[n];
-	      /* Check if the two rows should switch place,
-	      based on the direction, asc or desc: */
-	      if (dir == "asc") {
-	        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-	          // If so, mark as a switch and break the loop:
-	          shouldSwitch= true;
-	          break;
-	        }
-	      } 
-	      else if (dir == "desc") {
-	        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-	          // If so, mark as a switch and break the loop:
-	          shouldSwitch= true;
-	          break;
-	        }
-	      }
+	    for (var i = startIndexRow; i < (rows.length - 1); i++) {
+			// Start by saying there should be no switching:
+			shouldSwitch = false;
+			/* Get the two elements you want to compare,
+			one from current row and one from the next: */
+			x = $(rows[i]).children()[n];
+			y = $(rows[i + 1]).children()[n];
+			/* Check if the two rows should switch place,
+			based on the direction, asc or desc: */
+			if (dir == "asc") {
+				if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
+					if ($($(x).children()[0]).text().toLowerCase() > $($(y).children()[0]).text().toLowerCase()) {
+					  // If so, mark as a switch and break the loop:
+					  shouldSwitch= true;
+					  break;
+					}
+				}
+				else {
+					 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+					  // If so, mark as a switch and break the loop:
+					  shouldSwitch= true;
+					  break;
+					}
+				}
+			   
+			} 
+			else if (dir == "desc") {
+				if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
+					if ($($(x).children()[0]).text().toLowerCase() < $($(y).children()[0]).text().toLowerCase()) {
+					  // If so, mark as a switch and break the loop:
+					  shouldSwitch= true;
+					  break;
+					}
+				}
+				else {
+					if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+					  // If so, mark as a switch and break the loop:
+					  shouldSwitch= true;
+					  break;
+					}
+				}
+				
+			}
 	    }
+		
 	    if (shouldSwitch) {
 	      /* If a switch has been marked, make the switch
 	      and mark that a switch has been done: */
@@ -2154,6 +2175,28 @@ function switchSelectedToReserved(selectedSeats) {
 		    	  		}
 		    	  		
 		      }
+		    },
+			
+			{
+		    	text: "Close",
+		    	click: function() {
+		    		var seats = new Array();
+		    		$('.autocomplete').each(function() {
+		    			seats.push($(this).attr('id'));	
+		    		});
+		    		
+		    		var retValue = sendSeatsForRelease(seats);
+		    		if(retValue) {
+		    			$.each(seats, function(index, seat) {
+		    				if ($("#id_seat_" + seat).hasClass(settings.selectedSeatCss)) {
+			    				 $("#id_seat_" + seat).removeClass(settings.selectedSeatCss);
+			    			 }
+		    			});
+		    			 
+		    		}
+		    		
+		    		$( this ).dialog( "close" );
+		    	}
 		    }
 		  ]
 	});
@@ -2177,6 +2220,46 @@ function switchSelectedToReserved(selectedSeats) {
 	});
 	
 }
+
+function sendSeatsForRelease(seats) {
+	var retValue = false;
+	
+	var obj = {};
+	
+	obj["culturalInstitution"] = $("#id_cultural_institution").val();
+	obj["showing"] = $("#id_showing").val();
+	obj["date"] = $("#id_date").val();
+	obj["auditorium"] = $("#id_auditorium").val();
+	obj["time"] = $("#id_time").val();
+	obj["seats"] = seats;
+	
+	$.ajax({ 
+		async: false,
+	    type: "PUT",
+		url:  sendSeatsForReleaseURL,
+	    data: JSON.stringify(obj),
+	    dataType: "json", 
+	    contentType: "application/json",
+	    cache: false,
+	    success: function(success) {
+	    	retValue = success;
+	    	
+	    	if(retValue) {
+	    		toastr.success("Successful release of the seats!");
+	    	}
+	    	else {
+	    		toastr.error("Unsuccessful release of the seats!");
+	    	}	
+	    
+	   },
+		error : function(XMLHttpRequest, textStatus, errorThrown) { 
+					toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+		}
+	});
+	
+	return retValue;
+}
+
 
 function sendSeatsAndFriendsAndMe(loggedUser) {
 	var obj = {};
@@ -2294,55 +2377,55 @@ function workWithInvitationsAndTickets() {
 		$("#id_invitations_header_showing").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(1, "id_table_invitations");
+			sortTable(2, 1, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_cultural_institution").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(2, "id_table_invitations");
+			sortTable(2, 2, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_date").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(3, "id_table_invitations");
+			sortTable(2, 3, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_time").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(4, "id_table_invitations");
+			sortTable(2, 4, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_auditorium").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(5, "id_table_invitations");
+			sortTable(2, 5, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_seat").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(6, "id_table_invitations");
+			sortTable(2, 6, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_price").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(7, "id_table_invitations");
+			sortTable(2, 7, "id_table_invitations");
 		});
 		
 		$("#id_invitations_header_reserved_by").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(8, "id_table_invitations");
+			sortTable(2, 8, "id_table_invitations");
 		});
 		
 		$("#id_invitations_reserved_reserved_date_and_time").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(9, "id_table_invitations");
+			sortTable(2, 9, "id_table_invitations");
 		});
 	}
 	
@@ -2358,55 +2441,55 @@ function workWithInvitationsAndTickets() {
 		$("#id_tickets_header_showing").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(1, "id_table_tickets");
+			sortTable(2, 1, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_cultural_institution").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(2, "id_table_tickets");
+			sortTable(2, 2, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_date").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(3, "id_table_tickets");
+			sortTable(2, 3, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_time").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(4, "id_table_tickets");
+			sortTable(2, 4, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_auditorium").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(5, "id_table_tickets");
+			sortTable(2, 5, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_seat").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(6, "id_table_tickets");
+			sortTable(2, 6, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_price").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(7, "id_table_tickets");
+			sortTable(2, 7, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_reserved_by").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(8, "id_table_tickets");
+			sortTable(2, 8, "id_table_tickets");
 		});
 		
 		$("#id_tickets_header_reserved_reserved_date_and_time").click(function(event) {
 			event.preventDefault();
 			
-			sortTable(9, "id_table_tickets");
+			sortTable(2, 9, "id_table_tickets");
 		});
 	}
 	
@@ -2641,25 +2724,25 @@ function workWithVisitedAndUnvisitedCulturalInstitutions() {
 			$("#id_header_visited_name").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(1, "id_table_visited");
+				sortTable(2, 1, "id_table_visited");
 			});
 			
 			$("#id_header_visited_address").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(2, "id_table_visited");
+				sortTable(2, 2, "id_table_visited");
 			});
 			
 			$("#id_header_visited_description").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(3, "id_table_visited");
+				sortTable(2, 3, "id_table_visited");
 			});
 			
 			$("#id_header_visited_type").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(4, "id_table_visited");
+				sortTable(2, 4, "id_table_visited");
 			});
 			
 		}
@@ -2674,25 +2757,25 @@ function workWithVisitedAndUnvisitedCulturalInstitutions() {
 			$("#id_header_unvisited_name").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(1, "id_table_unvisited");
+				sortTable(2, 1, "id_table_unvisited");
 			});
 			
 			$("#id_header_unvisited_address").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(2, "id_table_unvisited");
+				sortTable(2, 2, "id_table_unvisited");
 			});
 			
 			$("#id_header_unvisited_description").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(3, "id_table_unvisited");
+				sortTable(2, 3, "id_table_unvisited");
 			});
 			
 			$("#id_header_unvisited_type").click(function(event) {
 				event.preventDefault();
 				
-				sortTable(4, "id_table_unvisited");
+				sortTable(2, 4, "id_table_unvisited");
 			});
 			
 		}
