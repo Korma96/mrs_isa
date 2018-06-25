@@ -157,48 +157,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 	
-	//@Async
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	@Override
-	public void saveImageinDatabase(String fileName, MultipartFile image) {
-		/*Thread thread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {*/
-
-		ImageModel newImageModel;
-		try {
-			newImageModel = new ImageModel(fileName, image.getBytes());
-			imageModelService.save(newImageModel);
-			System.out.println("File successfully uploaded to : " + fileName); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Error upload image!");
-		}
-		
-		
-				
-		//	}
-		//});
-		//thread.start();
-		
-	}
-	
 	public long computeSubtractTwoDateTime(LocalDate ld1, LocalDate ld2, LocalTime lt1, LocalTime lt2) {
 		long sub = ChronoUnit.MINUTES.between(LocalDateTime.of(ld1, lt1), LocalDateTime.of(ld2, lt2));
 		return sub;
 		//Duration.between(ticket.getTerm().getTime(), LocalTime.now()).toMinutes()
-	}
-	
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	@Override
-	public void removeImageFromDatabase(String oldName) {
-		ImageModel oldImageModel = imageModelService.getImageModel("cultural_institution_" + oldName);
-		if(oldImageModel != null) {
-			imageModelService.delete(oldImageModel);
-		}
-		
 	}
 	
 }
