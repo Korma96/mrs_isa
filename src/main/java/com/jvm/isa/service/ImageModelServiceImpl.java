@@ -1,10 +1,15 @@
 package com.jvm.isa.service;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.jvm.isa.domain.ImageModel;
+import com.jvm.isa.repository.ImageModelRepository;
 
 @Service
 public class ImageModelServiceImpl implements ImageModelService {

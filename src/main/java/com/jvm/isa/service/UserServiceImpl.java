@@ -1,5 +1,7 @@
 package com.jvm.isa.service;
 
+import java.io.IOException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -18,6 +20,10 @@ import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
 import com.jvm.isa.domain.UserType;
 import com.jvm.isa.repository.UserRepository;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.jvm.isa.domain.ImageModel;
 
 @Service
 public class UserServiceImpl implements UserService {

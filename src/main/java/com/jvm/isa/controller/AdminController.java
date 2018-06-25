@@ -73,9 +73,6 @@ public class AdminController {
 	private UserController userController;
 	
 	@Autowired
-	private UserService userService;
-	
-	@Autowired
 	private TermService termService;
 	
 	@Autowired

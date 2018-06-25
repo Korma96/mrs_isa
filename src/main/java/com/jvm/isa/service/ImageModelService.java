@@ -1,6 +1,7 @@
 package com.jvm.isa.service;
 
 import com.jvm.isa.domain.ImageModel;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageModelService {
 	
