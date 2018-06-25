@@ -11,4 +11,6 @@ public interface ImageModelRepository extends Repository<ImageModel, Long> {
 	ImageModel findByName(String name);
 	
 	void delete(ImageModel imageModel);
+	
+	void deleteAll();
 }

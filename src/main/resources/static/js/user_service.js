@@ -1296,6 +1296,7 @@ function registrateUser() {
 	    		$("#id_email").val("");
 	    		$("#id_city").val("");
 	    		$("#id_phone_number").val("");
+				resetImage();
 	    		
 	    		toastr.success("You have successfully registered! You will soon receive an email to activate your account.");
 	    	}
