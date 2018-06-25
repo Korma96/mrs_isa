@@ -16,6 +16,7 @@ var saveChangedPasswordURL = "/myapp/users/save_changed_password";
 var bookSelectedSeatsURL = "/myapp/users/book_selected_seats";
 var getIndexesOfBusySeatsAndRowsColsURL = "/myapp/users/get_indexes_of_busy_seats_and_rows_cols";
 var sendSeatsAndFriendsURL = "/myapp/users/send_seats_and_friends";
+var sendSeatsForReleaseURL = "/myapp/users/send_seats_for_release";
 var getCulturalInstitutionsForReservationURL = "/myapp/users/get_cultural_institutions";
 var getShowingsOfCulturalInstitutionForReservationURL = "/myapp/users/get_showings_of_cultural_institution";
 var getAuditoriumsURL = "/myapp/users/get_auditoriums";
@@ -245,7 +246,7 @@ function getPathname() {
 		pathname = tokens[1];
 	}
 	else {
-		if(url =="https://isaapp.herokuapp.com/myapp"  || url == "https://isaapp.herokuapp.com/myapp/" || url =="http://isaapp.herokuapp.com/myapp"  || url == "http://isaapp.herokuapp.com/myapp/") {
+		if(url == "http://localhost:8080/myapp/" || url == "http://localhost:8080/myapp") {
 			pathname = "";
 		}
 		else {
@@ -269,8 +270,6 @@ function loadHomePageComplete() {
 }
 
 function loadRegisterComplete() {
-	$("#id_username").focus();
-	function loadRegisterComplete() {
 	$("#id_username").focus();
 	$('.previewing').width($('.previewing').parent().width());
 	$('.previewing').height('230px');
@@ -662,7 +661,6 @@ function updateProfile() {
 	}
 }
 
-
 function saveChangesOnProfile() {
 	$.ajax({ 
 	    type: "POST",
@@ -702,7 +700,7 @@ function saveChangesOnProfile() {
 		    		$("#id_repeat_new_password").val("");
 		    		toastr.success("You have successfully edited the data!");
 		    		break;
-				case 7:
+		    	case 7:
 		    		toastr.error("There was a mistake in changing the data!");
 		    		break;
 		    	default:
@@ -738,6 +736,7 @@ function changePassword(changePasswordUrl) {
 					</div> \
 					<br/> \
 				</form>');
+		
 		
 		$("#id_old_password").focus();
 		
@@ -1296,9 +1295,10 @@ function registrateUser() {
 	    		$("#id_email").val("");
 	    		$("#id_city").val("");
 	    		$("#id_phone_number").val("");
-				resetImage();
+	    		resetImage()
 	    		
 	    		toastr.success("You have successfully registered! You will soon receive an email to activate your account.");
+	    		
 	    	}
 	    	else {
 	    		toastr.error("Registration error!"); 
@@ -1349,50 +1349,50 @@ function sortTable(startIndexRow, n, id_for_table) {
 	    /* Loop through all table rows (except the
 	    first, which contains table headers): */
 	    for (var i = startIndexRow; i < (rows.length - 1); i++) {
-			// Start by saying there should be no switching:
-			shouldSwitch = false;
-			/* Get the two elements you want to compare,
-			one from current row and one from the next: */
-			x = $(rows[i]).children()[n];
-			y = $(rows[i + 1]).children()[n];
-			/* Check if the two rows should switch place,
-			based on the direction, asc or desc: */
-			if (dir == "asc") {
-				if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
-					if ($($(x).children()[0]).text().toLowerCase() > $($(y).children()[0]).text().toLowerCase()) {
-					  // If so, mark as a switch and break the loop:
-					  shouldSwitch= true;
-					  break;
-					}
-				}
-				else {
-					 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-					  // If so, mark as a switch and break the loop:
-					  shouldSwitch= true;
-					  break;
-					}
-				}
-			   
-			} 
-			else if (dir == "desc") {
-				if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
-					if ($($(x).children()[0]).text().toLowerCase() < $($(y).children()[0]).text().toLowerCase()) {
-					  // If so, mark as a switch and break the loop:
-					  shouldSwitch= true;
-					  break;
-					}
-				}
-				else {
-					if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-					  // If so, mark as a switch and break the loop:
-					  shouldSwitch= true;
-					  break;
-					}
-				}
-				
-			}
+	      // Start by saying there should be no switching:
+	      shouldSwitch = false;
+	      /* Get the two elements you want to compare,
+	      one from current row and one from the next: */
+	      x = $(rows[i]).children()[n];
+	      y = $(rows[i + 1]).children()[n];
+	      /* Check if the two rows should switch place,
+	      based on the direction, asc or desc: */
+	      if (dir == "asc") {
+	    	if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
+	    		if ($($(x).children()[0]).text().toLowerCase() > $($(y).children()[0]).text().toLowerCase()) {
+	  	          // If so, mark as a switch and break the loop:
+	  	          shouldSwitch= true;
+	  	          break;
+	  	        }
+	    	}
+	    	else {
+	    		 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+	   	          // If so, mark as a switch and break the loop:
+	   	          shouldSwitch= true;
+	   	          break;
+	   	        }
+	    	}
+	       
+	      } 
+	      else if (dir == "desc") {
+	    	 if($($(x).children()[0]).is("a") && $($(y).children()[0]).is("a")) {
+	    		if ($($(x).children()[0]).text().toLowerCase() < $($(y).children()[0]).text().toLowerCase()) {
+	  	          // If so, mark as a switch and break the loop:
+	  	          shouldSwitch= true;
+	  	          break;
+	  	        }
+	    	}
+	    	else {
+	    		if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+	  	          // If so, mark as a switch and break the loop:
+	  	          shouldSwitch= true;
+	  	          break;
+	  	        }
+	    	}
+	        
+	      }
 	    }
-		
+	    
 	    if (shouldSwitch) {
 	      /* If a switch has been marked, make the switch
 	      and mark that a switch has been done: */
@@ -2155,7 +2155,7 @@ function switchSelectedToReserved(selectedSeats) {
 		  modal: true,
 		  buttons: [
 		    {
-		      text: "Save and send invitations",
+		      text: "Save tickets",
 		      click: function() {
 		    	  		var retValue = sendSeatsAndFriendsAndMe(loggedUser);
 		    	  		if(retValue == 0) {
@@ -2163,9 +2163,9 @@ function switchSelectedToReserved(selectedSeats) {
 		    	  		}
 		    	  		
 		      }
-		    },
-			
-			{
+		    }, 
+		    
+		    {
 		    	text: "Close",
 		    	click: function() {
 		    		sendSeatsForRelease();
@@ -2214,7 +2214,6 @@ $(window).on("beforeunload", function(e) {
     
 });
 
-
 function sendSeatsForRelease() {
 	var seats = new Array();
 	$('.autocomplete').each(function() {
@@ -2258,7 +2257,6 @@ function sendSeatsForRelease() {
 	});
 	
 }
-
 
 function sendSeatsAndFriendsAndMe(loggedUser) {
 	var obj = {};
