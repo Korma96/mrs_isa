@@ -1,6 +1,6 @@
 package com.jvm.isa.controller;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,13 +19,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.Auditorium;
 import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.CulturalInstitutionDTO;
 import com.jvm.isa.domain.CulturalInstitutionType;
+import com.jvm.isa.domain.ImageModel;
 import com.jvm.isa.domain.Requisite;
 import com.jvm.isa.domain.RequisiteDTO;
 import com.jvm.isa.domain.Showing;
@@ -38,9 +41,9 @@ import com.jvm.isa.domain.UserType;
 import com.jvm.isa.service.AdminService;
 import com.jvm.isa.service.CulturalInstitutionService;
 import com.jvm.isa.service.EmailService;
+import com.jvm.isa.service.ImageModelService;
 import com.jvm.isa.service.TermService;
 import com.jvm.isa.service.TicketService;
-import com.jvm.isa.service.UserService;
 
 
 @RestController
@@ -74,6 +77,9 @@ public class AdminController {
 	
 	@Autowired
 	private TermService termService;
+	
+	@Autowired
+	private ImageModelService imageModelService;
 	
 
 	@RequestMapping(value = "/sys_admin/register", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -388,29 +394,47 @@ public class AdminController {
 		return userController.saveChangedPassword(hm);
 	}
 
-	@RequestMapping(value = "/admin_cultural_institution/add_new_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> saveCulturalInstitution(@RequestBody HashMap<String, String> hm) {
-		String name = hm.get("name");
+	@RequestMapping(value = "/sys_admin/add_new_cultural_institution", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveCulturalInstitution(@RequestParam("name") String name, @RequestParam("address") String address, @RequestParam("description") String description, @RequestParam("type") String type, @RequestParam("image") MultipartFile image) {
+		/*String name = hm.get("name");
 		String address = hm.get("address");
 		String description = hm.get("description");
-		String type = hm.get("type");
+		String type = hm.get("type");*/
+		
+		if(name.equals("") || address.equals("") || description.equals("") || type.equals("")) {
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
 		
 		CulturalInstitutionType ciType = CulturalInstitutionType.valueOf(type);
 		CulturalInstitution ci = new CulturalInstitution(name, address, description, ciType);
 		if (!culturalInstitutionService.exists(ci.getName())) {
-			culturalInstitutionService.save(ci);
-			userController.saveNewCulturalInstitutionOnSession(ci);
+			boolean success =culturalInstitutionService.save(ci);
+			
+			if(success) {
+				if(!image.isEmpty()) {
+					String fileName = "cultural_institution_" + name;  
+					imageModelService.saveImageinDatabase(fileName, image);
+				}
+	
+			}
+			
 			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 		}
+		
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/admin_cultural_institution/update_cultural_institution", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateCulturalInstitution(@RequestBody HashMap<String, String> hm) {
-		String oldName = hm.get("old_name");
+	@RequestMapping(value = "/sys_admin/update_cultural_institution", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateCulturalInstitution(@RequestParam("old_name") String oldName, @RequestParam("name") String name, @RequestParam("address") String address, @RequestParam("description") String description, @RequestParam("image") MultipartFile image) {
+		/*String oldName = hm.get("old_name");
 		String name = hm.get("name");
 		String address = hm.get("address");
-		String description = hm.get("description");
+		String description = hm.get("description");*/
+		
+		if(oldName.equals("") || name.equals("") || address.equals("") || description.equals("")) {
+			return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+		}
+		
 		CulturalInstitution ci = culturalInstitutionService.getCulturalInstitution(oldName);
 		if (ci != null) 
 		{
@@ -421,13 +445,43 @@ public class AdminController {
 			ci.setName(name);
 			ci.setAddress(address);
 			ci.setDescription(description);
-			culturalInstitutionService.save(ci);
-			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			boolean success = culturalInstitutionService.save(ci);
+			
+			if(success) {
+				ImageModel oldImageModel = imageModelService.getImageModel("cultural_institution_" + oldName);
+				
+				if(!image.isEmpty()) {
+					if(oldImageModel != null) {
+						if(!oldName.equals(name)) {
+							oldImageModel.setName("cultural_institution_" + name);
+						}
+						try {
+							oldImageModel.setPic(image.getBytes());
+							imageModelService.save(oldImageModel);
+						} catch (IOException e) {
+							System.out.println("Image model error");
+						}
+						
+					}
+					else {
+						imageModelService.saveImageinDatabase("cultural_institution_" + name, image);
+					}
+					
+				}
+				else {
+					if(!oldName.equals(name) && oldImageModel != null) {
+						imageModelService.removeImageFromDatabase(oldImageModel);
+					}
+				}
+				
+			}
+			
+			return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 		}
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/admin_cultural_institution/delete_cultural_institution", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/sys_admin/delete_cultural_institution", method = RequestMethod.DELETE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> deleteCulturalInstitution(@RequestBody HashMap<String, String> hm) {
 		String name = hm.get("name");
 		CulturalInstitution ci = culturalInstitutionService.getCulturalInstitution(name);
@@ -474,8 +528,8 @@ public class AdminController {
 
 	}
 	
-	@RequestMapping(value = "/admin_cultural_institution/add_new_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> addNewShowing(@RequestBody HashMap<String, String> hm)
+	@RequestMapping(value = "/admin_cultural_institution/add_new_showing", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> addNewShowing(@RequestParam("name") String name, @RequestParam("type") String type, @RequestParam("genre") String genre, @RequestParam("duration") int duration, @RequestParam("actors") String actors, @RequestParam("director") String director, @RequestParam("description") String description, @RequestParam("image") MultipartFile image)
 	{
 		User loggedUser = userController.getLoggedUserLocalMethod();
 		
@@ -483,22 +537,32 @@ public class AdminController {
 			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
 				Administrator loggedAdministrator = (Administrator) loggedUser; 
 			
-				String name = hm.get("name");
+				if(name.equals("") || type.equals("") || genre.equals("") || duration == 0 || actors.equals("") || director.equals("") || description.equals("")) {
+					return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+				}
+				
+				//String name = hm.get("name");
 				if (loggedAdministrator.getCulturalInstitution().getShowing(name) == null) 
 				{
-					String type = hm.get("type");
+					/*String type = hm.get("type");
 					String genre = hm.get("genre");
 					String duration = hm.get("duration");
 					String actors = hm.get("actors");
 					String director = hm.get("director");
-					String description = hm.get("description");
+					String description = hm.get("description");*/
 					ShowingType shType = ShowingType.valueOf(type);
 					try
 					{
 						Showing showing = new Showing(name, genre, actors, director, new Integer(duration), description, shType);
 						boolean success = culturalInstitutionService.save(showing, loggedAdministrator.getCulturalInstitution());
 						
-						if(success) userController.saveNewShowingOnSession(showing);
+						if(success) {
+							if(!image.isEmpty()) {
+								String fileName = loggedAdministrator.getCulturalInstitution().getName() + "_" + name;
+								imageModelService.saveImageinDatabase(fileName, image);
+							}
+							
+						}
 						
 						return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 					}
@@ -514,8 +578,8 @@ public class AdminController {
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/admin_cultural_institution/update_showing", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateShowing(@RequestBody HashMap<String, String> hm)
+	@RequestMapping(value = "/admin_cultural_institution/update_showing", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateShowing(@RequestParam("old_name") String oldName, @RequestParam("name") String name, @RequestParam("type") String type, @RequestParam("genre") String genre, @RequestParam("duration") int duration, @RequestParam("actors") String actors, @RequestParam("director") String director, @RequestParam("description") String description, @RequestParam("image") MultipartFile image)
 	{
 		User loggedUser = userController.getLoggedUserLocalMethod();
 		
@@ -523,7 +587,11 @@ public class AdminController {
 			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
 				Administrator loggedAdministrator = (Administrator) loggedUser; 
 			
-				String oldName = hm.get("old_name");
+				if(oldName.equals("") || name.equals("") || type.equals("") || genre.equals("") || duration == 0 || actors.equals("") || director.equals("") || description.equals("")) {
+					return new ResponseEntity<Boolean>(false, HttpStatus.OK);
+				}
+				
+				/*String oldName = hm.get("old_name");
 				String name = hm.get("name");
 				String type = hm.get("type");
 				String genre = hm.get("genre");
@@ -531,7 +599,7 @@ public class AdminController {
 				//String rating = hm.get("rating");
 				String actors = hm.get("actors");
 				String director = hm.get("director");
-				String description = hm.get("description");
+				String description = hm.get("description");*/
 				ShowingType shType = ShowingType.valueOf(type);
 				CulturalInstitution ci = loggedAdministrator.getCulturalInstitution();
 				if(ci != null) {
@@ -558,6 +626,36 @@ public class AdminController {
 						s.setShortDescription(description);
 						s.setType(shType);
 						boolean success = culturalInstitutionService.save(s);
+						
+						if(success) {
+							ImageModel oldImageModel = imageModelService.getImageModel(ci.getName() +"_" + oldName);
+							
+							if(!image.isEmpty()) {
+								if(oldImageModel != null) {
+									if(!oldName.equals(name)) {
+										oldImageModel.setName(ci.getName() +"_" + name);
+									}
+									try {
+										oldImageModel.setPic(image.getBytes());
+										imageModelService.save(oldImageModel);
+									} catch (IOException e) {
+										System.out.println("Image model error");
+									}
+									
+								}
+								else {
+									imageModelService.saveImageinDatabase(ci.getName() +"_" + name, image);
+								}
+								
+							}
+							else {
+								if(!oldName.equals(name) && oldImageModel != null) {
+									imageModelService.removeImageFromDatabase(oldImageModel);
+								}
+							}
+							
+						}
+						
 						return new ResponseEntity<Boolean>(success, HttpStatus.OK);
 					}
 				}
@@ -930,45 +1028,6 @@ public class AdminController {
 		}
 
 		return new ResponseEntity<Boolean>(false, HttpStatus.OK);
-	}
-	
-	@RequestMapping(value = "/admin_cultural_institution/upload_cultural_institution_image", method = RequestMethod.POST/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE*/)
-	public void uploadCulturalInstitutionImage(@RequestBody InputStream is) {
-		User loggedUser = userController.getLoggedUserLocalMethod();
-		
-		if(loggedUser != null) {
-			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
-				CulturalInstitution newCulturalInstitution = userController.getNewCulturalInstitutionOnSession();
-				if(newCulturalInstitution != null) {
-					String fileName = "cultural_institution_" + newCulturalInstitution.getName();  
-					userController.removeNewCulturalInstitutionOnSession();
-					
-					userService.saveImageinDatabase(fileName, is);
-				}
-				
-			}
-		}
-		
-	}
-	
-	@RequestMapping(value = "/admin_cultural_institution/upload_showing_image", method = RequestMethod.POST/*, consumes = MediaType.MULTIPART_FORM_DATA_VALUE*/)
-	public void uploadShowingImage(@RequestBody InputStream is) {
-		User loggedUser = userController.getLoggedUserLocalMethod();
-		if(loggedUser != null) {
-			if(loggedUser.getUserType() == UserType.INSTITUTION_ADMINISTRATOR) {
-				Administrator loggedAdministrator = (Administrator) loggedUser;
-				
-				Showing newShowing = userController.getNewShowingOnSession();
-				if(newShowing != null) {
-					String fileName = loggedAdministrator.getCulturalInstitution().getName() + "_" + newShowing.getName();
-					userController.removeNewShowingOnSession();
-					
-					userService.saveImageinDatabase(fileName, is);
-				}
-				
-			}
-		}
-		
 	}
 	
 }

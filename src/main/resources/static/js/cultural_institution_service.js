@@ -1,8 +1,8 @@
-var addNewCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/add_new_cultural_institution";
-var updateCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/update_cultural_institution";
-var deleteCulturalInstitutionURL = "/myapp/administrators/admin_cultural_institution/delete_cultural_institution";
+var addNewCulturalInstitutionURL = "/myapp/administrators/sys_admin/add_new_cultural_institution";
+var updateCulturalInstitutionURL = "/myapp/administrators/sys_admin/update_cultural_institution";
+var deleteCulturalInstitutionURL = "/myapp/administrators/sys_admin/delete_cultural_institution";
 var showCulturalInstitutionsPath = "/myapp/home_page/cultural_institutions";
-var uploadCulturalInstitutionImageURL = "/myapp/administrators/admin_cultural_institution/upload_cultural_institution_image";
+//var uploadCulturalInstitutionImageURL = "/myapp/administrators/admin_cultural_institution/upload_cultural_institution_image";
 
 var cultural_institutions = null;
 
@@ -129,18 +129,23 @@ function update_institution()
 		deleteAllExceptFirst();
 		
 		$("#center").append(
-				'<form > \
+				'<div class="image_preview"><img alt="You did not select an image" src="#" id="id_img" class="previewing" /></div> \
+				<form id="id_update_cultural_institution_form"> \
 				<table> \
-					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name" value="' + ci.name + '" /></td></tr> \
-					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address" value="' + ci.address + '" /></td></tr> \
-					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" value="' + ci.description + '" /></td></tr> \
-	        		</td> \
-	        		</tr> \
+					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" name="name" id="id_institution_name" value="' + ci.name + '" /></td></tr> \
+					<tr><td><label for="id_address">Address:</label></td><td><input type="text" name="address" id="id_address" value="' + ci.address + '" /></td></tr> \
+					<tr><td><label for="id_description">Description:</label></td><td><input type="text" name="description" id="id_description" value="' + ci.description + '" /></td></tr> \
+					<tr>  <td><label for="id_cultural_institution_image">Cultural institution image:</label></td>  <td><input type="file" name="image" id="id_cultural_institution_image" name="image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
+					<tr><td colspan="2"><input type="hidden" name="old_name" id="id_institution_old_name" value="' + ci.name + '" /></td></tr> \
 				</table> \
-				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons_update" value="Update institution"/> \
+				<div align="center"><input type="button" id="id_btn_update_institution" class="buttons" value="Update institution"/> \
 				</div> \
 				<br/> \
 			</form>');
+		
+		loadAndSetImage("cultural_institution_" + ci.name, "id_img");
+		$('.previewing').width($('.previewing').parent().width());
+		$('.previewing').height('230px');
 		
 		$("#id_btn_update_institution").click(function(event) {
 			event.preventDefault();
@@ -156,29 +161,26 @@ function update_institution()
 
 function updateCulturalInstitutionAjax(old_name, type)
 {
-	var obj = {};
 	var name = $("#id_institution_name").val();
 	var address = $("#id_address").val();
 	var description = $("#id_description").val();
 
-	obj["name"] = name;
-	obj["old_name"] = old_name;
-	obj["address"] = address;	
-	obj["description"] = description;
+	if(name == "" || address == "" || description == "") {
+		toastr.error("All fields must be filled!");
+		return;
+	}
 
 	$.ajax({ 
 	    type: "POST",
-	    async: false,
 		url:  updateCulturalInstitutionURL,
-	    data: JSON.stringify(obj),
+	    data: new FormData($("#id_update_cultural_institution_form")[0]),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
+	    cache: false,
 	    success: function(success) {
 	    	if(success) {
-	    		$("#id_institution_name").val("");
-	    		$("#id_address").val("");
-	    		$("#id_description").val("");		
-	    		
 	    		toastr.success("You have successfully updated institution!");
 	    		if(type == "CINEMA")
 	    		{
@@ -211,13 +213,14 @@ function addCulturalInstitution(type)
 		deleteAllExceptFirst();
 		
 		$("#center").append(
-				'<div class="image_preview"><img alt="Niste odabrali sliku" src="#" class="previewing" /></div> \
-				<form > \
+				'<div class="image_preview"><img alt="You did not select an image" src="#" class="previewing" /></div> \
+				<form id="id_cultural_institution_form"> \
 				<table> \
-					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name"/></td></tr> \
-					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address"/></td></tr> \
-					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
-				<tr>  <td><label for="id_cultural_institution_image">Cultural institution image:</label></td>  <td><input type="file" id="id_cultural_institution_image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
+					<tr><td><label for="id_institution_name">Name:</label></td><td><input type="text" id="id_institution_name" name="name"/></td></tr> \
+					<tr><td><label for="id_address">Address:</label></td><td><input type="text" id="id_address" name="address"/></td></tr> \
+					<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" name="description"/></td></tr> \
+					<tr>  <td><label for="id_cultural_institution_image">Cultural institution image:</label></td>  <td><input type="file" id="id_cultural_institution_image" name="image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
+					<tr><td colspan="2"><input type="hidden" name="type" value="'+type+'"/></td></tr> \
 				</table> \
 				<div align="center"><input type="button" id="id_btn_save_new_institution" class="buttons" value="Save institution"/> \
 				</div> \
@@ -240,7 +243,7 @@ function addCulturalInstitution(type)
 	}
 }
 
-function uploadImage(urlParam) {
+/*function uploadImage(urlParam) {
 	var image = $(".id_image")[0].files[0];
 	
 	if(image) {
@@ -263,7 +266,7 @@ function uploadImage(urlParam) {
 		});
 	}
 	
-}
+}*/
 
 function drawImage() {
 	$(".id_image").change(function() {
@@ -295,32 +298,22 @@ function resetImage() {
 }
 
 
-function addCulturalInstitutionAjax(typeOfCulturalInstitution)
-{
-	var obj = {};
-	var name = $("#id_institution_name").val();
-	var address = $("#id_address").val();
-	var description = $("#id_description").val();
-	var type = typeOfCulturalInstitution; //$("#id_institution_role").val();
-
-	obj["name"] = name;
-	obj["address"] = address;	
-	obj["description"] = description;
-	obj["type"] = type;
-	
+function addCulturalInstitutionAjax(type)
+{	
 	$.ajax({ 
 	    type: "POST",
 		url:  addNewCulturalInstitutionURL,
-	    data: JSON.stringify(obj),
+	    data: new FormData($("#id_cultural_institution_form")[0]),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
+	    cache: false,
 	    success: function(success) {
 	    	if(success) {
 	    		$("#id_institution_name").val("");
 	    		$("#id_address").val("");
 	    		$("#id_description").val("");		
-	    		
-	    		uploadImage(uploadCulturalInstitutionImageURL);
 	    		
 	    		toastr.success("You have successfully added new institution!");
 	    		
@@ -397,7 +390,7 @@ function delete_institution()
 function put_data_in_html(data)
 {
 	var html_string = "";
-	html_string += "<table id='id_cul_ins_table'><tr><th>Name</th><th>Address</th><th>Description</th></tr>";
+	html_string += "<table id='id_cul_ins_table'><tr><th>Image</th><th>Name</th><th>Address</th><th>Description</th></tr>";
 	for(x in data)
 	{
 		html_string += "<tr>";
@@ -429,7 +422,7 @@ function put_data_in_html(data)
 function put_data_in_html_extended(data)
 {
 	var html_string = "";
-	html_string += '<table id="id_cul_ins_table"><tr> <th></th ><th>Name</th><th>Address</th><th>Description</th><th><input type="button" id="id_btn_add_new_institution" class="buttons" value="Add"/><th/></tr>';
+	html_string += '<table id="id_cul_ins_table"><tr> <th>Image</th ><th>Name</th><th>Address</th><th>Description</th><th><input type="button" id="id_btn_add_new_institution" class="buttons" value="Add"/><th/></tr>';
 	var counter = 0;
 	cultural_institutions = data;
 	for(x in data)

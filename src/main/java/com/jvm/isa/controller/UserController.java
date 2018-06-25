@@ -1,5 +1,6 @@
 package com.jvm.isa.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.jvm.isa.domain.Administrator;
 import com.jvm.isa.domain.AdministratorDTO;
@@ -129,18 +132,16 @@ public class UserController {
 		return new ResponseEntity<UserDTO>(userDTO, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/registrate", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, 
-																		produces = MediaType.APPLICATION_JSON_VALUE)
-	// NIJE MI RADILO BEZ ANOTACIJE @RequestBody ZA PARAMETAR METODE
-	public ResponseEntity<Boolean> registrate(@RequestBody HashMap<String, String> hm) { 
-		String username = hm.get("username");
+	@RequestMapping(value = "/registrate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> registrate(@RequestParam("username") String username, @RequestParam("password") String password, @RequestParam("repeat_password") String repeatPassword, @RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName, @RequestParam("email") String email, @RequestParam("city") String city, @RequestParam("phone_number") String phoneNumber, @RequestParam("image") MultipartFile image) { 
+		/*String username = hm.get("username");
 		String password = hm.get("password");
 		String repeatPassword = hm.get("repeatPassword");
 		String firstName = hm.get("firstName");
 		String lastName = hm.get("lastName");
 		String email = hm.get("email");
 		String city = hm.get("city");
-		String phoneNumber = hm.get("phoneNumber");
+		String phoneNumber = hm.get("phoneNumber");*/
 
 		//System.out.println("|" + username + " - " + password + " - " + repeatPassword + " - " + firstName + " - " + lastName + " - " + email + " - " + city + " - " + phoneNumber + "|");
 		
@@ -154,10 +155,17 @@ public class UserController {
 			successRegistrate = userService.registrate(user);
 			
 			try {
-				emailService.sendActivationEmailAsync(user);
+				if(successRegistrate) emailService.sendActivationEmailAsync(user);
 			}
 			catch(Exception e)	{
 				System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+			}
+			
+			if(successRegistrate) {
+				if(!image.isEmpty()) {
+					String fileName = "user_" + username;
+					imageModelService.saveImageinDatabase(fileName, image);
+				}
 			}
 			
 		}
@@ -205,16 +213,15 @@ public class UserController {
 		return new ResponseEntity<Boolean>(successActivate, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, 
-																					produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Integer> saveChangesOnProfile(@RequestBody HashMap<String, String> hm) {
+		@RequestMapping(value = "/save_changes_on_profile", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Integer> saveChangesOnProfile(@RequestParam("username") String username, @RequestParam("old_password") String oldPassword, @RequestParam("new_password") String newPassword, @RequestParam("repeat_new_password") String repeatNewPassword, @RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName, @RequestParam("email") String email, @RequestParam("city") String city, @RequestParam("phone_number") String phoneNumber, @RequestParam("image") MultipartFile image) {
 		User user = getLoggedUserLocalMethod();
 		
 		if(user != null) {
 			if(user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser loggedUser = (RegisteredUser) user;
 				
-				String username = hm.get("username");
+				/*String username = hm.get("username");
 				String oldPassword = hm.get("oldPassword");
 				String newPassword = hm.get("newPassword");
 				String repeatNewPassword = hm.get("repeatNewPassword");
@@ -222,28 +229,64 @@ public class UserController {
 				String lastName = hm.get("lastName");
 				String email = hm.get("email");
 				String city = hm.get("city");
-				String phoneNumber = hm.get("phoneNumber");
+				String phoneNumber = hm.get("phoneNumber");*/
 				
 				int correct = userService.correctUser(loggedUser, username, oldPassword, newPassword, repeatNewPassword, firstName, lastName, email, city, phoneNumber);
 				if(correct == 6) {
+					String oldUsername = loggedUser.getUsername();
 					loggedUser.setUsername(username);
 					setLogged(username);
 					
 					if(!repeatNewPassword.equals("")) loggedUser.setPassword(repeatNewPassword);
 					loggedUser.setFirstName(firstName);
 					loggedUser.setLastName(lastName);
+					
+					boolean emailChanged = false;
 					if (!email.equals(loggedUser.getEmail())) {
 						loggedUser.setEmail(email);
-						try {
-							emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
-						} catch (MessagingException e) {
-							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
-						}
+						emailChanged = true;
+						
 					}
 					loggedUser.setCity(city);
 					loggedUser.setPhoneNumber(phoneNumber);
 					
-					userService.registrate(loggedUser); // cuvanje napravljenih izmena
+					boolean success = userService.registrate(loggedUser); // cuvanje napravljenih izmena
+					
+					if(success) {
+						try {
+							if(emailChanged) emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+						} catch (MessagingException e) {
+							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
+						}
+						
+						ImageModel oldImageModel = imageModelService.getImageModel("user_" + oldUsername);
+						
+						if(!image.isEmpty()) {
+							if(oldImageModel != null) {
+								if(!oldUsername.equals(username)) {
+									oldImageModel.setName("user_" + username);
+								}
+								try {
+									oldImageModel.setPic(image.getBytes());
+									imageModelService.save(oldImageModel);
+								} catch (IOException e) {
+									System.out.println("Image model error");
+								}
+								
+							}
+							else {
+								imageModelService.saveImageinDatabase("user_" + username, image);
+							}
+							
+						}
+						else {
+							if(!oldUsername.equals(username) && oldImageModel != null) {
+								imageModelService.removeImageFromDatabase(oldImageModel);
+							}
+						}
+						
+					}
+					else correct = 7;
 				}
 				
 				return new ResponseEntity<Integer>(correct, HttpStatus.OK);
@@ -929,30 +972,6 @@ public class UserController {
 		}
 		
 		return new ResponseEntity<>(false, HttpStatus.OK);
-	}
-	
-	public void saveNewCulturalInstitutionOnSession(CulturalInstitution newCulturalInstitution) {
-		httpSession.setAttribute("newCulturalInstitution", newCulturalInstitution);
-	}
-	
-	public CulturalInstitution getNewCulturalInstitutionOnSession() {
-		return (CulturalInstitution) httpSession.getAttribute("newCulturalInstitution");
-	}
-	
-	public void removeNewCulturalInstitutionOnSession() {
-		httpSession.removeAttribute("newCulturalInstitution");
-	}
-	
-	public void saveNewShowingOnSession(Showing newShowing) {
-		httpSession.setAttribute("newShowing", newShowing);
-	}
-	
-	public Showing getNewShowingOnSession() {
-		return (Showing) httpSession.getAttribute("newShowing");
-	}
-	
-	public void removeNewShowingOnSession() {
-		httpSession.removeAttribute("newShowing");
 	}
 	
 	@RequestMapping(value = "/get_image/{name}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

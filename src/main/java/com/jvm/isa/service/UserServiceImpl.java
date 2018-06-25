@@ -1,7 +1,5 @@
 package com.jvm.isa.service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -9,14 +7,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.jvm.isa.domain.ImageModel;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.User;
 import com.jvm.isa.domain.UserStatus;
@@ -158,14 +154,15 @@ public class UserServiceImpl implements UserService {
 	//@Async
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Override
-	public void saveImageinDatabase(String fileName, InputStream is) {
+	public void saveImageinDatabase(String fileName, MultipartFile image) {
 		/*Thread thread = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {*/
 
+		ImageModel newImageModel;
 		try {
-			ImageModel newImageModel = new ImageModel(fileName, IOUtils.toByteArray(is));
+			newImageModel = new ImageModel(fileName, image.getBytes());
 			imageModelService.save(newImageModel);
 			System.out.println("File successfully uploaded to : " + fileName); 
 			
@@ -187,5 +184,16 @@ public class UserServiceImpl implements UserService {
 		return sub;
 		//Duration.between(ticket.getTerm().getTime(), LocalTime.now()).toMinutes()
 	}
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Override
+	public void removeImageFromDatabase(String oldName) {
+		ImageModel oldImageModel = imageModelService.getImageModel("cultural_institution_" + oldName);
+		if(oldImageModel != null) {
+			imageModelService.delete(oldImageModel);
+		}
+		
+	}
+	
 }
 

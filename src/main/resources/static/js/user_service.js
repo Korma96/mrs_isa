@@ -270,6 +270,11 @@ function loadHomePageComplete() {
 
 function loadRegisterComplete() {
 	$("#id_username").focus();
+	function loadRegisterComplete() {
+	$("#id_username").focus();
+	$('.previewing').width($('.previewing').parent().width());
+	$('.previewing').height('230px');
+	drawImage();
 	$("#title").html('REGISTER &nbsp;&nbsp; <a href="/myapp/#/" class="a_home_page"> Home page </a> &nbsp; <a href="/myapp/#/users/login" class="a_login" > Login </a> ');
 }
 
@@ -622,22 +627,27 @@ function updateProfile() {
 		deleteAllExceptFirst();
 		
 		center.append(
-				'<form > \
+				'<div class="image_preview"><img alt="You did not select an image" src="#" class="previewing" /></div> \
+				<form id="id_update_profile_form"> \
 					<table> \
-						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
-						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" id="id_old_password" /></td>  </tr> \
-						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" id="id_new_password" /></td>  </tr> \
-						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" id="id_repeat_new_password" /></td>  </tr> \
-						<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
-						<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
-						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" value="' + loggedUser.email + '" /></td>  </tr> \
-						<tr>  <td><label for="id_city">City:</label></td> <td><input type="text" id="id_city" value="' + loggedUser.city + '" /></td>  </tr> \
-						<tr>  <td><label for="id_phone_number">Phone number:</label></td>  <td><input type="text" id="id_phone_number" value="'+ loggedUser.phoneNumber +'" /></td>  </tr> \
+						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" name="username" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
+						<tr>  <td><label for="id_old_password">Old password:</label></td>  <td><input type="password" name="old_password" id="id_old_password" /></td>  </tr> \
+						<tr>  <td><label for="id_new_password">New password:</label></td>  <td><input type="password" name="new_password" id="id_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_repeat_new_password">Repeat new password:</label></td>  <td><input type="password" name="repeat_new_password" id="id_repeat_new_password" /></td>  </tr> \
+						<tr>  <td><label for="id_first_name">First name:</label></td>  <td><input type="text" id="id_first_name" name="first_name" value="' + loggedUser.firstName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_last_name">Last name:</label></td>  <td><input type="text" id="id_last_name" name="last_name" value="' + loggedUser.lastName + '" /></td>  </tr> \
+						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" name="email" value="' + loggedUser.email + '" /></td>  </tr> \
+						<tr>  <td><label for="id_city">City:</label></td> <td><input type="text" id="id_city" name="city" value="' + loggedUser.city + '" /></td>  </tr> \
+						<tr>  <td><label for="id_phone_number">Phone number:</label></td>  <td><input type="text" name="phone_number" id="id_phone_number" value="'+ loggedUser.phoneNumber +'" /></td>  </tr> \
 					</table> \
 					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
 					</div> \
 					<br/> \
 				</form>');
+		
+		$('.previewing').width($('.previewing').parent().width());
+		$('.previewing').height('230px');
+		drawImage();
 		
 		$("#id_btn_save_changes_on_profile").click(function(event) {
 			event.preventDefault();
@@ -652,33 +662,17 @@ function updateProfile() {
 	}
 }
 
-function saveChangesOnProfile() {
-	var username = $("#id_username").val();
-	var oldPassword = $("#id_old_password").val();
-	var newPassword = $("#id_new_password").val();
-	var repeatNewPassword = $("#id_repeat_new_password").val();
-	var firstName = $("#id_first_name").val();
-	var lastName = $("#id_last_name").val();
-	var email = $("#id_email").val();
-	var city = $("#id_city").val();
-	var phoneNumber = $("#id_phone_number").val();
 
+function saveChangesOnProfile() {
 	$.ajax({ 
-	    type: "PUT",
+	    type: "POST",
 		url:  saveChangesOnProfileURL,
-	    data: JSON.stringify({
-			"username": username,
-			"oldPassword": oldPassword,
-			"newPassword": newPassword,
-			"repeatNewPassword": repeatNewPassword,
-			"firstName": firstName,
-			"lastName": lastName,
-			"email": email,
-			"city": city,
-			"phoneNumber": phoneNumber
-		}),
+	    data: new FormData($("#id_update_profile_form")[0]),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
+	    cache: false,
 	    success: function(intValue) {
 	    	switch(intValue) {
 		    	case -1:
@@ -707,6 +701,9 @@ function saveChangesOnProfile() {
 		    		$("#id_new_password").val("");
 		    		$("#id_repeat_new_password").val("");
 		    		toastr.success("You have successfully edited the data!");
+		    		break;
+				case 7:
+		    		toastr.error("There was a mistake in changing the data!");
 		    		break;
 		    	default:
 		    		toastr.error("There was a problem.!");
@@ -1280,30 +1277,14 @@ $(document).on("click", "#id_btn_register", function(event) {
 });
 
 function registrateUser() {
-	var username = $("#id_username").val();
-	var password = $("#id_password").val();
-	var repeatPassword = $("#id_repeat_password").val();
-	var firstName = $("#id_first_name").val();
-	var lastName = $("#id_last_name").val();
-	var email = $("#id_email").val();
-	var city = $("#id_city").val();
-	var phoneNumber = $("#id_phone_number").val();
-	
 	$.ajax({ 
 	    type: "POST",
 		url:  registrateUserURL,
-	    data: JSON.stringify({
-			"username": username,
-			"password": password,
-			"repeatPassword": repeatPassword,
-			"firstName": firstName,
-			"lastName": lastName,
-			"email": email,
-			"city": city,
-			"phoneNumber": phoneNumber
-		}),
+	    data: new FormData($("#id_registrate_form")[0]),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
 	    cache: false,
 	    success: function(successRegistrate) {
 	    	if(successRegistrate) {

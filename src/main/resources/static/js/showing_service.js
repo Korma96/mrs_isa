@@ -1,7 +1,7 @@
 var addNewShowingURL = "/myapp/administrators/admin_cultural_institution/add_new_showing";
 var updateShowingURL = "/myapp/administrators/admin_cultural_institution/update_showing";
 var deleteShowingURL = "/myapp/administrators/admin_cultural_institution/delete_showing";
-var uploadShowingImageURL = "/myapp/administrators/admin_cultural_institution/upload_showing_image";
+//var uploadShowingImageURL = "/myapp/administrators/admin_cultural_institution/upload_showing_image";
 var getShowingsForChosenCIURL = "/myapp/administrators/admin_cultural_institution/get_showings_for_ci"
 var getAllCIsURL = "/myapp/administrators/admin_cultural_institution/get_cultural_institutions"
 
@@ -140,23 +140,23 @@ function add_showing()
 		deleteAllExceptFirst();
 		
 		$("#center").append(
-				'<div class="image_preview"><img alt="Niste odabrali sliku" src="#" class="previewing" /></div> \
-				<form > \
+				'<div class="image_preview"><img alt="You did not select an image" src="#" class="previewing" /></div> \
+				<form id="id_add_showing_form"> \
 				<table> \
-					<tr><td><label for="id_name">Name:</label></td><td><input type="text" id="id_name"/></td></tr> \
+					<tr><td><label for="id_name">Name:</label></td><td><input type="text" id="id_name" name="name" /></td></tr> \
 					<tr>  <td><label for="id_type">Type:</label></td>  <td class = "select"> \
-					<select id="id_type"> \
+					<select id="id_type" name="type"> \
 					<option value="MOVIE">MOVIE</option>\
 					<option value="THEATRICAL_PLAY">THEATRICAL_PLAY</option>\
 					</select>\
 					</td> \
 					</tr> \
-                    <tr><td><label for="id_genre">Genre:</label></td><td><input type="text" id="id_genre"/></td></tr> \
-                    <tr><td><label for="id_duration">Duration:</label></td><td><input type="number" id="id_duration"/></td></tr> \
-                    <tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors"/></td></tr> \
-                    <tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director"/></td></tr> \
-                    <tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description"/></td></tr> \
-				<tr>  <td><label for="id_showing_image"> Showing image:</label></td>  <td><input type="file" id="id_showing_image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
+                    <tr><td><label for="id_genre">Genre:</label></td><td><input type="text" id="id_genre" name="genre"/></td></tr> \
+                    <tr><td><label for="id_duration">Duration:</label></td><td><input type="number" id="id_duration" name="duration"/></td></tr> \
+                    <tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors" name="actors"/></td></tr> \
+                    <tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director" name="director"/></td></tr> \
+                    <tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" name="description"/></td></tr> \
+				<tr>  <td><label for="id_showing_image"> Showing image:</label></td>  <td><input type="file" id="id_showing_image" name="image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
 				</table> \
 				<div align="center"><input type="button" id="id_btn_save_new_showing" class="buttons" value="Save showing"/> \
 				</div> \
@@ -196,26 +196,26 @@ function addShowingAjax()
 		return;
 	}
 
-	var ci = getCIForAdmin();
-
-    obj["name"] = name;
+    /*obj["name"] = name;
     obj["type"] = type ;
     obj["genre"] = genre;
     obj["duration"] = duration;
     obj["actors"] = actors;
     obj["director"] = director;
-	obj["description"] = description;
+	obj["description"] = description;*/
 	
 	$.ajax({ 
 	    type: "POST",
-	    async: false,
 		url:  addNewShowingURL,
-	    data: JSON.stringify(obj),
+	    data: new FormData($("#id_add_showing_form")[0]), // data: JSON.stringify(obj),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
+	    cache: false,
 	    success: function(success) {
 	    	if(success) {
-                $("#id_name").val("");
+                /*$("#id_name").val("");
                 $("#id_genre").val("");
                 $("#id_duration").val("");
                 $("#id_rating").val("");
@@ -223,7 +223,7 @@ function addShowingAjax()
                 $("#id_director").val("");
                 $("#id_description").val("");	
                 
-                uploadImage(uploadShowingImageURL);
+                uploadImage(uploadShowingImageURL);*/
 	    		
 				toastr.success("You have successfully added new showing!");
 				deleteAllExceptFirst();
@@ -272,7 +272,8 @@ function update_showing()
 		deleteAllExceptFirst();
 		
 		var update_html = 
-			'<form > \
+			'<<div class="image_preview"><img alt="You did not select an image" src="#" class="previewing" /></div> \
+			<form id="id_update_showing_form"> \
 			<table> \
 				<tr><td><label for="id_name">Name:</label></td><td><input type="text" id="id_name" value="' + s.name + '" /></td></tr> \
 				<tr>  <td><label for="id_type">Type:</label></td>  <td class = "select"> \
@@ -299,11 +300,18 @@ function update_showing()
 				<tr><td><label for="id_actors">Actors:</label></td><td><input type="text" id="id_actors" value="' + s.listOfActors + '" /></td></tr> \
 				<tr><td><label for="id_director">Director:</label></td><td><input type="text" id="id_director" value="' + s.nameOfDirector + '" /></td></tr> \
 				<tr><td><label for="id_description">Description:</label></td><td><input type="text" id="id_description" value="' + s.shortDescription + '" /></td></tr> \
+				<tr><td colspan="2"><input type="hidden" name="old_name" id="id_old_name" value="' + s.name + '" /></td></tr> \
 			</table> \
 			<div align="center"><input type="button" id="id_btn_update_showing" class="buttons" value="Update showing"/> \
 			</div> \
 			<br/> \
 		</form>';
+		
+		
+		$('.previewing').width($('.previewing').parent().width());
+		$('.previewing').height('230px');
+		drawImage();
+		
 		$("#center").append(update_html);
 		$("#id_btn_update_showing").click(function(event) {
 			event.preventDefault();
@@ -319,7 +327,6 @@ function update_showing()
 
 function updateShowingAjax(old_name, ID)
 {
-	var obj = {};
 	var name = $("#id_name").val();
     var type = $("#id_type").val();
     var genre = $("#id_genre").val();
@@ -333,24 +340,17 @@ function updateShowingAjax(old_name, ID)
 		toastr.error("Field(s) can not be empty!"); 
 		return;
 	}
-	
-	obj["id"] = ID.toString();
-	obj["old_name"] = old_name;
-    obj["name"] = name;
-    obj["type"] = type ;
-    obj["genre"] = genre;
-    obj["duration"] = duration;
-    obj["actors"] = actors;
-    obj["director"] = director;
-	obj["description"] = description;
 
 	$.ajax({ 
 	    type: "POST",
 	    async: false,
 		url:  updateShowingURL,
-	    data: JSON.stringify(obj),
+	    data: new FormData($("#id_update_showing_form")[0]),
 	    dataType: "json", 
-	    contentType: "application/json",
+	    enctype: 'multipart/form-data',
+	    processData: false,
+	    contentType: false,
+	    cache: false,
 	    success: function(success) {
 	    	if(success) {	    		
 	    		toastr.success("You have successfully updated showing!");
@@ -367,6 +367,7 @@ function updateShowingAjax(old_name, ID)
 		}
 	});
 }
+
 
 function delete_showing()
 {

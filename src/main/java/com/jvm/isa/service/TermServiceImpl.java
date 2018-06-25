@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +17,7 @@ import com.jvm.isa.domain.CulturalInstitution;
 import com.jvm.isa.domain.RegisteredUser;
 import com.jvm.isa.domain.Showing;
 import com.jvm.isa.domain.Term;
-import com.jvm.isa.domain.Ticket;
 import com.jvm.isa.repository.AuditoriumRepository;
-import com.jvm.isa.repository.ShowingRepository;
 import com.jvm.isa.repository.TermRepository;
 
 @Service
