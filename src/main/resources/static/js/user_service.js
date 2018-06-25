@@ -246,7 +246,7 @@ function getPathname() {
 		pathname = tokens[1];
 	}
 	else {
-		if(url == "http://localhost:8080/myapp/" || url == "http://localhost:8080/myapp") {
+		if(url == "http://isaapp.herokuapp.com/myapp" || url == "http://isaapp.herokuapp.com/myapp/" || url == "https://isaapp.herokuapp.com/myapp" || url == "https://isaapp.herokuapp.com/myapp/") {
 			pathname = "";
 		}
 		else {
