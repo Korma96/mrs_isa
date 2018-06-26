@@ -190,7 +190,7 @@ public class EmailServiceImpl implements EmailService {
 	 * Anotacija za oznacavanje asinhronog zadatka
 	 * Vise informacija na: https://docs.spring.io/spring/docs/current/spring-framework-reference/integration.html#scheduling
 	 */
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	@Async
 	@Override
 	public void sendActivationEmailAsync(RegisteredUser user) throws MessagingException {
@@ -211,7 +211,7 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Username: &nbsp; <b> " + user.getUsername() + " </b> <br/>";
 				htmlMsg += "&nbsp; Password: &nbsp; <b> " + user.getPassword() + " </b> <br/><br/>";
 				htmlMsg += "To activate your account, please click on the following link (if the link is disabled Copy and Paste the URL into your Browser): <br/>";
-				htmlMsg += "<a href='http://isaapp.herokuapp.com/myapp/#/users/activate?id_for_activation=" + idForActivation + "'> http://localhost:8080/myapp/#/users/activate?id_for_activation=" + idForActivation + " </a> <br/><br/>";
+				htmlMsg += "<a href='http://isaapp.herokuapp.com/myapp/#/users/activate?id_for_activation=" + idForActivation + "'> http://isaapp.herokuapp.com/myapp/#/users/activate?id_for_activation=" + idForActivation + " </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");
@@ -228,6 +228,7 @@ public class EmailServiceImpl implements EmailService {
 
 		System.out.println("Email poslat!");
 	}
+
 	
 	/*@Async
 	@Override
@@ -288,7 +289,7 @@ public class EmailServiceImpl implements EmailService {
 				htmlMsg += "&nbsp; Username: &nbsp; <b> " + username + " </b> <br/>";
 				htmlMsg += "&nbsp; Password: &nbsp; <b> " + password + " </b> <br/><br/>";
 				htmlMsg += "After logging in, please change your username and password <br/><br/>";
-				htmlMsg += "<a href='http://isaapp.herokuapp.com/myapp/#/users/login'> http://localhost:8080/myapp/#/users/login </a> <br/><br/>";
+				htmlMsg += "<a href='http://isaapp.herokuapp.com/myapp/#/users/login'> https://isaapp.herokuapp.com/myapp/#/users/login </a> <br/><br/>";
 				htmlMsg += "Kind Regards, <br/>";
 				htmlMsg += "ISA Support";
 		mimeMessage.setContent(htmlMsg, "text/html");
