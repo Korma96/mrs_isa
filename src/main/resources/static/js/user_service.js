@@ -197,44 +197,44 @@ var pathname = getPathname();
 		culturalInstitutions();
 		break;
 	default:
-		$("#title").empty();
-		$("#center").html(getStringFor404());
+		if (pathname.indexOf("activate?id_for_activation=") >= 0) {
+			activateAccount(pathname);
+		}
+		else {
+			$("#title").empty();
+			$("#center").html(getStringFor404());
+		}
 		break;
 	}
 	
-	activateAccount(pathname);
 }
 
 function activateAccount(pathname) {
-	if (pathname.indexOf("activate?id_for_activation=") >= 0) {
-		var tokens = pathname.trim().split("=");
-		if(tokens.length == 2) {
-			var idForActivation = tokens[1];
-			
-			$.ajax({ 
-			    type: "PUT",
-				url:  activateAccountURL + "/" + idForActivation,
-				dataType : "json",
-			    contentType: "application/json",
-			    cache: false,
-			    success: function(successActivate) {
-							if(successActivate) {
-								toastr.success("You have successfully activated the account!"); 
-							}
-							else {
-								toastr.error("You have unsuccessfully activated the account!"); 
-							}
-							
-						
-			   },
-				error : function(XMLHttpRequest, textStatus, errorThrown) { 
-							toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
-				}
-			});
-		}
+	var tokens = pathname.trim().split("=");
+	if(tokens.length == 2) {
+		var idForActivation = tokens[1];
 		
-	}
-	
+		$.ajax({ 
+			type: "PUT",
+			url:  activateAccountURL + "/" + idForActivation,
+			dataType : "json",
+			contentType: "application/json",
+			cache: false,
+			success: function(successActivate) {
+						if(successActivate) {
+							toastr.success("You have successfully activated the account!"); 
+						}
+						else {
+							toastr.error("You have unsuccessfully activated the account!"); 
+						}
+						
+					
+		   },
+			error : function(XMLHttpRequest, textStatus, errorThrown) { 
+						toastr.error("Ajax ERROR: " + errorThrown + ", STATUS: " + textStatus); 
+			}
+		});
+	}	
 }
 
 function getPathname() {
