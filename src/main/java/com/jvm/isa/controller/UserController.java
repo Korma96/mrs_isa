@@ -283,7 +283,7 @@ public class UserController {
 							
 						}
 						else {
-							if(!oldUsername.equals(username) && oldImageModel != null) {
+							if(oldImageModel != null) {
 								imageModelService.removeImageFromDatabase(oldImageModel);
 							}
 						}

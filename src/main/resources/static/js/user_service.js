@@ -626,7 +626,7 @@ function updateProfile() {
 		deleteAllExceptFirst();
 		
 		center.append(
-				'<div class="image_preview"><img alt="You did not select an image" src="#" class="previewing" /></div> \
+				'<div class="image_preview"><img id="id_user_img" alt="You did not select an image" src="#" class="previewing" /></div> \
 				<form id="id_update_profile_form"> \
 					<table> \
 						<tr>  <td><label for="id_username">Username:</label></td>  <td><input type="text" name="username" id="id_username" value="' + loggedUser.username + '" /></td>  </tr> \
@@ -638,6 +638,7 @@ function updateProfile() {
 						<tr>  <td><label for="id_email">Email:</label></td>  <td><input type="text" id="id_email" name="email" value="' + loggedUser.email + '" /></td>  </tr> \
 						<tr>  <td><label for="id_city">City:</label></td> <td><input type="text" id="id_city" name="city" value="' + loggedUser.city + '" /></td>  </tr> \
 						<tr>  <td><label for="id_phone_number">Phone number:</label></td>  <td><input type="text" name="phone_number" id="id_phone_number" value="'+ loggedUser.phoneNumber +'" /></td>  </tr> \
+						<tr>  <td><label for="id_user_image"> User image:</label></td>  <td><input type="file" id="id_user_image" name="image" class="id_image" accept=".gif, .jpg, .png" /></td>  </tr> \
 					</table> \
 					<div align="center"><input type="button" id="id_btn_save_changes_on_profile" class="buttons" value="Save changes"/> \
 					</div> \
@@ -647,6 +648,7 @@ function updateProfile() {
 		$('.previewing').width($('.previewing').parent().width());
 		$('.previewing').height('230px');
 		drawImage();
+		loadAndSetImage("user_" + loggedUser.username, "id_user_img");
 		
 		$("#id_btn_save_changes_on_profile").click(function(event) {
 			event.preventDefault();
