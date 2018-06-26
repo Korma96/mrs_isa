@@ -156,7 +156,8 @@ public class UserController {
 			successRegistrate = userService.registrate(user);
 			
 			try {
-				if(successRegistrate) emailService.sendActivationEmailAsyncSparkPost(user);
+				//if(successRegistrate) emailService.sendActivationEmailAsyncSparkPost(user);
+				if(successRegistrate) emailService.sendActivationEmailAsync(user);
 			}
 			catch(Exception e)	{
 				System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
