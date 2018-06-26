@@ -3,7 +3,7 @@ insert into cultural_institution values(102,'Bulevar Mihajla Pupina 3, Novi Sad'
 insert into cultural_institution values(103,'Sentandrejski put 11, Novi Sad','Promotivni opis 3','CineStar', 0);
 insert into cultural_institution values(104,'Ignjata Pavlasa 4, Novi Sad','Promotivni opis 4','Pozoriste mladih', 1); 
 
-insert into user values('AD', 101, 'admin', 0, 1, 'admin, ' 'sunjkajovo@gmail.com', 'ia', 'ia', 'rrr', 123, 101);
+insert into user values('AD', 101, 'admin', 0, 1, 'admin', 'sunjkajovo@gmail.com', 'ia', 'ia', 'rrr', 123, 101);
 insert into user values('AD', 102, 'ia1', 1, 1, 'ia1', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123, 102);
 insert into user values('AD', 103, 'ia2', 2, 1, 'ia2', 'markoradovic996@gmail.com', 'ia', 'ia', 'rrr', 123, 103);
 insert into user values('AD', 104, 'fa', 0, 1, 'fa', 'markoradovic996@gmail.com', 'fa', 'fa', 'rrr', 123, 104);
