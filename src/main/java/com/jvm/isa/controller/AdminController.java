@@ -134,6 +134,7 @@ public class AdminController {
 
 				if (successregister) {
 					try {
+						//emailService.sendNewAdminEmailAsyncSparkPost(potentionalUsername, password, email, typeOfAdmin);
 						emailService.sendNewAdminEmailAsync(potentionalUsername, password, email, typeOfAdmin);
 					} catch (MessagingException e) {
 						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
@@ -147,6 +148,7 @@ public class AdminController {
 
 			if (successregister) {
 				try {
+					//emailService.sendNewAdminEmailAsyncSparkPost(potentionalUsername, password, email, typeOfAdmin);
 					emailService.sendNewAdminEmailAsync(potentionalUsername, password, email, typeOfAdmin);
 				} catch (MessagingException e) {
 					System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
@@ -181,8 +183,8 @@ public class AdminController {
 				if (!email.equals(sysAdministrator.getEmail())) {
 					sysAdministrator.setEmail(email);
 					try {
-						emailService.sendUserChangedEmail(sysAdministrator.getUsername(),
-								sysAdministrator.getPassword(), sysAdministrator.getEmail());
+						//emailService.sendUserChangedEmailAsyncSparkPost(sysAdministrator.getUsername(), sysAdministrator.getPassword(), sysAdministrator.getEmail());
+						emailService.sendUserChangedEmailAsync(sysAdministrator.getUsername(), sysAdministrator.getPassword(), sysAdministrator.getEmail());
 					} catch (MessagingException e) {
 						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
 					}
@@ -363,8 +365,8 @@ public class AdminController {
 				if (!email.equals(loggedUser.getEmail())) {
 					loggedUser.setEmail(email);
 					try {
-						emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(),
-								loggedUser.getEmail());
+						//emailService.sendUserChangedEmailAsyncSparkPost(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+						emailService.sendUserChangedEmailAsync(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
 					} catch (MessagingException e) {
 						System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
 					}

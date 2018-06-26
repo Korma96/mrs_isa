@@ -46,6 +46,7 @@ import com.jvm.isa.service.TicketService;
 import com.jvm.isa.service.UserService;
 
 
+
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
@@ -155,7 +156,7 @@ public class UserController {
 			successRegistrate = userService.registrate(user);
 			
 			try {
-				if(successRegistrate) emailService.sendActivationEmailAsync(user);
+				if(successRegistrate) emailService.sendActivationEmailAsyncSparkPost(user);
 			}
 			catch(Exception e)	{
 				System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
@@ -254,7 +255,8 @@ public class UserController {
 					
 					if(success) {
 						try {
-							if(emailChanged) emailService.sendUserChangedEmail(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+							//if(emailChanged) emailService.sendUserChangedEmailAsyncSparkPost(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
+							if(emailChanged) emailService.sendUserChangedEmailAsync(loggedUser.getUsername(), loggedUser.getPassword(), loggedUser.getEmail());
 						} catch (MessagingException e) {
 							System.out.println("Greska prilikom slanja emaila! - " + e.getMessage());
 						}
@@ -641,7 +643,8 @@ public class UserController {
 						if(user.getUserType() == UserType.REGISTERED_USER) {
 							friend = (RegisteredUser) user;
 							try {
-								emailService.sendInviteForShowing(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, term.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+								//emailService.sendInviteForShowingAsyncSparkPost(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, term.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
+								emailService.sendInviteForShowingAsync(culturalInstitutionName, showingName, dateStr, timeStr, term.getAuditorium().getName(), seatStr, term.getPrice(), term.getShowing().getDuration(), loggedRegisteredUser, friend);
 								
 								friend.getInvitations().add(savedTicket);
 								userService.registrate(friend);

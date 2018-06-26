@@ -10,12 +10,18 @@ public interface EmailService {
 	String generateIdForActivation();
 	
 	void sendActivationEmailAsync(RegisteredUser user) throws MessagingException;
+	//void sendActivationEmailAsyncSparkPost(RegisteredUser user) throws SparkPostException;
+	
 	void sendNewAdminEmailAsync(String username, String password, String email, String typeOfAdmin) throws MessagingException;
+	//void sendNewAdminEmailAsyncSparkPost(String username, String password, String email, String typeOfAdmin) throws SparkPostException;
 	
 	boolean activateAccount(String idForActivation);
 
-	void sendUserChangedEmail(String username, String password, String email) throws MessagingException;
-
-	void sendInviteForShowing(String culturalInstitutionName, String showingName, String dateStr, String timeStr, String auditoriumName,
+	void sendUserChangedEmailAsync(String username, String password, String email) throws MessagingException;
+	//void sendUserChangedEmailAsyncSparkPost(String username, String password, String email) throws SparkPostException;
+	
+	void sendInviteForShowingAsync(String culturalInstitutionName, String showingName, String dateStr, String timeStr, String auditoriumName,
 			String seat, double price, int duration, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws MessagingException;
+	//void sendInviteForShowingAsyncSparkPost(String culturalInstitutionName, String showingName, String dateStr, String timeStr, String auditoriumName,
+	//		String seat, double price, int duration, RegisteredUser loggedRegisteredUser, RegisteredUser friend) throws SparkPostException;
 }
