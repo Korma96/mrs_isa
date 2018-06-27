@@ -878,7 +878,7 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat()-1);
 				
 				if(ru.getInvitations().contains(ticket) && !ru.getTickets().contains(ticket)) {
 					ticket.setOwner(ru);
@@ -906,7 +906,7 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat()-1);
 				if(ticket == null) return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 				
 				if(ru.getInvitations().contains(ticket)) {
@@ -944,7 +944,7 @@ public class UserController {
 		if(user != null) {
 			if (user.getUserType() == UserType.REGISTERED_USER) {
 				RegisteredUser ru = (RegisteredUser) user;
-				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat());
+				Ticket ticket = ticketService.getTicket(ticketDTO.getDate(), ticketDTO.getTime(), ticketDTO.getCulturalInstitution(), ticketDTO.getShowing(), ticketDTO.getAuditorium(), ticketDTO.getSeat()-1);
 				if(ticket == null) return new ResponseEntity<Boolean>(false, HttpStatus.OK);
 				
 				if(userService.computeSubtractTwoDateTime(LocalDate.now(), ticket.getTerm().getDate(), LocalTime.now(), ticket.getTerm().getTime()) < 30) {
@@ -954,7 +954,7 @@ public class UserController {
 				if(ru.getTickets().contains(ticket)) {
 					ru.getTickets().remove(ticket);
 					Term term = ticket.getTerm();
-					term.getSeats()[ticket.getSeat() - 1] = false;
+					term.getSeats()[ticket.getSeat()] = false;
 					
 					userService.registrate(ru); // cuvanje izmena (brisanje ticket-a)
 					termService.save(term);
