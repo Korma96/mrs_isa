@@ -2603,7 +2603,7 @@ function declineInvitationTicket(newInvitationTicket) {
 	    cache: false,
 	    success: function(successDeclineInvitationTicket) {
 	    	if(successDeclineInvitationTicket) {
-	    		toastr.success("You declined an invitation for friendship with " + newInvitationTicket.showing + "!"); 
+	    		toastr.success("You declined an invitation for showing " + newInvitationTicket.showing + "!"); 
 	    	}
 	    	else {
 	    		toastr.error("Unsuccessful decline of the invitation showing " + newInvitationTicket.showing + "!"); 
