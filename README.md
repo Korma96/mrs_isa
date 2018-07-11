@@ -1,2 +1,2 @@
-# mrs_isa_copy
-MRS/ISA copy
+# mrs_isa
+MRS/ISA
