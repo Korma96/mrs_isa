@@ -25,8 +25,8 @@ import com.sparkpost.Client;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-	private String emailOfSender = "mrs.isa.jvm@gmail.com";
-	private String passwordOfSender = "isa**mrs";
+	private String emailOfSender = "upisi pravu email adresu";
+	private String passwordOfSender = "upisi pravi password";
 	private final String API_KEY = "b49192ca8ec4372511c82d4bfde346255b720142";
 	private Client client;
 	private static final String CONFIG_FILE = "config.properties";
